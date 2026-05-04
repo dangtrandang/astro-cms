@@ -1,0 +1,63 @@
+import 'dotenv/config';
+import react from '@astrojs/react';
+import vercel from '@astrojs/vercel';
+import { defineConfig, memoryCache } from 'astro/config';
+import { fetchRedirects } from './src/lib/fetchRedirects';
+
+const directusUrl = process.env.PUBLIC_DIRECTUS_URL || process.env.DIRECTUS_URL || '';
+const directusHost = directusUrl?.split('//')[1];
+const siteUrl = process.env.PUBLIC_SITE_URL || 'http://localhost:3000';
+
+// Gracefully handle missing Directus URL during build/config evaluation
+// fetchRedirects will return empty array if Directus is not available
+const redirectsArray = directusUrl ? await fetchRedirects(directusUrl) : [];
+const redirectsConfig: Record<string, { status: 301 | 302; destination: string }> = {};
+
+for (const { source, destination, permanent } of redirectsArray) {
+  redirectsConfig[source] = {
+    status: permanent ? 301 : 302,
+    destination,
+  };
+}
+
+export default defineConfig({
+  site: siteUrl,
+  server: {
+    port: 3000,
+    host: true,
+  },
+  adapter: vercel(),
+  integrations: [react()],
+  image: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: directusHost,
+        pathname: '/assets/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8055',
+        pathname: '/assets/**',
+      },
+    ],
+  },
+  redirects: redirectsConfig,
+
+  vite: {
+    envPrefix: ['PUBLIC_', 'DIRECTUS_'],
+    assetsInclude: ['**/*.svg'],
+  },
+
+  experimental: {
+    queuedRendering: {
+      enabled: true,
+    },
+    cache: {
+      // memoryCache() is per-process only; in serverless/edge deployments each
+      // function instance has its own isolated cache with no cross-instance sharing.
+      provider: memoryCache(),
+    },
+  },
+});

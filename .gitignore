@@ -1,0 +1,11 @@
+# Astro Build Output
+dist/
+.astro/
+.vercel/
+node_modules/
+tsconfig.tsbuildinfo
+
+# Environment files
+.env
+.env.*
+!.env.example

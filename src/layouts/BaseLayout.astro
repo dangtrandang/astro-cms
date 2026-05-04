@@ -1,0 +1,69 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import VisualEditingLayout from '@/components/layout/VisualEditingLayout';
+import { getDirectusAssetURL } from '@/lib/directus/directus-utils';
+import { fetchSiteData } from '@/lib/directus/fetchers';
+import '@/styles/global.css';
+import '@/styles/fonts.css';
+
+const { globals, headerNavigation, footerNavigation } = await fetchSiteData();
+
+const siteTitle = globals?.title || 'Simple CMS';
+const siteDescription = globals?.description || 'A starter CMS template powered by Directus and Astro.';
+const faviconURL = '/favicon.ico';
+const accentColor = '#89aacc';
+
+const { metadata } = Astro.props;
+
+const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTitle;
+---
+<html lang="en" class="dark" style={`--accent-color: ${accentColor};`}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={metadata?.description || siteDescription} />
+    <link rel="icon" href={faviconURL} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+
+    {metadata?.openGraph && (
+      <>
+        <meta property="og:title" content={metadata.openGraph.title} />
+        <meta property="og:description" content={metadata.openGraph.description} />
+        <meta property="og:url" content={metadata.openGraph.url} />
+        <meta property="og:type" content={metadata.openGraph.type} />
+      </>
+    )}
+
+    <ClientRouter />
+
+    <script is:inline>
+      const applyThemeClass = () => {
+        document.documentElement.classList.add('dark');
+      };
+      if (window.__themeHandler) {
+        document.removeEventListener('astro:after-swap', window.__themeHandler);
+      }
+      window.__themeHandler = applyThemeClass;
+      document.addEventListener('astro:after-swap', applyThemeClass);
+      applyThemeClass();
+    </script>
+  </head>
+  <body class="min-h-screen bg-bg font-body antialiased text-text-primary">
+    <VisualEditingLayout
+      headerNavigation={headerNavigation}
+      footerNavigation={footerNavigation}
+      globals={globals}
+      client:load
+    >
+      <main class="flex-grow">
+        <slot />
+      </main>
+    </VisualEditingLayout>
+  </body>
+</html>
