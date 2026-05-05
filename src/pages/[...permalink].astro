@@ -1,22 +1,8 @@
 ---
-export const prerender = true;
-
 import Layout from '@/layouts/BaseLayout.astro';
-import { fetchAllPages, fetchPageData, fetchPageDataById, getPageIdByPermalink } from '@/lib/directus/fetchers';
+import { fetchPageData, fetchPageDataById, getPageIdByPermalink } from '@/lib/directus/fetchers';
 import PageClient from '@/components/layout/PageClient';
 import type { Page, PageBlock } from '@/types/directus-schema';
-
-export async function getStaticPaths() {
-  const pages = await fetchAllPages();
-
-  return pages.map((page) => {
-    const cleaned = page.permalink.replace(/^\/+|\/+$/g, '');
-
-    return {
-      params: { permalink: cleaned.length === 0 ? undefined : cleaned },
-    };
-  });
-}
 
 const { permalink } = Astro.params;
 const query = Astro.url.searchParams;
