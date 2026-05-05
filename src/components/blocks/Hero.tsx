@@ -8,8 +8,14 @@ const HERO_VIDEO_URL =
 interface HeroProps {
   data: {
     id: string;
+    title?: string | null;
     headline?: string | null;
     content?: string | null;
+    description?: string | null;
+    tagline?: string | null;
+    image?: string | { id?: string | null } | null;
+    image_position?: 'left' | 'right' | null;
+    layout?: 'image_left' | 'image_center' | 'image_right' | null;
     button_group?: {
       id: string;
       buttons?: ButtonProps[];
@@ -24,6 +30,7 @@ export default function Hero({ data }: HeroProps) {
   const content =
     data.content ||
     "We're designing tools for deep thinkers, bold creators, and quiet rebels. Amid the chaos, we build digital spaces for sharp focus and inspired work.";
+  const eyebrow = data.title || 'Creative direction';
   const hasButtons = Boolean(data.button_group?.buttons?.length);
 
   return (
@@ -70,19 +77,30 @@ export default function Hero({ data }: HeroProps) {
 
         <div className="flex flex-1 items-center justify-center px-6 pb-40 pt-32 text-center">
           <div className="flex max-w-7xl flex-col items-center justify-center">
+            <div
+              className="animate-fade-rise text-sm uppercase tracking-[0.32em] text-white/70"
+              data-directus={setAttr({
+                collection: 'block_hero',
+                item: data.id,
+                fields: 'title',
+                mode: 'popover',
+              })}
+            >
+              {eyebrow}
+            </div>
+
             <h1
-              className="animate-fade-rise max-w-7xl font-serif-display text-5xl leading-[0.95] tracking-[-2.46px] text-white sm:text-7xl md:text-8xl"
+              className="animate-fade-rise mt-6 max-w-7xl font-serif-display text-5xl leading-[0.95] tracking-[-2.46px] text-white sm:text-7xl md:text-8xl"
               data-directus={setAttr({
                 collection: 'block_hero',
                 item: data.id,
                 fields: 'headline',
                 mode: 'popover',
               })}
-            >
-              {headline}
-            </h1>
+              dangerouslySetInnerHTML={{ __html: headline }}
+            />
 
-            <p
+            <div
               className="animate-fade-rise-delay mt-8 max-w-2xl text-base leading-relaxed text-white sm:text-lg"
               data-directus={setAttr({
                 collection: 'block_hero',
@@ -92,7 +110,7 @@ export default function Hero({ data }: HeroProps) {
               })}
             >
               {content}
-            </p>
+            </div>
 
             {hasButtons ? (
               <div

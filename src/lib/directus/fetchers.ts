@@ -35,10 +35,28 @@ const pageFields = [
         item: {
           block_hero: [
             'id',
+            'title',
             'headline',
+            'content',
             'image',
-            'button_group',
-          ],
+            'image_position',
+            {
+              button_group: [
+                'id',
+                {
+                  buttons: [
+                    'id',
+                    'label',
+                    'variant',
+                    'color',
+                    'type',
+                    'external_url',
+                    { page: ['permalink'] },
+                  ],
+                },
+              ],
+            },
+          ] as any,
         },
       },
     ],
@@ -87,6 +105,55 @@ export const fetchPageData = async (
     // This is where we enhance static block data with dynamic content
     if (Array.isArray(page.blocks)) {
       for (const block of page.blocks as PageBlock[]) {
+        if (block.collection === 'block_hero' && block.item && typeof block.item !== 'string') {
+          const hero = block.item as PageBlock['item'] & {
+            content?: string | null;
+            button_group?: {
+              id: string;
+              buttons?: Array<{
+                id: string;
+                label?: string | null;
+                variant?: string | null;
+                color?: string | null;
+                type?: 'pages' | 'posts' | 'external' | null;
+                external_url?: string | null;
+                page?: { permalink?: string | null } | string | null;
+                post?: { slug?: string | null } | string | null;
+              }>;
+            } | null;
+          };
+
+          console.log('[fetchPageData.block_hero]', JSON.stringify({
+            id: (hero as { id?: string }).id,
+            hasContent: Boolean(hero.content),
+            hasButtonGroup: Boolean(hero.button_group?.id),
+            buttonCount: hero.button_group?.buttons?.length ?? 0,
+          }));
+
+          if (hero.button_group?.buttons?.length) {
+            hero.button_group.buttons = hero.button_group.buttons.map((button) => ({
+              ...button,
+              type:
+                button.type === 'pages'
+                  ? 'page'
+                  : button.type === 'posts'
+                    ? 'post'
+                    : button.type === 'external'
+                      ? 'url'
+                      : null,
+              url: button.external_url ?? null,
+              variant:
+                button.variant === 'solid'
+                  ? 'default'
+                  : button.variant === 'soft'
+                    ? 'secondary'
+                    : button.variant === 'ghost' || button.variant === 'outline' || button.variant === 'link'
+                      ? button.variant
+                      : 'default',
+            })) as typeof hero.button_group.buttons;
+          }
+        }
+
         // Handle dynamic posts blocks - these blocks display a list of posts
         // The posts are fetched dynamically based on the block's configuration
         if (
