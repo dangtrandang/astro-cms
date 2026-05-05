@@ -70,9 +70,11 @@ const metadata = page
       },
     }
   : { title: '404 - Page Not Found', description: '' };
+
+const hideGlobalChrome = resolvedPermalink === '/';
 ---
 
-<Layout metadata={metadata}>
+<Layout metadata={metadata} hideGlobalChrome={hideGlobalChrome}>
   {page ? (
     <PageClient
       client:load
