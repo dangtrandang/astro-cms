@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { setAttr } from '@directus/visual-editing';
+import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
 import Button from '@/components/blocks/Button';
 import { Form } from '@/components/ui/form';
 import Field from './FormField';

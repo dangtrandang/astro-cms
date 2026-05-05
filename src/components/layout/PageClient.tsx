@@ -8,7 +8,7 @@ import RecentPosts from '@/components/blocks/RecentPosts';
 import type { PageBlock } from '@/types/directus-schema';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
-import { setAttr } from '@directus/visual-editing';
+import { setVisualEditingAttr } from '@/lib/visualEditing';
 
 interface PageClientProps {
   initialSections: PageBlock[];
@@ -40,9 +40,20 @@ export default function PageClient({ initialSections, permalink, pageId }: PageC
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setIsPreviewEnabled(params.get('preview') === 'true');
-    setHasVersioningParams(!!params.get('version') || !!params.get('id'));
-  }, []);
+    const preview = params.get('preview') === 'true';
+    const hasVersioning = !!params.get('version') || !!params.get('id');
+
+    console.log('[PageClient] preview context', {
+      permalink,
+      pageId,
+      query: window.location.search,
+      preview,
+      hasVersioning,
+    });
+
+    setIsPreviewEnabled(preview);
+    setHasVersioningParams(hasVersioning);
+  }, [permalink, pageId]);
 
   const shouldFetchLive = isVisualEditingEnabled || isPreviewEnabled || hasVersioningParams;
   const swrKey = shouldFetchLive ? `${permalink}-${new URLSearchParams(window.location.search).toString()}` : null;
@@ -58,21 +69,30 @@ export default function PageClient({ initialSections, permalink, pageId }: PageC
 
   useEffect(() => {
     if (isVisualEditingEnabled) {
+      console.log('[PageClient] enabling visual editing overlays', {
+        permalink,
+        pageId,
+      });
+
       apply({
         onSaved: () => {
           mutate();
         },
       } as VisualEditingOptions);
 
-      apply({
-        elements: document.querySelector('#visual-editing-button') as HTMLElement,
-        customClass: 'visual-editing-button-class',
-        onSaved: () => {
-          mutate();
-        },
-      } as VisualEditingOptions);
+      const editButton = document.querySelector('#visual-editing-button') as HTMLElement | null;
+
+      if (editButton) {
+        apply({
+          elements: editButton,
+          customClass: 'visual-editing-button-class',
+          onSaved: () => {
+            mutate();
+          },
+        } as VisualEditingOptions);
+      }
     }
-  }, [isVisualEditingEnabled, apply, mutate]);
+  }, [isVisualEditingEnabled, apply, mutate, permalink, pageId]);
 
   return (
     <div className="relative">
@@ -84,7 +104,7 @@ export default function PageClient({ initialSections, permalink, pageId }: PageC
             id="visual-editing-button"
             variant="secondary"
             className="visual-editing-button-class"
-            data-directus={setAttr({
+            data-directus={setVisualEditingAttr({
               collection: 'pages',
               item: pageId,
               fields: ['blocks', 'meta_m2a_button'],

@@ -4,7 +4,7 @@ import Tagline from '@/components/ui/Tagline';
 import Headline from '@/components/ui/Headline';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { ArrowLeft, ArrowRight, ZoomIn, X } from 'lucide-react';
-import { setAttr } from '@directus/visual-editing';
+import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
 
 interface GalleryItem {
   id: string;

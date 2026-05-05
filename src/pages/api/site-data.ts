@@ -2,7 +2,16 @@ import type { APIRoute } from 'astro';
 import { fetchSiteData } from '@/lib/directus/fetchers';
 
 export const GET: APIRoute = async ({ url }) => {
-  const isEditing = url.searchParams.get('visual-editing') === 'true';
+  const isEditing =
+    url.searchParams.get('visual-editing') === 'true' ||
+    url.searchParams.get('preview') === 'true' ||
+    Boolean(url.searchParams.get('id')) ||
+    Boolean(url.searchParams.get('version'));
+
+  console.log('[site-data] request', {
+    query: url.search,
+    isEditing,
+  });
 
   if (!isEditing) {
     return new Response(JSON.stringify({}), {

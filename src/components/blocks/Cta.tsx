@@ -1,4 +1,4 @@
-import { setAttr } from '@directus/visual-editing';
+import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
 import ButtonGroup from '@/components/blocks/ButtonGroup';
 import type { ButtonProps } from '@/components/blocks/Button';
 

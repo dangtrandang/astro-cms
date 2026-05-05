@@ -1,4 +1,4 @@
-import { setAttr } from '@directus/visual-editing';
+import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
 import { useState } from 'react';
 
 interface FaqItem {

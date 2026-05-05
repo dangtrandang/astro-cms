@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import Button from '@/components/blocks/Button';
 import { CheckCircle2 } from 'lucide-react';
-import { setAttr } from '@directus/visual-editing';
+import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
 import type { VariantProps } from 'class-variance-authority';
 import type { buttonVariants } from '@/components/ui/button';
 

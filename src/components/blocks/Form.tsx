@@ -2,7 +2,7 @@ import type { FormField } from '@/types/directus-schema';
 import Tagline from '@/components/ui/Tagline';
 import FormBuilder from '@/components/forms/FormBuilder';
 import Headline from '@/components/ui/Headline';
-import { setAttr } from '@directus/visual-editing';
+import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
 
 interface FormBlockProps {
   data: {

@@ -1,7 +1,7 @@
 import Tagline from '@/components/ui/Tagline';
 import Headline from '@/components/ui/Headline';
 import Text from '@/components/ui/Text';
-import { setAttr } from '@directus/visual-editing';
+import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
 
 interface RichTextProps {
   data: {

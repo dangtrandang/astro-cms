@@ -1,7 +1,7 @@
 import Tagline from '@/components/ui/Tagline';
 import Headline from '@/components/ui/Headline';
 import PricingCard from '@/components/blocks/PricingCard';
-import { setAttr } from '@directus/visual-editing';
+import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
 
 interface PricingCardType {
   id: string;

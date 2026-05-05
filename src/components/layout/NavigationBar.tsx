@@ -18,7 +18,7 @@ import Container from '@/components/ui/Container';
 import SearchModal from '@/components/ui/SearchModal';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { forwardRef } from 'react';
-import { setAttr } from '@directus/visual-editing';
+import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
 
 interface NavigationBarProps {
   navigation: {

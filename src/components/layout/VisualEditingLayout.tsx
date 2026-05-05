@@ -31,10 +31,14 @@ export default function VisualEditingLayout({
   const footerRef = useRef<HTMLElement>(null);
   const { isVisualEditingEnabled, apply } = useVisualEditing();
 
-  const { data: siteData, mutate } = useSWR(isVisualEditingEnabled ? '/api/site-data' : null, fetchSiteData, {
-    fallbackData: { globals, headerNavigation, footerNavigation },
-    revalidateOnFocus: false,
-  });
+  const { data: siteData, mutate } = useSWR(
+    isVisualEditingEnabled ? '/api/site-data?visual-editing=true' : null,
+    fetchSiteData,
+    {
+      fallbackData: { globals, headerNavigation, footerNavigation },
+      revalidateOnFocus: false,
+    },
+  );
 
   const layoutData = siteData ?? {
     globals,
@@ -42,28 +46,40 @@ export default function VisualEditingLayout({
     footerNavigation,
   };
   const safeGlobals = (layoutData.globals ?? {}) as SiteGlobals;
+  const safeHeaderNavigation = (layoutData.headerNavigation ?? { items: [] }) as any;
+  const safeFooterNavigation = (layoutData.footerNavigation ?? { items: [] }) as any;
 
   useEffect(() => {
-    if (isVisualEditingEnabled) {
-      if (navRef.current) {
+    if (!isVisualEditingEnabled) return;
+
+    console.log('[VisualEditingLayout] enabling layout overlays', {
+      hasNavRef: Boolean(navRef.current),
+      hasFooterRef: Boolean(footerRef.current),
+    });
+
+    if (navRef.current) {
+      try {
         apply({
           elements: [navRef.current],
           onSaved: () => {
             mutate();
           },
         });
+      } catch (error) {
+        console.error('[VisualEditingLayout] Failed to apply visual editing to nav', error);
       }
+    }
 
-      if (footerRef.current) {
-        apply({
-          elements: [footerRef.current],
-          onSaved: () => {
-            mutate();
-          },
-        });
-      }
+    if (footerRef.current) {
+      console.warn('[VisualEditingLayout] Footer visual editing temporarily disabled for isolation.');
     }
   }, [isVisualEditingEnabled, apply, mutate]);
 
-  return <>{children}</>;
+  return (
+    <>
+      <NavigationBar ref={navRef} navigation={safeHeaderNavigation} globals={safeGlobals} />
+      {children}
+      <Footer ref={footerRef} navigation={safeFooterNavigation} globals={safeGlobals} />
+    </>
+  );
 }

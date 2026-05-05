@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/pagination';
 import type { Post } from '@/types/directus-schema';
 import { fetchPaginatedPosts } from '@/lib/directus/fetchers';
-import { setAttr } from '@directus/visual-editing';
+import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
 
 interface PostsProps {
   data: {

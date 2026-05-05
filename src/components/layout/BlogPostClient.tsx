@@ -9,7 +9,7 @@ import ShareDialog from '@/components/ui/ShareDialog';
 import Headline from '@/components/ui/Headline';
 import Container from '@/components/ui/Container';
 import type { Post, DirectusUser } from '@/types/directus-schema';
-import { setAttr } from '@directus/visual-editing';
+import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
 import { useVisualEditing } from '@/hooks/useVisualEditing';
 
 interface BlogPostClientProps {
