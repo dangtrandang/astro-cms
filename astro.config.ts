@@ -21,6 +21,7 @@ for (const { source, destination, permanent } of redirectsArray) {
 }
 
 export default defineConfig({
+  output: 'server',
   site: siteUrl,
   server: {
     port: 3000,
