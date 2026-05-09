@@ -9,8 +9,8 @@ import Footer from './Footer';
 import NavigationBar from './NavigationBar';
 
 type SiteGlobals = {
-  logo?: string;
-  logo_dark_mode?: string;
+  logo_on_light_bg?: string;
+  logo_on_dark_bg?: string;
   social_links?: { service: string; url: string }[];
 };
 
@@ -31,14 +31,10 @@ export default function VisualEditingLayout({
   const footerRef = useRef<HTMLElement>(null);
   const { isVisualEditingEnabled, apply } = useVisualEditing();
 
-  const { data: siteData, mutate } = useSWR(
-    isVisualEditingEnabled ? '/api/site-data?visual-editing=true' : null,
-    fetchSiteData,
-    {
-      fallbackData: { globals, headerNavigation, footerNavigation },
-      revalidateOnFocus: false,
-    },
-  );
+  const { data: siteData, mutate } = useSWR(isVisualEditingEnabled ? '/api/site-data' : null, fetchSiteData, {
+    fallbackData: { globals, headerNavigation, footerNavigation },
+    revalidateOnFocus: false,
+  });
 
   const layoutData = siteData ?? {
     globals,
@@ -46,40 +42,73 @@ export default function VisualEditingLayout({
     footerNavigation,
   };
   const safeGlobals = (layoutData.globals ?? {}) as SiteGlobals;
-  const safeHeaderNavigation = (layoutData.headerNavigation ?? { items: [] }) as any;
-  const safeFooterNavigation = (layoutData.footerNavigation ?? { items: [] }) as any;
 
   useEffect(() => {
-    if (!isVisualEditingEnabled) return;
-
-    console.log('[VisualEditingLayout] enabling layout overlays', {
-      hasNavRef: Boolean(navRef.current),
-      hasFooterRef: Boolean(footerRef.current),
-    });
-
-    if (navRef.current) {
-      try {
+    if (isVisualEditingEnabled) {
+      if (navRef.current) {
         apply({
           elements: [navRef.current],
           onSaved: () => {
             mutate();
           },
         });
-      } catch (error) {
-        console.error('[VisualEditingLayout] Failed to apply visual editing to nav', error);
       }
-    }
 
-    if (footerRef.current) {
-      console.warn('[VisualEditingLayout] Footer visual editing temporarily disabled for isolation.');
+      if (footerRef.current) {
+        apply({
+          elements: [footerRef.current],
+          onSaved: () => {
+            mutate();
+          },
+        });
+      }
     }
   }, [isVisualEditingEnabled, apply, mutate]);
 
   return (
     <>
-      <NavigationBar ref={navRef} navigation={safeHeaderNavigation} globals={safeGlobals} />
+      <NavigationBar
+        ref={navRef}
+        navigation={{
+          ...layoutData.headerNavigation,
+          items: (layoutData.headerNavigation.items || []).map((item: any) => ({
+            id: item.id,
+            title: item.title || '',
+            url: item.url,
+            page: item.page ? { permalink: item.page.permalink || '' } : undefined,
+            children: (item.children || []).map((child: any) => ({
+              id: child.id,
+              title: child.title || '',
+              url: child.url,
+              page: child.page ? { permalink: child.page.permalink || '' } : undefined,
+            })),
+          })),
+        }}
+        globals={{
+          ...safeGlobals,
+          logo_on_light_bg:
+            typeof safeGlobals.logo_on_light_bg === 'string' ? safeGlobals.logo_on_light_bg : undefined,
+          logo_on_dark_bg: typeof safeGlobals.logo_on_dark_bg === 'string' ? safeGlobals.logo_on_dark_bg : undefined,
+        }}
+      />
+
       {children}
-      <Footer ref={footerRef} navigation={safeFooterNavigation} globals={safeGlobals} />
+      <Footer
+        ref={footerRef}
+        navigation={{
+          ...layoutData.footerNavigation,
+          items: (layoutData.footerNavigation.items || []).map((item: any) => ({
+            ...item,
+            page: item.page ? { permalink: item.page.permalink || null } : undefined,
+          })),
+        }}
+        globals={{
+          ...safeGlobals,
+          logo_on_light_bg: typeof safeGlobals.logo_on_light_bg === 'string' ? safeGlobals.logo_on_light_bg : null,
+          logo_on_dark_bg: typeof safeGlobals.logo_on_dark_bg === 'string' ? safeGlobals.logo_on_dark_bg : null,
+          social_links: Array.isArray(safeGlobals.social_links) ? safeGlobals.social_links : undefined,
+        }}
+      />
     </>
   );
 }

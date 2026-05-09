@@ -1,7 +1,7 @@
 ---
 import { ClientRouter } from 'astro:transitions';
-import NavigationBar from '@/components/layout/NavigationBar';
-import Footer from '@/components/layout/Footer';
+import VisualEditingLayout from '@/components/layout/VisualEditingLayout';
+import { getDirectusAssetURL } from '@/lib/directus/directus-utils';
 import { fetchSiteData } from '@/lib/directus/fetchers';
 import '@/styles/global.css';
 import '@/styles/fonts.css';
@@ -10,30 +10,20 @@ const { globals, headerNavigation, footerNavigation } = await fetchSiteData();
 
 const siteTitle = globals?.title || 'Simple CMS';
 const siteDescription = globals?.description || 'A starter CMS template powered by Directus and Astro.';
-const faviconURL = '/favicon.ico';
-const accentColor = '#89aacc';
+const faviconURL = globals?.favicon ? getDirectusAssetURL(globals.favicon) : '/favicon.ico';
+const accentColor = globals?.accent_color || '#6644ff';
 
-const { metadata, hideGlobalChrome = false } = Astro.props;
+const { metadata } = Astro.props;
 
 const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTitle;
-const isVisualEditingEnabled = import.meta.env.PUBLIC_ENABLE_VISUAL_EDITING !== 'false';
-const VisualEditingLayout = isVisualEditingEnabled
-  ? (await import('@/components/layout/VisualEditingLayout')).default
-  : null;
 ---
-<html lang="en" class="dark" style={`--accent-color: ${accentColor};`}>
+<html lang="en" style={`--accent-color: ${accentColor};`}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={metadata?.description || siteDescription} />
     <link rel="icon" href={faviconURL} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap"
-      rel="stylesheet"
-    />
 
     {metadata?.openGraph && (
       <>
@@ -45,43 +35,17 @@ const VisualEditingLayout = isVisualEditingEnabled
     )}
 
     <ClientRouter />
-
-    <script is:inline>
-      const applyThemeClass = () => {
-        document.documentElement.classList.add('dark');
-      };
-      if (window.__themeHandler) {
-        document.removeEventListener('astro:after-swap', window.__themeHandler);
-      }
-      window.__themeHandler = applyThemeClass;
-      document.addEventListener('astro:after-swap', applyThemeClass);
-      applyThemeClass();
-    </script>
   </head>
-  <body class="min-h-screen bg-bg font-body antialiased text-text-primary">
-    {hideGlobalChrome ? (
+  <body class="antialiased font-sans flex flex-col min-h-screen">
+    <VisualEditingLayout
+      headerNavigation={headerNavigation}
+      footerNavigation={footerNavigation}
+      globals={globals}
+      client:load
+    >
       <main class="flex-grow">
         <slot />
       </main>
-    ) : isVisualEditingEnabled && VisualEditingLayout ? (
-      <VisualEditingLayout
-        headerNavigation={headerNavigation}
-        footerNavigation={footerNavigation}
-        globals={globals}
-        client:load
-      >
-        <main class="flex-grow">
-          <slot />
-        </main>
-      </VisualEditingLayout>
-    ) : (
-      <>
-        <NavigationBar navigation={headerNavigation} globals={globals} client:load />
-        <main class="flex-grow">
-          <slot />
-        </main>
-        <Footer navigation={footerNavigation} globals={globals} client:load />
-      </>
-    )}
+    </VisualEditingLayout>
   </body>
 </html>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -84,6 +84,8 @@
 
   body {
     font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     @apply bg-bg text-text-primary;
   }
 }
@@ -92,10 +94,7 @@
 
   input:focus,
   textarea:focus,
-  select:focus,
-  button:focus,
-  a:focus,
-  [role='button']:focus {
+  select:focus {
     @apply outline-none ring-2 ring-[var(--accent-color)] ring-offset-2 ring-offset-background;
   }
 
@@ -110,7 +109,7 @@
   }
 
   .liquid-glass {
-    background: rgba(255, 255, 255, 0.01);
+    background: rgba(0, 0, 0, 0.4);
     background-blend-mode: luminosity;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -127,12 +126,9 @@
     border-radius: inherit;
     padding: 1.4px;
     background: linear-gradient(180deg,
-        rgba(255, 255, 255, 0.45) 0%,
-        rgba(255, 255, 255, 0.15) 20%,
-        rgba(255, 255, 255, 0) 40%,
-        rgba(255, 255, 255, 0) 60%,
-        rgba(255, 255, 255, 0.15) 80%,
-        rgba(255, 255, 255, 0.45) 100%);
+        rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 20%,
+        rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0) 60%,
+        rgba(255, 255, 255, 0.1) 80%, rgba(255, 255, 255, 0.3) 100%);
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);
@@ -157,6 +153,28 @@
 }
 
 @layer utilities {
+  @keyframes hero-video-char {
+    from {
+      opacity: 0;
+      transform: translateX(-18px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes hero-video-fade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
   a {
     @apply transition-colors no-underline;
   }
@@ -192,5 +210,18 @@
 
   .animate-fade-rise-delay-2 {
     animation: fade-rise 0.8s ease-out 0.4s both;
+  }
+
+  .animate-hero-video-char {
+    animation-name: hero-video-char;
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
+  }
+
+  .animate-hero-video-fade {
+    opacity: 0;
+    animation-name: hero-video-fade;
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
   }
 }

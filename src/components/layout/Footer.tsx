@@ -1,7 +1,6 @@
 'use client';
 
 import { forwardRef } from 'react';
-import ThemeToggle from '@/components/ui/ThemeToggle';
 import Container from '@/components/ui/Container';
 import SocialIcon from '@/components/ui/SocialIcon';
 
@@ -20,8 +19,8 @@ interface NavigationItem {
 interface FooterProps {
   navigation: { items: NavigationItem[] };
   globals: {
-    logo?: string | null;
-    logo_dark_mode?: string | null;
+    logo_on_light_bg?: string | null;
+    logo_on_dark_bg?: string | null;
     description?: string | null;
     social_links?: SocialLink[];
   };
@@ -29,12 +28,12 @@ interface FooterProps {
 
 const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, ref) => {
   const directusURL = import.meta.env.PUBLIC_DIRECTUS_URL;
-  const lightLogoUrl = globals?.logo ? `${directusURL}/assets/${globals.logo}` : '/images/logo.svg';
-  const darkLogoUrl = globals?.logo_dark_mode ? `${directusURL}/assets/${globals.logo_dark_mode}` : '';
+  const lightLogoUrl = globals?.logo_on_light_bg ? `${directusURL}/assets/${globals.logo_on_light_bg}` : '/images/logo.svg';
+  const darkLogoUrl = globals?.logo_on_dark_bg ? `${directusURL}/assets/${globals.logo_on_dark_bg}` : '';
 
   return (
-    <footer ref={ref} className="bg-gray dark:bg-[var(--background-variant-color)] py-16">
-      <Container className="text-foreground dark:text-white">
+    <footer ref={ref} className="bg-[#141414] py-16 text-white">
+      <Container className="text-white">
         <div className="flex flex-col md:flex-row justify-between items-start gap-8 pt-8">
           <div className="flex-1">
             <a href="/" className="inline-block transition-opacity hover:opacity-70">
@@ -77,7 +76,6 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
                     </a>
                   </li>
                 ))}
-                <ThemeToggle className="dark:text-white" />
               </ul>
             </nav>
           </div>
