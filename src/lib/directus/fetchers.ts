@@ -1,6 +1,6 @@
-import type { BlockPost, DirectusUser, Page, PageBlock, Post, Schema } from '@/types/directus-schema';
+import type { BlockPost, DirectusUser, Page, Post, Schema } from '@/types/directus-schema';
 import type { QueryFilter } from '@directus/sdk';
-import { createDirectus, readItems as sdkReadItems, rest, staticToken } from '@directus/sdk';
+import { aggregate as sdkAggregate, createDirectus, readItems as sdkReadItems, rest, staticToken } from '@directus/sdk';
 import { useDirectus } from './directus';
 
 const { directus, readItems, readItem, readSingleton, aggregate, withToken } = useDirectus();
@@ -57,11 +57,105 @@ const pageFields = [
               ],
             },
           ] as any,
+          block_blog_archive: [
+            'id',
+            'headline',
+            'author_filter',
+            {
+              categories: [{ categories_id: ['id', 'title', 'slug'] }],
+            },
+          ] as any,
         },
       },
     ],
   },
 ] as const;
+
+const blogArchivePostFields = [
+  'id',
+  'title',
+  'summary',
+  'content',
+  'Slug',
+  'image',
+  'date_published',
+  'tags',
+  { category: ['id', 'title', 'slug'] },
+  { author: ['id', 'name', 'image'] },
+] as any[];
+
+const BLOG_ARCHIVE_PAGE_SIZE = 9;
+
+const enrichBlogArchiveBlocks = async (page: Page, token?: string) => {
+  const blocks = Array.isArray(page.blocks) ? [...page.blocks] : [];
+  if (!blocks.length) return page;
+
+  const serverToken = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
+  const client = createAuthClient(token || serverToken);
+
+  const enrichedBlocks = await Promise.all(
+    blocks.map(async (block: any) => {
+      if (block?.collection !== 'block_blog_archive' || !block.item || typeof block.item !== 'object') {
+        return block;
+      }
+
+      const blockItem = block.item as any;
+      const categoryIds = Array.isArray(blockItem.categories)
+        ? blockItem.categories
+          .map((entry: any) => entry?.categories_id?.id ?? entry?.categories_id)
+          .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0)
+        : [];
+
+      const andConditions: any[] = [{ status: { _eq: 'published' } }];
+
+      if (blockItem.author_filter) {
+        andConditions.push({ author: { _eq: blockItem.author_filter } });
+      }
+
+      if (categoryIds.length > 0) {
+        andConditions.push({ category: { _in: categoryIds } });
+      }
+
+      const filter = andConditions.length > 1 ? { _and: andConditions } : andConditions[0];
+      const sortDir = blockItem.sort_mode === 'oldest' ? 'date_published' : '-date_published';
+
+      const [posts, countResponse] = await Promise.all([
+        client.request(
+          sdkReadItems('posts', {
+            filter: filter as any,
+            sort: [sortDir] as any[],
+            limit: BLOG_ARCHIVE_PAGE_SIZE,
+            page: 1,
+            fields: blogArchivePostFields,
+          }),
+        ),
+        client.request(
+          sdkAggregate('posts', {
+            aggregate: { count: '*' },
+            filter: filter as any,
+          }),
+        ),
+      ]);
+
+      const totalCount = Number((countResponse as any)[0]?.count ?? 0);
+
+      return {
+        ...block,
+        item: {
+          ...blockItem,
+          posts,
+          totalCount,
+          totalPages: Math.max(1, Math.ceil(totalCount / BLOG_ARCHIVE_PAGE_SIZE)),
+        },
+      };
+    }),
+  );
+
+  return {
+    ...page,
+    blocks: enrichedBlocks,
+  };
+};
 
 /**
  * Fetches page data by permalink, including all nested blocks and dynamically fetching blog posts if required.
@@ -73,9 +167,11 @@ export const fetchPageData = async (
   preview?: boolean,
 ): Promise<Page> => {
   try {
+    const authToken = token || (import.meta.env.DIRECTUS_SERVER_TOKEN as string);
+
     const pageData = (await directus.request(
       withToken(
-        token as string,
+        authToken,
         readItems('pages', {
           filter:
             preview && token
@@ -97,107 +193,9 @@ export const fetchPageData = async (
       throw new Error('Page not found');
     }
 
-    const page = pageData[0];
-
-
-    // Dynamic Content Enhancement:
-    // Some blocks need additional data fetched at runtime
-    // This is where we enhance static block data with dynamic content
-    if (Array.isArray(page.blocks)) {
-      for (const block of page.blocks as PageBlock[]) {
-        if (block.collection === 'block_hero' && block.item && typeof block.item !== 'string') {
-          const hero = block.item as PageBlock['item'] & {
-            content?: string | null;
-            button_group?: {
-              id: string;
-              buttons?: Array<{
-                id: string;
-                label?: string | null;
-                variant?: string | null;
-                color?: string | null;
-                type?: 'pages' | 'posts' | 'external' | null;
-                external_url?: string | null;
-                page?: { permalink?: string | null } | string | null;
-                post?: { slug?: string | null } | string | null;
-              }>;
-            } | null;
-          };
-
-          console.log('[fetchPageData.block_hero]', JSON.stringify({
-            id: (hero as { id?: string }).id,
-            hasContent: Boolean(hero.content),
-            hasButtonGroup: Boolean(hero.button_group?.id),
-            buttonCount: hero.button_group?.buttons?.length ?? 0,
-          }));
-
-          if (hero.button_group?.buttons?.length) {
-            hero.button_group.buttons = hero.button_group.buttons.map((button) => ({
-              ...button,
-              type:
-                button.type === 'pages'
-                  ? 'page'
-                  : button.type === 'posts'
-                    ? 'post'
-                    : button.type === 'external'
-                      ? 'url'
-                      : null,
-              url: button.external_url ?? null,
-              variant:
-                button.variant === 'solid'
-                  ? 'default'
-                  : button.variant === 'soft'
-                    ? 'secondary'
-                    : button.variant === 'ghost' || button.variant === 'outline' || button.variant === 'link'
-                      ? button.variant
-                      : 'default',
-            })) as typeof hero.button_group.buttons;
-          }
-        }
-
-        // Handle dynamic posts blocks - these blocks display a list of posts
-        // The posts are fetched dynamically based on the block's configuration
-        if (
-          block.collection === 'block_posts' &&
-          block.item &&
-          typeof block.item !== 'string' &&
-          'collection' in block.item &&
-          block.item.collection === 'posts'
-        ) {
-          const blockPost = block.item as BlockPost;
-          const limit = blockPost.limit ?? 6; // Default to 6 posts if no limit specified
-
-          // Fetch the actual posts data for this block
-          // Always fetch published posts only (no preview mode for dynamic content)
-          const posts = await directus.request<Post[]>(
-            readItems('posts', {
-              fields: ['id', 'title', 'description', 'slug', 'image', 'status', 'published_at'],
-              filter: { status: { _eq: 'published' } },
-              sort: ['-published_at'],
-              limit,
-              page: postPage,
-            }),
-          );
-
-          const countResponse = await directus.request(
-            aggregate('posts', {
-              aggregate: { count: '*' },
-              filter: { status: { _eq: 'published' } },
-            }),
-          );
-
-          const totalPages = Math.ceil(Number(countResponse[0]?.count || 0) / limit);
-
-          // Attach the fetched posts to the block for frontend rendering
-          (block.item as BlockPost & { posts: Post[]; totalPages: number }).posts = posts;
-          (block.item as BlockPost & { totalPages: number }).totalPages = totalPages;
-        }
-      }
-    }
-
-    return page;
-  } catch (error) {
-    console.error('fetchPageData actual error:', JSON.stringify(error, null, 2), error);
-    throw new Error('Failed to fetch page data');
+    return enrichBlogArchiveBlocks(pageData[0], token);
+  } catch {
+    throw new Error(`Failed to fetch page with permalink "${permalink}"`);
   }
 };
 
@@ -323,7 +321,7 @@ export const fetchRelatedPosts = async (excludeId: string) => {
         fields: ['id', 'title', 'image', 'Slug', 'seo'] as any[],
         limit: 2,
       }),
-    )) as Post[];
+    )) as unknown as Post[];
 
     return relatedPosts;
   } catch {
@@ -428,6 +426,7 @@ export const searchContent = async (search: string) => {
   }
 };
 
+
 export const fetchAllPosts = async (): Promise<Post[]> => {
   try {
     const posts = (await directus.request(
@@ -470,7 +469,7 @@ export const fetchPageDataById = async (id: string, version: string, token?: str
   }
 
   try {
-    return (await directus.request(
+    const page = (await directus.request(
       withToken(
         token as string,
         readItem('pages', id, {
@@ -485,6 +484,8 @@ export const fetchPageDataById = async (id: string, version: string, token?: str
         }),
       ),
     )) as Page;
+
+    return enrichBlogArchiveBlocks(page, token);
   } catch {
     throw new Error('Failed to fetch versioned page');
   }

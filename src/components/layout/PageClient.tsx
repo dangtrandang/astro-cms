@@ -1,10 +1,9 @@
 'use client';
 
 import useSWR from 'swr';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useVisualEditing } from '@/hooks/useVisualEditing';
 import PageBuilder from '@/components/layout/PageBuilder';
-import RecentPosts from '@/components/blocks/RecentPosts';
 import type { PageBlock } from '@/types/directus-schema';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
@@ -55,15 +54,16 @@ export default function PageClient({ initialSections, permalink, pageId }: PageC
     setHasVersioningParams(hasVersioning);
   }, [permalink, pageId]);
 
-  const shouldFetchLive = isVisualEditingEnabled || isPreviewEnabled || hasVersioningParams;
-  const swrKey = shouldFetchLive ? `${permalink}-${new URLSearchParams(window.location.search).toString()}` : null;
+  const queryString = typeof window !== 'undefined' ? window.location.search : '';
+  const swrKey = useMemo(() => `${permalink}-${queryString}`, [permalink, queryString]);
 
   const { data: sections = initialSections, mutate } = useSWR(
     swrKey,
-    () => fetchBlocks(permalink, new URLSearchParams(window.location.search)),
+    () => fetchBlocks(permalink, new URLSearchParams(queryString)),
     {
       fallbackData: initialSections,
       revalidateOnFocus: false,
+      revalidateOnMount: true,
     },
   );
 
@@ -97,7 +97,6 @@ export default function PageClient({ initialSections, permalink, pageId }: PageC
   return (
     <div className="relative">
       <PageBuilder sections={sections} />
-      <RecentPosts />
       {isVisualEditingEnabled && (
         <div className="fixed z-[60] w-full bottom-4 inset-x-0 p-4 flex justify-center items-center gap-2">
           <Button

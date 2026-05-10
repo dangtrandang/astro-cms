@@ -16,6 +16,7 @@ import Team from './Team';
 import Testimonials from './Testimonials';
 import Video from './Video';
 import Divider from './Divider';
+import BlogArchive from './BlogArchive';
 import type { PageBlock } from '@/types/directus-schema';
 
 interface BaseBlockProps {
@@ -29,6 +30,7 @@ export default function BaseBlock({ block }: BaseBlockProps) {
     block_hero: Hero,
     block_gallery: Gallery,
     block_posts: Posts,
+    block_blog_archive: BlogArchive,
     block_form: Form,
     block_richtext: RichText,
     block_pricing: Pricing,

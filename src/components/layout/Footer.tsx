@@ -32,8 +32,8 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
   const darkLogoUrl = globals?.logo_on_dark_bg ? `${directusURL}/assets/${globals.logo_on_dark_bg}` : '';
 
   return (
-    <footer ref={ref} className="bg-[#141414] py-16 text-white">
-      <Container className="text-white">
+    <footer ref={ref} className="bg-[#850E35] py-16 text-[#FCF5EE]">
+      <Container className="text-[#FCF5EE]">
         <div className="flex flex-col md:flex-row justify-between items-start gap-8 pt-8">
           <div className="flex-1">
             <a href="/" className="inline-block transition-opacity hover:opacity-70">
@@ -55,9 +55,9 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="size-8 rounded bg-transparent inline-flex items-center justify-center transition-colors hover:opacity-70"
+                    className="size-8 rounded bg-transparent inline-flex items-center justify-center transition-colors hover:text-[#C6DCE4] hover:opacity-100"
                   >
-                    <SocialIcon service={social.service} size={24} className="size-6" />
+                    <SocialIcon service={social.service} size={24} className="size-6 text-[#FCF5EE] hover:text-[#C6DCE4] transition-colors" />
                   </a>
                 ))}
               </div>
@@ -70,7 +70,7 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
                   <li key={group.title}>
                     <a
                       href={group.page?.permalink || group.url || '#'}
-                      className="text-nav font-medium hover:underline"
+                      className="text-[#FCF5EE] font-medium hover:text-[#C6DCE4] transition-colors"
                     >
                       {group.title}
                     </a>

@@ -8,10 +8,12 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        heading: ['Poppins', 'sans-serif'],
         sans: ['Inter', 'sans-serif'],
+        serif: ['"Playfair Display"', 'serif'],
+        accent: ['"Great Vibes"', 'cursive'],
         body: ['Inter', 'sans-serif'],
-        display: ['Instrument Serif', 'serif'],
+        heading: ['"Playfair Display"', 'serif'],
+        display: ['"Playfair Display"', 'serif'],
         code: ['Fira Mono', 'monospace'],
       },
       fontSize: {
@@ -70,21 +72,21 @@ const config: Config = {
               },
             },
             h1: {
-              fontFamily: 'Poppins',
+              fontFamily: '"Playfair Display", serif',
               fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
               fontWeight: '400',
               lineHeight: '1.2',
               marginTop: '1rem',
             },
             h2: {
-              fontFamily: 'Poppins',
+              fontFamily: '"Playfair Display", serif',
               fontSize: 'clamp(2rem, 4vw, 2.5rem)',
               fontWeight: '400',
               lineHeight: '1.3',
               marginTop: '1rem',
             },
             h3: {
-              fontFamily: 'Poppins',
+              fontFamily: '"Playfair Display", serif',
               fontSize: 'clamp(1.5rem, 3vw, 2rem)',
               fontWeight: '400',
               lineHeight: '1.4',

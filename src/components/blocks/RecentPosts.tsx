@@ -48,9 +48,9 @@ const RecentPosts = () => {
         <section className="py-20 px-6">
             <div className="mx-auto max-w-7xl space-y-12">
                 <div className="flex items-end justify-between">
-                    <h2 className="font-serif-display text-3xl tracking-tight sm:text-4xl">Latest Posts</h2>
-                    <a href="/blog" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
-                        View all →
+                    <h2 className="font-serif text-3xl text-[#850E35] tracking-tight sm:text-4xl">Bài viết mới nhất</h2>
+                    <a href="/blog" className="text-sm font-medium text-gray-800 hover:text-[#850E35] transition-colors">
+                        Xem tất cả →
                     </a>
                 </div>
                 <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -73,8 +73,8 @@ const RecentPosts = () => {
                                     )}
                                 </div>
                                 <div className="space-y-1">
-                                    {date && <p className="text-xs text-gray-400">{date}</p>}
-                                    <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                    {date && <p className="text-xs text-gray-500">{date}</p>}
+                                    <h3 className="font-serif text-lg font-bold text-gray-800 line-clamp-2 group-hover:text-[#850E35] transition-colors">
                                         {post.title}
                                     </h3>
                                 </div>

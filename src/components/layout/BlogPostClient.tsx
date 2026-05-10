@@ -104,9 +104,9 @@ export default function BlogPostClient({
         )}
 
         <Headline
-          as="h2"
+          as="h1"
           headline={post.title}
-          className="!text-accent mb-4"
+          className="!text-[#850E35] font-serif text-4xl lg:text-5xl mb-6"
           data-directus={setAttr({
             collection: 'posts',
             item: post.id,
@@ -129,7 +129,7 @@ export default function BlogPostClient({
             />
           </main>
 
-          <aside className="space-y-6 p-6 rounded-lg max-w-[496px] h-fit bg-background-muted">
+          <aside className="space-y-6 p-6 rounded-xl max-w-[496px] h-fit bg-[#F2D1D1]/40 border border-[#F2D1D1]">
             {author && (
               <div
                 className="flex items-center space-x-4"
@@ -170,14 +170,14 @@ export default function BlogPostClient({
             </div>
 
             <div>
-              <Separator className="my-4" />
-              <h3 className="font-bold mb-4">Related Posts</h3>
+              <Separator className="my-4 border-gray-200" />
+              <h3 className="font-bold font-serif text-2xl text-[#850E35] mb-4">Bài viết liên quan</h3>
               <div className="space-y-4">
                 {relatedPosts.map((relatedPost) => (
                   <a
                     key={relatedPost.id}
-                    href={`/blog/${relatedPost.slug}`}
-                    className="flex items-center space-x-4 hover:text-accent group"
+                    href={`/blog/${(relatedPost as any).Slug || relatedPost.slug}`}
+                    className="flex items-center space-x-4 group"
                   >
                     {relatedPost.image && (
                       <div className="relative shrink-0 w-[150px] h-[100px] overflow-hidden rounded-lg">
@@ -190,7 +190,7 @@ export default function BlogPostClient({
                         />
                       </div>
                     )}
-                    <span className="font-heading">{relatedPost.title}</span>
+                    <span className="font-serif text-lg font-bold text-gray-800 transition-colors group-hover:text-[#850E35]">{relatedPost.title}</span>
                   </a>
                 ))}
               </div>

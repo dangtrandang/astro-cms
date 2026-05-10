@@ -69,8 +69,8 @@ const metadata = {
   },
 };
 
-// Route caching (Astro v6): only cache published posts; never cache preview/draft
-if (Astro.cache.enabled) {
+// Route caching (Astro v6): only cache published posts; never cache preview/draft or in DEV mode
+if (Astro.cache && Astro.cache.enabled && !import.meta.env.DEV) {
   if (isDraft) {
     Astro.cache.set(false);
   } else {
