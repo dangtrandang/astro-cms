@@ -66,6 +66,15 @@ const pageFields = [
               categories: [{ categories_id: ['id', 'title', 'slug'] }],
             },
           ] as any,
+          block_gallery: [
+            'id',
+            'title',
+            'headline',
+            'variant',
+            {
+              gallery_items: ['id', 'sort', { directus_files_id: ['id', 'title', 'description', 'width', 'height'] }],
+            },
+          ] as any,
           block_quote: ['id', 'title', 'subtitle', 'content'] as any,
           block_who_i_am: [
             'id',

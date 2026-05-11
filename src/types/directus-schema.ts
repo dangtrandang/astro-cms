@@ -116,6 +116,7 @@ export interface BlockGallery {
 	/** @primaryKey */
 	id: string;
 	title?: string | null;
+	variant?: 'grid' | 'accordion' | null;
 	gallery_items?: BlockGalleryFile[] | string[];
 }
 
