@@ -1,4 +1,4 @@
-import type { BlockPost, DirectusUser, Page, Post, Schema } from '@/types/directus-schema';
+import type { DirectusUser, Page, Post, Schema } from '@/types/directus-schema';
 import type { QueryFilter } from '@directus/sdk';
 import { aggregate as sdkAggregate, createDirectus, readItems as sdkReadItems, rest, staticToken } from '@directus/sdk';
 import { useDirectus } from './directus';
@@ -65,6 +65,19 @@ const pageFields = [
             {
               categories: [{ categories_id: ['id', 'title', 'slug'] }],
             },
+          ] as any,
+          block_quote: ['id', 'title', 'subtitle', 'content'] as any,
+          block_who_i_am: [
+            'id',
+            'title',
+            'eyebrow',
+            'headline',
+            'content',
+            { portrait_image: ['id'] },
+            'center_badge',
+            'right_items',
+            'social_links',
+            'theme_variant',
           ] as any,
         },
       },

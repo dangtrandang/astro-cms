@@ -17,6 +17,7 @@ import Testimonials from './Testimonials';
 import Video from './Video';
 import Divider from './Divider';
 import BlogArchive from './BlogArchive';
+import WhoIAm from './WhoIAm';
 import type { PageBlock } from '@/types/directus-schema';
 
 interface BaseBlockProps {
@@ -45,6 +46,7 @@ export default function BaseBlock({ block }: BaseBlockProps) {
     block_testimonials: Testimonials,
     block_video: Video,
     block_divider: Divider,
+    block_who_i_am: WhoIAm,
   };
 
   const Component = components[block.collection];
