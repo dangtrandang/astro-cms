@@ -40,6 +40,7 @@ const pageFields = [
             'content',
             'image',
             'image_position',
+            'variant',
             {
               button_group: [
                 'id',
