@@ -44,10 +44,10 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const directusURL = import.meta.env.PUBLIC_DIRECTUS_URL;
 
-  const logoUrl = globals?.logo_on_light_bg
-    ? `${directusURL}/assets/${globals.logo_on_light_bg}`
-    : globals?.logo_on_dark_bg
-      ? `${directusURL}/assets/${globals.logo_on_dark_bg}`
+  const logoUrl = globals?.logo_on_dark_bg
+    ? `${directusURL}/assets/${globals.logo_on_dark_bg}`
+    : globals?.logo_on_light_bg
+      ? `${directusURL}/assets/${globals.logo_on_light_bg}`
       : '/images/logo.svg';
 
   const closeMobileMenu = () => {
