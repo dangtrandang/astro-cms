@@ -2,7 +2,7 @@
 
 import { forwardRef, useEffect, useState } from 'react';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
-import { ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Container from '@/components/ui/Container';
 import SearchModal from '@/components/ui/SearchModal';
@@ -167,10 +167,26 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
             variant="ghost"
             size="icon"
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            className="border-0 text-gray-800 outline-none ring-0 hover:bg-gray-100 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 md:hidden"
+            className="group relative border-0 text-gray-800 outline-none ring-0 hover:bg-gray-100 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 md:hidden"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
           >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <span className="relative block h-[18px] w-[18px]">
+              <span
+                className={`absolute left-0 top-1/2 block h-[2px] w-full rounded-full bg-current transition-all duration-300 ease-in-out ${
+                  mobileMenuOpen ? '-translate-y-1/2 rotate-45' : '-translate-y-[calc(50%+7px)]'
+                }`}
+              />
+              <span
+                className={`absolute left-0 top-1/2 block h-[2px] w-full -translate-y-1/2 rounded-full bg-current transition-all duration-300 ease-in-out ${
+                  mobileMenuOpen ? 'opacity-0 scale-x-0' : 'opacity-100'
+                }`}
+              />
+              <span
+                className={`absolute left-0 top-1/2 block h-[2px] w-full rounded-full bg-current transition-all duration-300 ease-in-out ${
+                  mobileMenuOpen ? '-translate-y-1/2 -rotate-45' : '-translate-y-[calc(50%-5px)]'
+                }`}
+              />
+            </span>
           </Button>
         </div>
       </Container>
@@ -190,10 +206,13 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
                 variant="ghost"
                 size="icon"
                 aria-label="Close menu"
-                className="border-0 text-gray-800 outline-none ring-0 hover:bg-gray-100 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                className="relative border-0 text-gray-800 outline-none ring-0 hover:bg-gray-100 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                 onClick={closeMobileMenu}
               >
-                <X className="h-5 w-5" />
+                <span className="relative block h-[18px] w-[18px]">
+                  <span className="absolute left-0 top-1/2 block h-[2px] w-full -translate-y-1/2 rotate-45 rounded-full bg-current" />
+                  <span className="absolute left-0 top-1/2 block h-[2px] w-full -translate-y-1/2 -rotate-45 rounded-full bg-current" />
+                </span>
               </Button>
             </div>
 
@@ -214,7 +233,7 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
                 <div key={section.id} className="border-b border-gray-200 pb-4 last:border-b-0">
                   {section.children?.length ? (
                     <Collapsible open={openSections[section.id]} onOpenChange={() => toggleSection(section.id)}>
-                      <CollapsibleTrigger className="flex w-full items-center justify-between border-0 bg-transparent text-left text-base font-medium text-gray-800 outline-none ring-0 transition-colors hover:text-[#850E35] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
+                      <CollapsibleTrigger className="flex w-full items-center justify-between border-0 bg-transparent py-2 text-left text-base font-medium text-gray-800 outline-none ring-0 transition-colors hover:text-[#850E35] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
                         <span>{section.title}</span>
                         <ChevronDown
                           className={`h-4 w-4 transition-transform duration-200 ${openSections[section.id] ? 'rotate-180' : ''}`}
@@ -225,7 +244,7 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
                           <a
                             key={child.id}
                             href={getHref(child)}
-                            className="text-sm text-gray-600 outline-none transition-colors hover:text-[#850E35] focus:outline-none"
+                            className="block py-1 text-sm text-gray-600 outline-none transition-colors hover:text-[#850E35] focus:outline-none"
                             onClick={closeMobileMenu}
                           >
                             {child.title}
@@ -236,7 +255,7 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
                   ) : (
                     <a
                       href={getHref(section)}
-                      className="text-base font-medium text-gray-800 outline-none transition-colors hover:text-[#850E35] focus:outline-none"
+                      className="block py-2 text-base font-medium text-gray-800 outline-none transition-colors hover:text-[#850E35] focus:outline-none"
                       onClick={closeMobileMenu}
                     >
                       {section.title}

@@ -252,55 +252,61 @@ const Gallery = ({ data }: GalleryProps) => {
 
       {isLightboxOpen && isValidIndex && (
         <Dialog open={isLightboxOpen} onOpenChange={setLightboxOpen}>
-          <DialogContent className="max-w-[96vw] border-none bg-transparent p-0 shadow-none sm:max-w-[94vw]" hideCloseButton>
+          <DialogContent className="max-w-[96vw] border-none bg-transparent p-0 shadow-none sm:max-w-[45vw]" hideCloseButton>
             <DialogTitle className="sr-only">Gallery lightbox</DialogTitle>
             <DialogDescription className="sr-only">Xem anh phong to trong bo suu tap.</DialogDescription>
 
             <div
-              className="relative flex h-[92vh] w-full items-center justify-center overflow-hidden bg-black/88 px-4 py-6 sm:px-8"
+              className="flex h-[92vh] w-full items-center justify-center bg-black/88 px-4 py-6 sm:px-8"
               onClick={() => setLightboxOpen(false)}
               role="presentation"
             >
-              <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-center">
+              <div onClick={(e) => e.stopPropagation()} className="relative inline-flex items-center justify-center">
                 <DirectusImage
                   uuid={sortedItems[currentIndex].fileId}
                   alt={headline || title || `Gallery image ${currentIndex + 1}`}
                   width={1600}
                   height={1100}
-                  className="max-h-full max-w-full object-contain"
+                  className="max-h-[calc(92vh-3rem)] max-w-full object-contain"
                 />
+
+                <DialogClose asChild>
+                  <button
+                    type="button"
+                    className="absolute right-1 top-1 inline-flex h-10 w-10 -translate-y-full translate-x-full items-center justify-center rounded-full border border-white/40 bg-black/55 text-white backdrop-blur-sm transition hover:bg-black/75"
+                    aria-label="Dong lightbox"
+                  >
+                    <X className="size-5" />
+                  </button>
+                </DialogClose>
+
+                {sortedItems.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        showPrev();
+                      }}
+                      className="absolute left-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm transition hover:bg-black/75"
+                      aria-label="Anh truoc"
+                    >
+                      <ArrowLeft className="size-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        showNext();
+                      }}
+                      className="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm transition hover:bg-black/75"
+                      aria-label="Anh tiep theo"
+                    >
+                      <ArrowRight className="size-5" />
+                    </button>
+                  </>
+                )}
               </div>
-
-              {sortedItems.length > 1 && (
-                <div className="pointer-events-auto absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-between px-4 sm:px-6">
-                  <button
-                    type="button"
-                    onClick={showPrev}
-                    className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/16 text-white transition hover:bg-white/24"
-                    aria-label="Anh truoc"
-                  >
-                    <ArrowLeft className="size-5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={showNext}
-                    className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/16 text-white transition hover:bg-white/24"
-                    aria-label="Anh tiep theo"
-                  >
-                    <ArrowRight className="size-5" />
-                  </button>
-                </div>
-              )}
-
-              <DialogClose asChild>
-                <button
-                  type="button"
-                  className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/16 text-white backdrop-blur-sm transition hover:bg-white/28 sm:right-5 sm:top-5 sm:h-12 sm:w-12"
-                  aria-label="Dong lightbox"
-                >
-                  <X className="size-5" />
-                </button>
-              </DialogClose>
             </div>
           </DialogContent>
         </Dialog>
