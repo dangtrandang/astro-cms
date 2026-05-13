@@ -256,14 +256,20 @@ const Gallery = ({ data }: GalleryProps) => {
             <DialogTitle className="sr-only">Gallery lightbox</DialogTitle>
             <DialogDescription className="sr-only">Xem anh phong to trong bo suu tap.</DialogDescription>
 
-            <div className="relative flex h-[92vh] w-full items-center justify-center overflow-hidden bg-black/88 px-4 py-6 sm:px-8">
-              <DirectusImage
-                uuid={sortedItems[currentIndex].fileId}
-                alt={headline || title || `Gallery image ${currentIndex + 1}`}
-                width={1600}
-                height={1100}
-                className="max-h-full max-w-full object-contain"
-              />
+            <div
+              className="relative flex h-[92vh] w-full items-center justify-center overflow-hidden bg-black/88 px-4 py-6 sm:px-8"
+              onClick={() => setLightboxOpen(false)}
+              role="presentation"
+            >
+              <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-center">
+                <DirectusImage
+                  uuid={sortedItems[currentIndex].fileId}
+                  alt={headline || title || `Gallery image ${currentIndex + 1}`}
+                  width={1600}
+                  height={1100}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
 
               {sortedItems.length > 1 && (
                 <div className="pointer-events-auto absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-between px-4 sm:px-6">
@@ -289,7 +295,7 @@ const Gallery = ({ data }: GalleryProps) => {
               <DialogClose asChild>
                 <button
                   type="button"
-                  className="absolute right-5 top-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-black/35 text-white transition hover:bg-black/55"
+                  className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/16 text-white backdrop-blur-sm transition hover:bg-white/28 sm:right-5 sm:top-5 sm:h-12 sm:w-12"
                   aria-label="Dong lightbox"
                 >
                   <X className="size-5" />
