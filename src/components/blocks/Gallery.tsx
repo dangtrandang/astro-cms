@@ -3,6 +3,8 @@ import DirectusImage from '@/components/shared/DirectusImage';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { ArrowLeft, ArrowRight, Eye, X } from 'lucide-react';
 import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
+import Floating, { FloatingElement } from '@/components/fancy/image/parallax-floating';
+import { motion, stagger, useAnimate } from 'framer-motion';
 
 interface GalleryFileAsset {
   id: string;
@@ -13,6 +15,7 @@ interface GalleryFileAsset {
 interface GalleryItem {
   id: string;
   sort?: number | null;
+  size?: 'small' | 'medium' | 'large' | null;
   directus_files_id?: GalleryFileAsset | string | null;
 }
 
@@ -20,7 +23,10 @@ interface GalleryData {
   id: string;
   title?: string | null;
   headline?: string | null;
-  variant?: 'grid' | 'accordion' | null;
+  variant?: 'grid' | 'accordion' | 'floating' | null;
+  background_color?: string | null;
+  background_image?: GalleryFileAsset | string | null;
+  background_video?: GalleryFileAsset | string | null;
   gallery_items?: GalleryItem[] | null;
 }
 
@@ -31,13 +37,14 @@ interface GalleryProps {
 interface ResolvedGalleryItem {
   id: string;
   sort: number;
+  size: 'small' | 'medium' | 'large';
   fileId: string;
   title: string;
   description: string;
 }
 
 const Gallery = ({ data }: GalleryProps) => {
-  const { title, headline, variant, gallery_items, id } = data;
+  const { title, headline, variant, background_color, background_image, background_video, gallery_items, id } = data;
 
   const sortedItems = useMemo<ResolvedGalleryItem[]>(() => {
     return (gallery_items ?? [])
@@ -51,6 +58,7 @@ const Gallery = ({ data }: GalleryProps) => {
         return {
           id: item.id,
           sort: item.sort ?? index,
+          size: item.size ?? 'medium',
           fileId,
           title: fileMeta?.title ?? '',
           description: fileMeta?.description ?? '',
@@ -61,6 +69,7 @@ const Gallery = ({ data }: GalleryProps) => {
   }, [gallery_items]);
 
   const isAccordion = (variant ?? 'accordion') === 'accordion';
+  const isFloating = variant === 'floating';
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -118,6 +127,9 @@ const Gallery = ({ data }: GalleryProps) => {
   }, [isLightboxOpen, sortedItems.length]);
 
   if (!hasItems) return null;
+
+  /* ---- FLOATING variant ---- */
+  if (isFloating) return <FloatingGallery data={data} items={sortedItems} />;
 
   return (
     <section className="bg-[#FCF5EE] py-16 text-[#3e2a2a] md:py-20">
@@ -314,5 +326,146 @@ const Gallery = ({ data }: GalleryProps) => {
     </section>
   );
 };
+
+/* ------------------------------------------------------------------ */
+/*  FloatingGallery – variant nổi với mouse-driven parallax             */
+/* ------------------------------------------------------------------ */
+
+/** Vị trí được tính trước cho từng ảnh (tối đa 10) */
+const FLOATING_POSITIONS: { top: string; left: string; width: string; height: string; depth: number }[] = [
+  { top: '8%', left: '5%', width: 'w-16 h-16 md:w-24 md:h-24', height: '', depth: 0.5 },
+  { top: '10%', left: '32%', width: 'w-20 h-20 md:w-28 md:h-28', height: '', depth: 1 },
+  { top: '2%', left: '55%', width: 'w-28 md:w-40', height: 'h-40 md:h-52', depth: 2 },
+  { top: '0%', left: '78%', width: 'w-24 h-24 md:w-32 md:h-32', height: '', depth: 1 },
+  { top: '40%', left: '2%', width: 'w-28 h-28 md:w-36 md:h-36', height: '', depth: 1 },
+  { top: '68%', left: '75%', width: 'w-28 md:w-36', height: 'h-28 md:h-48', depth: 2 },
+  { top: '70%', left: '12%', width: 'w-40 md:w-52', height: 'h-full', depth: 4 },
+  { top: '78%', left: '48%', width: 'w-24 h-24 md:w-32 md:h-32', height: '', depth: 1 },
+  { top: '55%', left: '35%', width: 'w-20 h-20 md:w-24 md:h-24', height: '', depth: 0.5 },
+  { top: '45%', left: '62%', width: 'w-16 h-16 md:w-20 md:h-20', height: '', depth: 0.7 },
+];
+
+interface FloatingGalleryProps {
+  data: GalleryData;
+  items: ResolvedGalleryItem[];
+}
+
+function FloatingGallery({ data, items }: FloatingGalleryProps) {
+  const { title, headline, background_color, background_image, background_video, id } = data;
+  const [scope, animate] = useAnimate();
+
+  useEffect(() => {
+    animate('img', { opacity: [0, 1] }, { duration: 0.5, delay: stagger(0.15) });
+  }, [animate]);
+
+  const displayTitle = title || 'Mỗi vấn đề sẽ có 1 công cụ chuyên biệt';
+  const displayHeadline =
+    headline ||
+    'Có nhiều vấn đề phải sử dụng nhiều công cụ và chuyên môn khác nhau, như tarot, thần số, tử vi, phong thuỷ...';
+
+  const backgroundImageId = typeof background_image === 'string' ? background_image : background_image?.id;
+  const backgroundVideoId = typeof background_video === 'string' ? background_video : background_video?.id;
+
+  return (
+    <section
+      className="relative flex h-[85vh] w-full items-center justify-center overflow-hidden"
+      style={{ backgroundColor: background_color || '#FCF5EE' }}
+      ref={scope}
+    >
+      {backgroundImageId ? (
+        <div className="absolute inset-0">
+          <img
+            src={`${import.meta.env.PUBLIC_DIRECTUS_URL}/assets/${backgroundImageId}`}
+            alt={title || 'Gallery background'}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      ) : null}
+
+      {backgroundVideoId ? (
+        <div className="absolute inset-0">
+          <video
+            className="h-full w-full object-cover"
+            autoPlay
+            loop
+            muted
+            playsInline
+          >
+            <source src={`${import.meta.env.PUBLIC_DIRECTUS_URL}/assets/${backgroundVideoId}`} />
+          </video>
+        </div>
+      ) : null}
+
+      {(backgroundImageId || backgroundVideoId) ? <div className="absolute inset-0 bg-white/20" /> : null}
+
+      {/* ---- Floating images ---- */}
+      <div className="absolute inset-0">
+        <Floating sensitivity={-1} className="h-full w-full overflow-hidden">
+          {items.slice(0, FLOATING_POSITIONS.length).map((item, index) => {
+            const pos = FLOATING_POSITIONS[index];
+            if (!pos) return null;
+
+            const sizeClass =
+              item.size === 'small'
+                ? 'w-[88px] h-[88px] md:w-[120px] md:h-[120px]'
+                : item.size === 'large'
+                  ? 'w-[220px] h-[320px] md:w-[320px] md:h-[440px]'
+                  : 'w-[140px] h-[140px] md:w-[200px] md:h-[200px]';
+
+            return (
+              <FloatingElement key={item.id} depth={pos.depth} style={{ top: pos.top, left: pos.left }}>
+                <motion.img
+                  initial={{ opacity: 0 }}
+                  src={`${import.meta.env.PUBLIC_DIRECTUS_URL}/assets/${item.fileId}`}
+                  alt={headline || title || `Ảnh ${index + 1}`}
+                  className={`${sizeClass} rounded-xl object-cover shadow-[0_10px_30px_rgba(133,14,53,0.08)] hover:scale-105 duration-200 cursor-pointer transition-transform`}
+                />
+              </FloatingElement>
+            );
+          })}
+        </Floating>
+      </div>
+
+      {/* ---- Text overlay ---- */}
+      <motion.div
+        className="z-10 mx-auto flex w-[calc(100%-2rem)] max-w-3xl flex-col items-center gap-6 rounded-[28px] border border-white/45 bg-white/75 px-5 py-8 text-center shadow-[0_18px_50px_rgba(133,14,53,0.12)] backdrop-blur-sm md:gap-8 md:px-10 md:py-10"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.88, delay: 1.5 }}
+      >
+        <h2
+          className="font-heading text-4xl font-bold not-italic leading-[1.02] tracking-[-0.02em] text-[#850E35] md:text-5xl lg:text-6xl"
+          data-directus={setAttr({
+            collection: 'block_gallery',
+            item: id,
+            fields: ['title'],
+            mode: 'popover',
+          })}
+        >
+          {displayTitle}
+        </h2>
+
+        <div
+          className="max-w-2xl text-pretty text-base leading-8 text-[#3e2a2a] md:text-lg md:leading-9"
+          data-directus={setAttr({
+            collection: 'block_gallery',
+            item: id,
+            fields: ['headline'],
+            mode: 'popover',
+          })}
+          dangerouslySetInnerHTML={{ __html: displayHeadline }}
+        />
+
+        <a
+          href="/lien-he"
+          className="mt-2 inline-flex rounded-xl bg-[#850E35] px-10 py-3.5 text-base font-medium text-[#FCF5EE] shadow-[0_8px_24px_rgba(133,14,53,0.18)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_12px_32px_rgba(133,14,53,0.28)]"
+        >
+          Cùng kết nối
+        </a>
+      </motion.div>
+    </section>
+  );
+}
+
 
 export default Gallery;

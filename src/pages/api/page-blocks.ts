@@ -30,12 +30,22 @@ export const GET: APIRoute = async ({ request }) => {
     const blocks = (page?.blocks ?? []).filter((block: any) => typeof block === 'object' && block.collection);
 
     return new Response(JSON.stringify({ blocks }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
     });
   } catch {
     return new Response(JSON.stringify({ error: 'Failed to load blocks' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
     });
   }
 };

@@ -71,8 +71,11 @@ const pageFields = [
             'title',
             'headline',
             'variant',
+            'background_color',
+            { background_image: ['id', 'title', 'description'] },
+            { background_video: ['id', 'title', 'description'] },
             {
-              gallery_items: ['id', 'sort', { directus_files_id: ['id', 'title', 'description', 'width', 'height'] }],
+              gallery_items: ['id', 'sort', 'size', { directus_files_id: ['id', 'title', 'description', 'width', 'height'] }],
             },
           ] as any,
           block_quote: ['id', 'title', 'subtitle', 'content'] as any,
