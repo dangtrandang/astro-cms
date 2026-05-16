@@ -331,19 +331,112 @@ const Gallery = ({ data }: GalleryProps) => {
 /*  FloatingGallery – variant nổi với mouse-driven parallax             */
 /* ------------------------------------------------------------------ */
 
-/** Vị trí được tính trước cho từng ảnh (tối đa 10) */
-const FLOATING_POSITIONS: { top: string; left: string; width: string; height: string; depth: number }[] = [
-  { top: '8%', left: '5%', width: 'w-16 h-16 md:w-24 md:h-24', height: '', depth: 0.5 },
-  { top: '10%', left: '32%', width: 'w-20 h-20 md:w-28 md:h-28', height: '', depth: 1 },
-  { top: '2%', left: '55%', width: 'w-28 md:w-40', height: 'h-40 md:h-52', depth: 2 },
-  { top: '0%', left: '78%', width: 'w-24 h-24 md:w-32 md:h-32', height: '', depth: 1 },
-  { top: '40%', left: '2%', width: 'w-28 h-28 md:w-36 md:h-36', height: '', depth: 1 },
-  { top: '68%', left: '75%', width: 'w-28 md:w-36', height: 'h-28 md:h-48', depth: 2 },
-  { top: '70%', left: '12%', width: 'w-40 md:w-52', height: 'h-full', depth: 4 },
-  { top: '78%', left: '48%', width: 'w-24 h-24 md:w-32 md:h-32', height: '', depth: 1 },
-  { top: '55%', left: '35%', width: 'w-20 h-20 md:w-24 md:h-24', height: '', depth: 0.5 },
-  { top: '45%', left: '62%', width: 'w-16 h-16 md:w-20 md:h-20', height: '', depth: 0.7 },
-];
+/** Sinh vị trí động cho N ảnh, phân bổ trải đều toàn màn hình bằng phân phối golden-angle */
+/**
+ * Sinh vị trí cho N ảnh:
+ * - Chia khung hình thành lưới vùng (cols × rows) đảm bảo phủ đều
+ * - Mỗi ảnh rơi vào tâm 1 vùng + jitter ngẫu nhiên trong vùng
+ * - Ảnh large ưu tiên vùng rìa (nhiều không gian hơn)
+ * - Các ảnh có thể chồng nhẹ lên nhau ở biên vùng
+ */
+function generateFloatingPositions(
+  count: number,
+  sizes: ('small' | 'medium' | 'large')[],
+): { top: string; left: string; depth: number }[] {
+  if (count <= 0) return [];
+
+  // Xác định lưới: ưu tiên ngang > dọc, tối thiểu 2 hàng
+  const cols = count <= 3 ? count : count <= 6 ? 3 : Math.ceil(Math.sqrt(count * 1.4));
+  const rows = Math.ceil(count / cols);
+
+  const cellW = 1 / cols;
+  const cellH = 1 / rows;
+
+  // Tạo mảng chỉ số vùng, ưu tiên vùng rìa cho ảnh large
+  const zoneIndices = Array.from({ length: count }, (_, i) => i);
+
+  // Sắp xếp: ảnh large nhận vùng rìa (góc/ biên), ảnh small nhận vùng giữa
+  const sizePriority: Record<string, number> = { large: 0, medium: 1, small: 2 };
+  const sortedIndices = zoneIndices
+    .map((zoneIdx, itemIdx) => ({ zoneIdx, itemIdx, size: sizes[itemIdx] || 'medium' }))
+    .sort((a, b) => {
+      // Sắp theo độ "rìa" của vùng (ưu tiên góc) rồi theo size
+      const aCol = a.zoneIdx % cols;
+      const aRow = Math.floor(a.zoneIdx / cols);
+      const bCol = b.zoneIdx % cols;
+      const bRow = Math.floor(b.zoneIdx / cols);
+      const aEdge = (aCol === 0 || aCol === cols - 1 ? 1 : 0) + (aRow === 0 || aRow === rows - 1 ? 1 : 0);
+      const bEdge = (bCol === 0 || bCol === cols - 1 ? 1 : 0) + (bRow === 0 || bRow === rows - 1 ? 1 : 0);
+      return bEdge - aEdge || sizePriority[a.size] - sizePriority[b.size];
+    });
+
+  // Map: ảnh gốc index -> vùng được gán
+  const itemToZone = new Map<number, number>();
+  const usedZones = new Set<number>();
+
+  for (const { itemIdx } of sortedIndices) {
+    // Tìm vùng chưa dùng, ưu tiên vùng rìa cho large
+    const size = sizes[itemIdx] || 'medium';
+    let bestZone = -1;
+
+    for (let z = 0; z < count; z++) {
+      if (usedZones.has(z)) continue;
+      const col = z % cols;
+      const row = Math.floor(z / cols);
+      const edgeScore = (col === 0 || col === cols - 1 ? 1 : 0) + (row === 0 || row === rows - 1 ? 1 : 0);
+
+      if (bestZone === -1) {
+        bestZone = z;
+        continue;
+      }
+      const bestCol = bestZone % cols;
+      const bestRow = Math.floor(bestZone / cols);
+      const bestEdge = (bestCol === 0 || bestCol === cols - 1 ? 1 : 0) + (bestRow === 0 || bestRow === rows - 1 ? 1 : 0);
+
+      // Large ưu tiên vùng rìa, small ưu tiên vùng giữa
+      if (size === 'large' && edgeScore > bestEdge) bestZone = z;
+      else if (size === 'small' && edgeScore < bestEdge) bestZone = z;
+    }
+
+    itemToZone.set(itemIdx, bestZone);
+    usedZones.add(bestZone);
+  }
+
+  // Sinh tọa độ cho từng ảnh
+  const positions: { top: string; left: string; depth: number }[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const zoneIdx = itemToZone.get(i) ?? i;
+    const col = zoneIdx % cols;
+    const row = Math.floor(zoneIdx / cols);
+
+    // Tâm vùng (phần trăm)
+    const zoneCenterX = (col + 0.5) * cellW;
+    const zoneCenterY = (row + 0.5) * cellH;
+
+    // Jitter ngẫu nhiên trong vùng: ±40% kích thước vùng (cho phép chồng nhẹ sang vùng kế)
+    const seedX = ((i * 137 + 42) % 100) / 100;
+    const seedY = ((i * 251 + 73) % 100) / 100;
+    const jitterX = (seedX - 0.5) * cellW * 0.85;
+    const jitterY = (seedY - 0.5) * cellH * 0.85;
+
+    const left = Math.max(0.03, Math.min(0.93, zoneCenterX + jitterX));
+    const top = Math.max(0.03, Math.min(0.93, zoneCenterY + jitterY));
+
+    // Depth: large ở xa (depth cao), small ở gần
+    const size = sizes[i] || 'medium';
+    const depthBase = size === 'large' ? 0.6 : size === 'small' ? 0.2 : 0.4;
+    const depth = depthBase + ((i * 0.173 + 0.42) % 1) * 1.6;
+
+    positions.push({
+      top: `${(top * 100).toFixed(1)}%`,
+      left: `${(left * 100).toFixed(1)}%`,
+      depth: Math.round(depth * 10) / 10,
+    });
+  }
+
+  return positions;
+}
 
 interface FloatingGalleryProps {
   data: GalleryData;
@@ -353,6 +446,11 @@ interface FloatingGalleryProps {
 function FloatingGallery({ data, items }: FloatingGalleryProps) {
   const { title, headline, background_color, background_image, background_video, id } = data;
   const [scope, animate] = useAnimate();
+
+  const positions = useMemo(
+    () => generateFloatingPositions(items.length, items.map((i) => i.size)),
+    [items],
+  );
 
   useEffect(() => {
     animate('img', { opacity: [0, 1] }, { duration: 0.5, delay: stagger(0.15) });
@@ -401,16 +499,15 @@ function FloatingGallery({ data, items }: FloatingGalleryProps) {
       {/* ---- Floating images ---- */}
       <div className="absolute inset-0">
         <Floating sensitivity={-1} className="h-full w-full overflow-hidden">
-          {items.slice(0, FLOATING_POSITIONS.length).map((item, index) => {
-            const pos = FLOATING_POSITIONS[index];
-            if (!pos) return null;
+          {items.map((item, index) => {
+            const pos = positions[index];
 
             const sizeClass =
               item.size === 'small'
-                ? 'w-[88px] h-[88px] md:w-[120px] md:h-[120px]'
+                ? 'w-[106px] h-[106px] md:w-[144px] md:h-[144px]'
                 : item.size === 'large'
-                  ? 'w-[220px] h-[320px] md:w-[320px] md:h-[440px]'
-                  : 'w-[140px] h-[140px] md:w-[200px] md:h-[200px]';
+                  ? 'w-[264px] h-[384px] md:w-[384px] md:h-[528px]'
+                  : 'w-[168px] h-[168px] md:w-[240px] md:h-[240px]';
 
             return (
               <FloatingElement key={item.id} depth={pos.depth} style={{ top: pos.top, left: pos.left }}>
