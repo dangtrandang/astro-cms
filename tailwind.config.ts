@@ -187,7 +187,16 @@ const config: Config = {
     },
   },
   plugins: [tailwindcssAnimate, typography],
-  safelist: ['grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3'],
+  safelist: [
+    'grid-cols-1',
+    'sm:grid-cols-2',
+    'lg:grid-cols-3',
+    'hover:bg-[#f5e1e0]',
+    'hover:bg-[#850e35]',
+    'active:bg-[#850e35]',
+    'bg-[#f2d1d1]/70',
+    'backdrop-blur-md',
+  ],
 };
 
 export default config;

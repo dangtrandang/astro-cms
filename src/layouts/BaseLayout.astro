@@ -13,7 +13,7 @@ const siteDescription = globals?.description || 'A starter CMS template powered 
 const faviconURL = globals?.favicon ? getDirectusAssetURL(globals.favicon) : '/favicon.ico';
 const accentColor = globals?.accent_color || '#6644ff';
 
-const { metadata } = Astro.props;
+const { metadata, headerVariant = 'default' } = Astro.props;
 
 const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTitle;
 ---
@@ -41,6 +41,7 @@ const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTit
       headerNavigation={headerNavigation}
       footerNavigation={footerNavigation}
       globals={globals}
+      headerVariant={headerVariant}
       client:load
     >
       <main class="flex-grow">

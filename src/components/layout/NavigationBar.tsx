@@ -1,47 +1,25 @@
 'use client';
 
 import { forwardRef, useEffect, useState } from 'react';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import Container from '@/components/ui/Container';
-import SearchModal from '@/components/ui/SearchModal';
-import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
-
-interface NavigationChildItem {
-  id: string;
-  title: string;
-  url?: string;
-  page?: { permalink?: string | null };
-}
-
-interface NavigationItem {
-  id: string;
-  title: string;
-  url?: string;
-  page?: { permalink?: string | null };
-  children?: NavigationChildItem[];
-}
+import { LogIn, UserPlus, Menu, X } from 'lucide-react';
 
 interface NavigationBarProps {
-  navigation: {
+  navigation?: {
     id: string;
-    items: NavigationItem[];
+    items?: any[];
   };
   globals: {
     logo_on_light_bg?: string;
     logo_on_dark_bg?: string;
   };
+  variant?: 'default' | 'overlay';
 }
 
-const CTA_LINK = '/contact';
-const CTA_LABEL = 'Liên hệ';
+const getHref = (item?: { page?: { permalink?: string | null }; url?: string }) =>
+  item?.page?.permalink || item?.url || '#';
 
-const getHref = (item?: { page?: { permalink?: string | null }; url?: string }) => item?.page?.permalink || item?.url || '#';
-
-const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation, globals }, ref) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation, globals, variant = 'default' }, ref) => {
+  const [menuOpen, setMenuOpen] = useState(false);
   const directusURL = import.meta.env.PUBLIC_DIRECTUS_URL;
 
   const logoUrl = globals?.logo_on_dark_bg
@@ -50,231 +28,156 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
       ? `${directusURL}/assets/${globals.logo_on_light_bg}`
       : '/images/logo.svg';
 
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  };
-
-  const toggleSection = (id: string) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setMobileMenuOpen(false);
+      if (window.innerWidth >= 1024) {
+        setMenuOpen(false);
       }
     };
-
-    const handleRouteChange = () => {
-      setMobileMenuOpen(false);
-    };
-
     window.addEventListener('resize', handleResize);
-    window.addEventListener('popstate', handleRouteChange);
-
+    window.addEventListener('popstate', () => setMenuOpen(false));
     return () => {
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('popstate', handleRouteChange);
+      window.removeEventListener('popstate', () => setMenuOpen(false));
     };
   }, []);
 
+  const isOverlay = variant === 'overlay';
+
   return (
-    <header ref={ref} className="sticky top-0 z-[60] border-b border-gray-200 bg-[#F2D1D1] text-gray-800">
-      <Container className="flex h-16 items-center gap-4 px-4 sm:px-6 lg:px-8">
-        <a
-          href="/"
-          className="flex shrink-0 items-center border-0 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-          onClick={closeMobileMenu}
-        >
-          <img src={logoUrl} alt="Logo" className="block h-9 w-auto max-w-none" />
+    <header
+      ref={ref}
+      className={
+        isOverlay
+          ? 'absolute top-0 left-0 right-0 z-[60] bg-transparent text-[#2d3a2a]'
+          : 'sticky top-0 z-[60] border-b border-white/20 bg-[#f2d1d1]/70 backdrop-blur-md text-[#2d3a2a]'
+      }
+    >
+      <nav className="flex items-center justify-between px-4 sm:px-6 md:px-10 py-4 sm:py-6">
+        {/* Logo */}
+        <a href="/" className="flex shrink-0 items-center">
+          <img src={logoUrl} alt="Logo" className="block h-8 sm:h-9 w-auto max-w-none" />
         </a>
 
-        <nav
-          className="hidden min-w-0 flex-1 items-center justify-center md:flex"
-          data-directus={
-            navigation
-              ? setAttr({
-                collection: 'navigation',
-                item: navigation.id,
-                fields: ['items'],
-                mode: 'modal',
-              })
-              : undefined
-          }
-        >
-          <ul className="flex items-center gap-6 lg:gap-8">
-            {navigation?.items?.map((section) => {
-              const href = getHref(section);
-              const hasChildren = Boolean(section.children?.length);
-
-              return (
-                <li key={section.id} className="group relative">
-                  {hasChildren ? (
-                    <>
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1 border-0 bg-transparent p-0 text-sm font-medium text-gray-800 outline-none ring-0 transition-colors hover:text-[#850E35] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                      >
-                        <span>{section.title}</span>
-                        <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
-                      </button>
-
-                      <div className="invisible absolute left-1/2 top-full z-20 mt-3 w-56 -translate-x-1/2 opacity-0 transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-                        <div className="rounded-xl border border-gray-100 bg-[#F2D1D1] p-2 shadow-xl">
-                          <ul className="flex flex-col gap-1">
-                            {section.children?.map((child) => (
-                              <li key={child.id}>
-                                <a
-                                  href={getHref(child)}
-                                  className="block rounded-lg px-3 py-2 text-sm text-gray-800 outline-none transition-colors hover:bg-[#FCF5EE] hover:text-[#850E35] focus:outline-none"
-                                  onClick={closeMobileMenu}
-                                >
-                                  {child.title}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <a
-                      href={href}
-                      className="inline-flex items-center border-0 p-0 text-sm font-medium text-gray-800 outline-none ring-0 transition-colors hover:text-[#850E35] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                      onClick={closeMobileMenu}
-                    >
-                      {section.title}
-                    </a>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        <div className="ml-auto flex shrink-0 items-center gap-3">
-          <SearchModal />
-          <a
-            href={CTA_LINK}
-            className="hidden items-center rounded-xl bg-[#850E35] px-4 py-2 text-sm font-medium text-[#FCF5EE] outline-none transition-colors hover:bg-[#850E35]/90 focus:outline-none md:inline-flex"
-          >
-            {CTA_LABEL}
-          </a>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            className="group relative border-0 text-gray-800 outline-none ring-0 hover:bg-gray-100 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 md:hidden"
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
-          >
-            <span className="relative block h-[18px] w-[18px]">
-              <span
-                className={`absolute left-0 top-1/2 block h-[2px] w-full rounded-full bg-current transition-all duration-300 ease-in-out ${
-                  mobileMenuOpen ? '-translate-y-1/2 rotate-45' : '-translate-y-[calc(50%+7px)]'
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-1/2 block h-[2px] w-full -translate-y-1/2 rounded-full bg-current transition-all duration-300 ease-in-out ${
-                  mobileMenuOpen ? 'opacity-0 scale-x-0' : 'opacity-100'
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-1/2 block h-[2px] w-full rounded-full bg-current transition-all duration-300 ease-in-out ${
-                  mobileMenuOpen ? '-translate-y-1/2 -rotate-45' : '-translate-y-[calc(50%-5px)]'
-                }`}
-              />
-            </span>
-          </Button>
-        </div>
-      </Container>
-
-      {mobileMenuOpen && (
-        <div className="md:hidden">
-          <button
-            type="button"
-            aria-label="Close menu overlay"
-            className="fixed inset-0 z-[69] bg-black/40"
-            onClick={closeMobileMenu}
-          />
-          <div className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-sm flex-col overflow-y-auto bg-[#F2D1D1] p-6 text-gray-800 shadow-xl">
-            <div className="mb-6 flex items-center justify-between gap-4">
-              <span className="text-sm font-medium text-gray-500">Menu</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Close menu"
-                className="relative border-0 text-gray-800 outline-none ring-0 hover:bg-gray-100 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                onClick={closeMobileMenu}
-              >
-                <span className="relative block h-[18px] w-[18px]">
-                  <span className="absolute left-0 top-1/2 block h-[2px] w-full -translate-y-1/2 rotate-45 rounded-full bg-current" />
-                  <span className="absolute left-0 top-1/2 block h-[2px] w-full -translate-y-1/2 -rotate-45 rounded-full bg-current" />
-                </span>
-              </Button>
-            </div>
-
-            <nav
-              className="flex flex-1 flex-col gap-4"
-              data-directus={
-                navigation
-                  ? setAttr({
-                    collection: 'navigation',
-                    item: navigation.id,
-                    fields: ['items'],
-                    mode: 'modal',
-                  })
-                  : undefined
-              }
-            >
-              {navigation?.items?.map((section) => (
-                <div key={section.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-                  {section.children?.length ? (
-                    <Collapsible open={openSections[section.id]} onOpenChange={() => toggleSection(section.id)}>
-                      <CollapsibleTrigger className="flex w-full items-center justify-between border-0 bg-transparent py-2 text-left text-base font-medium text-gray-800 outline-none ring-0 transition-colors hover:text-[#850E35] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0">
-                        <span>{section.title}</span>
-                        <ChevronDown
-                          className={`h-4 w-4 transition-transform duration-200 ${openSections[section.id] ? 'rotate-180' : ''}`}
-                        />
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-3 flex flex-col gap-3 pl-4">
-                        {section.children.map((child) => (
-                          <a
-                            key={child.id}
-                            href={getHref(child)}
-                            className="block py-1 text-sm text-gray-600 outline-none transition-colors hover:text-[#850E35] focus:outline-none"
-                            onClick={closeMobileMenu}
-                          >
-                            {child.title}
-                          </a>
-                        ))}
-                      </CollapsibleContent>
-                    </Collapsible>
-                  ) : (
-                    <a
-                      href={getHref(section)}
-                      className="block py-2 text-base font-medium text-gray-800 outline-none transition-colors hover:text-[#850E35] focus:outline-none"
-                      onClick={closeMobileMenu}
-                    >
-                      {section.title}
-                    </a>
-                  )}
-                </div>
-              ))}
-            </nav>
-
+        {/* Desktop pill nav */}
+        <div className="hidden lg:flex items-center gap-1 bg-white/70 backdrop-blur-md rounded-full pl-6 pr-1 py-1 shadow-sm border border-white/60">
+          {(navigation?.items || []).map((link: any, i: number) => (
             <a
-              href={CTA_LINK}
-              className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[#850E35] px-4 py-3 text-sm font-medium text-[#FCF5EE] outline-none transition-colors hover:bg-[#850E35]/90 focus:outline-none"
-              onClick={closeMobileMenu}
+              key={link.id || i}
+              href={getHref(link)}
+              className={`text-sm px-3 py-2 rounded-full transition-colors hover:bg-[#f5e1e0] ${i === 0
+                ? 'font-semibold text-[#1f2a1d]'
+                : 'font-medium text-[#4b5b47] hover:text-[#1f2a1d]'
+                }`}
             >
-              {CTA_LABEL}
+              {link.title}
             </a>
+          ))}
+          <button className="ml-2 bg-[#1f2a1d] hover:bg-[#850e35] active:bg-[#850e35] text-white text-sm font-medium px-5 py-2.5 rounded-full transition-colors">
+            Try it Live
+          </button>
+        </div>
+
+        {/* Right side: auth links + hamburger */}
+        <div className="flex items-center gap-3 sm:gap-6 text-[#2d3a2a]">
+          <a
+            href="#signup"
+            className="hidden sm:flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
+          >
+            <UserPlus className="w-4 h-4" />
+            Sign Me Up!
+          </a>
+          <a
+            href="#login"
+            className="hidden sm:flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
+          >
+            <LogIn className="w-4 h-4" />
+            Enter
+          </a>
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            className="lg:hidden relative flex items-center justify-center w-10 h-10 rounded-full bg-white/70 backdrop-blur-md border border-white/60 text-[#1f2a1d] transition-all duration-300 hover:bg-white/90"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
+          >
+            <Menu
+              className={`w-5 h-5 absolute transition-all duration-300 ${menuOpen ? 'opacity-0 rotate-90 scale-50' : 'opacity-100 rotate-0 scale-100'
+                }`}
+            />
+            <X
+              className={`w-5 h-5 absolute transition-all duration-300 ${menuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'
+                }`}
+            />
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile menu overlay */}
+      <div
+        className={`lg:hidden fixed inset-0 z-20 transition-opacity duration-300 ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+        onClick={() => setMenuOpen(false)}
+      >
+        <div className="absolute inset-0 bg-[#1f2a1d]/40 backdrop-blur-sm" />
+      </div>
+
+      {/* Mobile menu drawer */}
+      <div
+        className={`lg:hidden fixed top-0 right-0 bottom-0 z-20 w-[85%] max-w-sm bg-white/95 backdrop-blur-xl shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${menuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+      >
+        <div className="flex flex-col h-full pt-24 px-8 pb-8">
+          <div className="flex flex-col gap-1">
+            {(navigation?.items || []).map((link: any, i: number) => (
+              <a
+                key={link.id || i}
+                href={getHref(link)}
+                onClick={() => setMenuOpen(false)}
+                className={`text-2xl font-semibold text-[#1f2a1d] py-4 border-b border-[#1f2a1d]/10 transition-all duration-500 ${menuOpen ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
+                  }`}
+                style={{ transitionDelay: menuOpen ? `${150 + i * 70}ms` : '0ms' }}
+              >
+                {link.title}
+              </a>
+            ))}
+          </div>
+
+          <div
+            className={`mt-8 flex flex-col gap-4 transition-all duration-500 ${menuOpen ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
+              }`}
+            style={{ transitionDelay: menuOpen ? '400ms' : '0ms' }}
+          >
+            <a
+              href="#signup"
+              className="flex items-center gap-2 text-sm font-medium text-[#2d3a2a] sm:hidden"
+            >
+              <UserPlus className="w-4 h-4" />
+              Sign Me Up!
+            </a>
+            <a
+              href="#login"
+              className="flex items-center gap-2 text-sm font-medium text-[#2d3a2a] sm:hidden"
+            >
+              <LogIn className="w-4 h-4" />
+              Enter
+            </a>
+            <button className="mt-2 bg-[#1f2a1d] hover:bg-[#2a3827] text-white text-sm font-semibold px-5 py-3 rounded-full transition-colors">
+              Try it Live
+            </button>
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 });

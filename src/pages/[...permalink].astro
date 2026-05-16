@@ -58,9 +58,10 @@ const metadata = page
   : { title: '404 - Page Not Found', description: '' };
 
 const hideGlobalChrome = false;
+const isHomepage = resolvedPermalink === '/';
 ---
 
-<Layout metadata={metadata} hideGlobalChrome={hideGlobalChrome}>
+<Layout metadata={metadata} hideGlobalChrome={hideGlobalChrome} headerVariant={isHomepage ? 'overlay' : 'default'}>
   {page ? (
     <PageClient
       client:load

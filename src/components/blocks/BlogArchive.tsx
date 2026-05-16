@@ -424,7 +424,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
 
   const fetchArchivePosts = useCallback(
     async (page: number, categoryId: string, sort: string, month: string) => {
-      const params = new URLSearchParams({ page: String(page), limit: '9', sort });
+      const params = new URLSearchParams({ page: String(page), limit: '10', sort });
 
       if (author_filter) {
         params.set('author_id', author_filter);
@@ -449,6 +449,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
 
   const runFetch = useCallback(
     async (page: number, categoryId: string, sort: string, month: string) => {
+      setLoading(true);
       setIsTransitioning(true);
       try {
         const result = await fetchArchivePosts(page, categoryId, sort, month);
@@ -458,6 +459,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
         setPosts([]);
         setTotalPages(1);
       } finally {
+        setLoading(false);
         window.setTimeout(() => setIsTransitioning(false), 220);
       }
     },
@@ -468,10 +470,11 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
     (categoryId: string) => {
       if (loading || isTransitioning || categoryId === activeCategoryId) return;
       setActiveCategoryId(categoryId);
+      setActiveMonth('all');
       setCurrentPage(1);
-      runFetch(1, categoryId, sortMode, activeMonth);
+      runFetch(1, categoryId, sortMode, 'all');
     },
-    [loading, isTransitioning, activeCategoryId, sortMode, activeMonth, runFetch],
+    [loading, isTransitioning, activeCategoryId, sortMode, runFetch],
   );
 
   const handleSortChange = useCallback(
@@ -498,6 +501,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
     (page: number) => {
       if (page < 1 || page > totalPages || loading || isTransitioning || page === currentPage) return;
       setCurrentPage(page);
+      setLoading(true);
       setIsTransitioning(true);
       fetchArchivePosts(page, activeCategoryId, sortMode, activeMonth)
         .then((result) => {
@@ -509,6 +513,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
           setTotalPages(1);
         })
         .finally(() => {
+          setLoading(false);
           window.scrollTo({ top: 0, behavior: 'smooth' });
           window.setTimeout(() => setIsTransitioning(false), 220);
         });
@@ -562,7 +567,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
                 : 'bg-white text-[#850E35] ring-1 ring-[#F2D1D1] hover:bg-[#F2D1D1]'
                 }`}
             >
-              Tat ca
+              Tất cả
             </button>
             {availableCategories.map((category) => (
               <button

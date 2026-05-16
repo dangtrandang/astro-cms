@@ -25,7 +25,7 @@ export const GET: APIRoute = async ({ url }) => {
         }
 
         if (categoryIds.length > 0) {
-            andConditions.push({ category: { _in: categoryIds } });
+            andConditions.push({ category: { id: { _in: categoryIds } } });
         }
 
         const filter = andConditions.length > 1 ? { _and: andConditions } : andConditions[0];

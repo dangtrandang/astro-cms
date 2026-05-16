@@ -9,7 +9,7 @@ export const GET: APIRoute = async ({ url }) => {
 
     const client = createDirectus<Schema>(directusUrl).with(staticToken(token)).with(rest());
 
-    const limit = Math.min(Number(url.searchParams.get('limit') ?? '9'), 50);
+    const limit = Math.min(Number(url.searchParams.get('limit') ?? '10'), 50);
     const page = Math.max(Number(url.searchParams.get('page') ?? '1'), 1);
     const categorySlug = url.searchParams.get('category_slug') ?? '';
     const authorId = url.searchParams.get('author_id') ?? '';
@@ -24,7 +24,7 @@ export const GET: APIRoute = async ({ url }) => {
     const andConditions: any[] = [{ status: { _eq: 'published' } }];
 
     if (categoryIds.length > 0) {
-      andConditions.push({ category: { _in: categoryIds } });
+      andConditions.push({ category: { id: { _in: categoryIds } } });
     } else if (categorySlug && categorySlug !== 'all') {
       andConditions.push({ category: { slug: { _eq: categorySlug } } });
     }

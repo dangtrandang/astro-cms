@@ -138,6 +138,7 @@ export interface BlockHero {
 	/** @primaryKey */
 	id: string;
 	image?: DirectusFile | string | null;
+	video?: DirectusFile | string | null;
 	title?: string | null;
 	image_position?: 'left' | 'right' | null;
 	button_group?: BlockButtonGroup | string | null;

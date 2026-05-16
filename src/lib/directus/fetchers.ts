@@ -39,6 +39,7 @@ const pageFields = [
             'headline',
             'content',
             'image',
+            'video',
             'image_position',
             'variant',
             {
@@ -145,7 +146,7 @@ const blogArchivePostFields = [
   { author: ['id', 'name', 'image'] },
 ] as any[];
 
-const BLOG_ARCHIVE_PAGE_SIZE = 9;
+const BLOG_ARCHIVE_PAGE_SIZE = 10;
 
 const enrichBlogArchiveBlocks = async (page: Page, token?: string) => {
   const blocks = Array.isArray(page.blocks) ? [...page.blocks] : [];
@@ -174,7 +175,7 @@ const enrichBlogArchiveBlocks = async (page: Page, token?: string) => {
       }
 
       if (categoryIds.length > 0) {
-        andConditions.push({ category: { _in: categoryIds } });
+        andConditions.push({ category: { id: { _in: categoryIds } } });
       }
 
       const filter = andConditions.length > 1 ? { _and: andConditions } : andConditions[0];

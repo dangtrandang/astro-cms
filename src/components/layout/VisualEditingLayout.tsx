@@ -18,6 +18,7 @@ interface VisualEditingLayoutProps {
   headerNavigation: any;
   footerNavigation: any;
   globals: any;
+  headerVariant?: 'default' | 'overlay';
   children: ReactNode;
 }
 
@@ -25,6 +26,7 @@ export default function VisualEditingLayout({
   headerNavigation,
   footerNavigation,
   globals,
+  headerVariant = 'default',
   children,
 }: VisualEditingLayoutProps) {
   const navRef = useRef<HTMLElement>(null);
@@ -69,6 +71,7 @@ export default function VisualEditingLayout({
     <>
       <NavigationBar
         ref={navRef}
+        variant={headerVariant}
         navigation={{
           ...layoutData.headerNavigation,
           items: (layoutData.headerNavigation.items || []).map((item: any) => ({
