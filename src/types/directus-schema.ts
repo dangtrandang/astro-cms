@@ -142,7 +142,7 @@ export interface BlockHero {
 	image_position?: 'left' | 'right' | null;
 	button_group?: BlockButtonGroup | string | null;
 	/** @description Select which hero variant the frontend should render. */
-	variant?: 'default' | 'video' | null;
+	variant?: 'default' | 'video' | 'linkflow' | null;
 }
 
 export interface BlockHtml {

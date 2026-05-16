@@ -420,8 +420,9 @@ function generateFloatingPositions(
     const jitterX = (seedX - 0.5) * cellW * 0.85;
     const jitterY = (seedY - 0.5) * cellH * 0.85;
 
-    const left = Math.max(0.03, Math.min(0.93, zoneCenterX + jitterX));
-    const top = Math.max(0.03, Math.min(0.93, zoneCenterY + jitterY));
+    // Định vị theo tâm ảnh nên có thể nới rộng clamp
+    const left = Math.max(0.04, Math.min(0.96, zoneCenterX + jitterX));
+    const top = Math.max(0.04, Math.min(0.96, zoneCenterY + jitterY));
 
     // Depth: large ở xa (depth cao), small ở gần
     const size = sizes[i] || 'medium';
@@ -515,7 +516,7 @@ function FloatingGallery({ data, items }: FloatingGalleryProps) {
                   initial={{ opacity: 0 }}
                   src={`${import.meta.env.PUBLIC_DIRECTUS_URL}/assets/${item.fileId}`}
                   alt={headline || title || `Ảnh ${index + 1}`}
-                  className={`${sizeClass} rounded-xl object-cover shadow-[0_10px_30px_rgba(133,14,53,0.08)] hover:scale-105 duration-200 cursor-pointer transition-transform`}
+                  className={`${sizeClass} -translate-x-1/2 -translate-y-1/2 rounded-xl object-cover shadow-[0_10px_30px_rgba(133,14,53,0.08)] hover:scale-105 duration-200 cursor-pointer transition-transform`}
                 />
               </FloatingElement>
             );

@@ -91,6 +91,41 @@ const pageFields = [
             'social_links',
             'theme_variant',
           ] as any,
+          block_steps: [
+            'id',
+            'title',
+            'headline',
+            'show_step_numbers',
+            'alternate_image_position',
+            'badge_text',
+            'author_image',
+            {
+              steps: [
+                'id',
+                'sort',
+                'title',
+                'content',
+                'bg_color',
+                { image: ['id'] },
+                {
+                  button_group: [
+                    'id',
+                    {
+                      buttons: [
+                        'id',
+                        'label',
+                        'variant',
+                        'color',
+                        'type',
+                        'external_url',
+                        { page: ['permalink'] },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ] as any,
         },
       },
     ],
