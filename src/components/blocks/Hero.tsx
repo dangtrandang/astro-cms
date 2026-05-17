@@ -53,7 +53,7 @@ function LinkflowHero({
   imageSrc?: string | null;
 }) {
   return (
-    <section className="relative flex min-h-[80vh] w-full items-center justify-center overflow-hidden sm:h-screen">
+    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden sm:h-screen">
       {videoSrc ? (
         <video
           autoPlay
