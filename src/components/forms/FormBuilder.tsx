@@ -20,9 +20,11 @@ interface FormBuilderProps {
     is_active?: boolean | null;
     fields: FormField[];
   };
+  submitVariant?: string;
+  submitClassName?: string;
 }
 
-const FormBuilder = ({ form, className }: FormBuilderProps) => {
+const FormBuilder = ({ form, className, submitVariant, submitClassName }: FormBuilderProps) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,8 +64,8 @@ const FormBuilder = ({ form, className }: FormBuilderProps) => {
   }
 
   return (
-    <div className={cn('space-y-6 border border-input p-8 rounded-lg', className)}>
-      {form.title && <h3 className="text-xl font-semibold mb-4">{form.title}</h3>}
+    <div className={cn('space-y-6 bg-white p-8 rounded-xl shadow-[0_10px_30px_rgba(133,14,53,0.08)] [&_input]:bg-[#f6f6f6] [&_textarea]:bg-[#f6f6f6] [&_input]:border-[#f5dcda] [&_textarea]:border-[#f5dcda] [&_input]:focus-visible:ring-white [&_textarea]:focus-visible:ring-white [&_input]:rounded-[1.75rem] [&_textarea]:rounded-[1.75rem] [&_textarea]:min-h-[200px]', className)}>
+      {form.title && <h3 className="text-xl font-['Playfair_Display'] text-[#850E35] mb-4">{form.title}</h3>}
 
       {error && (
         <div className="p-4 text-red-500 bg-red-100 rounded-md">
@@ -76,6 +78,8 @@ const FormBuilder = ({ form, className }: FormBuilderProps) => {
         onSubmit={handleSubmit}
         submitLabel={form.submit_label || 'Submit'}
         id={form.id}
+        submitVariant={submitVariant}
+        submitClassName={submitClassName}
       />
     </div>
   );

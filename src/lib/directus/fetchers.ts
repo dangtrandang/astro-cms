@@ -67,6 +67,28 @@ const pageFields = [
               categories: [{ categories_id: ['id', 'title', 'slug'] }],
             },
           ] as any,
+          block_form: [
+            'id',
+            'title',
+            'headline',
+            {
+              form: [
+                'id',
+                'title',
+                'on_success',
+                'submit_label',
+                'success_message',
+                'schema',
+              ],
+            },
+            {
+              image: [
+                {
+                  directus_files_id: ['id', 'title', 'description', 'width', 'height'],
+                },
+              ],
+            },
+          ] as any,
           block_gallery: [
             'id',
             'title',

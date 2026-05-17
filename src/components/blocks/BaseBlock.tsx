@@ -1,5 +1,5 @@
 import React from 'react';
-import Form from './Form';
+import ContactForm from './ContactForm';
 import Gallery from './Gallery';
 import Posts from './Posts';
 import Hero from './Hero';
@@ -32,7 +32,7 @@ export default function BaseBlock({ block }: BaseBlockProps) {
     block_gallery: Gallery,
     block_posts: Posts,
     block_blog_archive: BlogArchive,
-    block_form: Form,
+    block_form: ContactForm,
     block_richtext: RichText,
     block_pricing: Pricing,
     block_cta: Cta,
