@@ -5,6 +5,7 @@ import BlogPostClient from '@/components/layout/BlogPostClient';
 import Layout from '@/layouts/BaseLayout.astro';
 import { getDirectusAssetURL } from '@/lib/directus/directus-utils';
 import {
+  fetchAdjacentPosts,
   fetchAuthorById,
   fetchPostByIdAndVersion,
   fetchPostBySlug,
@@ -176,6 +177,7 @@ if (!post) {
 const { tocItems, enrichedContent } = generateToc(post.content || '');
 
 const relatedPosts = await fetchRelatedPosts(post.id);
+const { previousPost, nextPost } = await fetchAdjacentPosts(post);
 const author = post.author && typeof post.author === 'object' ? (post.author as Team) : null;
 const authorName = (author as Team)?.name || '';
 
@@ -197,9 +199,9 @@ const tags: Array<{ name: string; slug: string }> | null =
     : null;
 
 const datePublished = post.date_published ? new Date(post.date_published).toLocaleDateString('vi-VN', {
+  day: '2-digit',
+  month: 'short',
   year: 'numeric',
-  month: 'long',
-  day: 'numeric',
 }) : null;
 
 const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
@@ -236,6 +238,8 @@ if (Astro.cache && Astro.cache.enabled && !import.meta.env.DEV) {
     client:load
     initialPost={post}
     relatedPosts={relatedPosts}
+    previousPost={previousPost}
+    nextPost={nextPost}
     author={author}
     authorName={authorName}
     postUrl={postUrl}

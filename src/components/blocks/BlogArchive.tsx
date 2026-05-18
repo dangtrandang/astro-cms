@@ -191,7 +191,7 @@ function FeaturedPost({ post }: { post: Post }) {
   return (
     <a
       href={slug ? `/blog/${slug}` : '#'}
-      className="group relative hidden w-full overflow-hidden rounded-2xl md:block md:h-[480px]"
+      className="group relative block w-full overflow-hidden rounded-2xl h-[320px] sm:h-[380px] md:h-[480px]"
       style={{ outline: 'none' }}
     >
       {/* Background image */}
@@ -211,7 +211,7 @@ function FeaturedPost({ post }: { post: Post }) {
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
       {/* Content */}
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-4 p-8">
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 sm:gap-4 p-4 sm:p-6 md:p-8">
         {categoryTitle && (
           <span className="w-fit rounded-full bg-[#C6DCE4]/90 px-3 py-1 text-xs font-semibold text-[#850E35] backdrop-blur-sm">
             {categoryTitle}
@@ -219,7 +219,7 @@ function FeaturedPost({ post }: { post: Post }) {
         )}
 
         <div className="flex items-start justify-between gap-4">
-          <h2 className="max-w-2xl font-serif text-2xl font-semibold leading-tight text-white md:text-3xl">
+          <h2 className="max-w-2xl font-serif text-lg sm:text-xl font-semibold leading-tight text-white md:text-3xl">
             {post.title}
           </h2>
           {/* Arrow icon */}
@@ -234,7 +234,7 @@ function FeaturedPost({ post }: { post: Post }) {
           </svg>
         </div>
 
-        {excerpt && <p className="max-w-xl text-sm leading-relaxed text-white/80 line-clamp-2">{excerpt}</p>}
+        {excerpt && <p className="max-w-xl text-xs leading-relaxed text-white/80 line-clamp-2 sm:text-sm">{excerpt}</p>}
 
         <div className="flex flex-wrap items-center gap-6">
           {/* Author */}
@@ -271,7 +271,7 @@ function FeaturedPost({ post }: { post: Post }) {
 
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-col gap-1">
+            <div className="hidden sm:flex flex-col gap-1">
               <p className="text-xs font-semibold text-white/60">Từ khoá</p>
               <ul className="flex gap-2">
                 {post.tags.slice(0, 3).map((tag) => (
@@ -549,12 +549,6 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
         {/* Featured post */}
         {featuredPost && <FeaturedPost post={featuredPost} />}
 
-        {/* Mobile featured (hiển thị như card bình thường) */}
-        {featuredPost && (
-          <div className="mt-4 md:hidden">
-            <PostCard post={featuredPost} />
-          </div>
-        )}
 
         {availableCategories.length > 0 && (
           <div className="mt-10 flex flex-wrap gap-2">

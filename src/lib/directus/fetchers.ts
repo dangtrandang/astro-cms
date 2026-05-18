@@ -379,6 +379,7 @@ export const fetchPostBySlug = async (slug: string, draft = false, token?: strin
           'seo',
           { tags: [{ tags_id: ['name', 'slug'] }] },
           { category: ['id', 'title', 'color', 'slug'] },
+          { author: ['id', 'name', 'image', 'bio'] },
         ] as any[],
       }),
     )) as unknown as Post[];
@@ -405,13 +406,71 @@ export const fetchRelatedPosts = async (excludeId: string) => {
       readItems('posts', {
         filter: { status: { _eq: 'published' }, id: { _neq: excludeId } },
         fields: ['id', 'title', { image: ['id'] }, 'Slug', 'seo'] as any[],
-        limit: 2,
+        limit: 3,
       }),
     )) as unknown as Post[];
 
     return relatedPosts;
   } catch {
     throw new Error('Failed to fetch related posts');
+  }
+};
+
+export type AdjacentPost = Pick<Post, 'id' | 'title' | 'Slug'>;
+
+export interface AdjacentPostLinks {
+  previousPost: AdjacentPost | null;
+  nextPost: AdjacentPost | null;
+}
+
+/**
+ * Fetches previous and next published posts by date.
+ */
+export const fetchAdjacentPosts = async (post: Post): Promise<AdjacentPostLinks> => {
+  if (!post.date_published) {
+    return { previousPost: null, nextPost: null };
+  }
+
+  try {
+    const fields = ['id', 'title', 'Slug'] as any[];
+    const publishedAt = post.date_published;
+
+    const [previousPosts, nextPosts] = await Promise.all([
+      directus.request(
+        readItems('posts', {
+          filter: {
+            status: { _eq: 'published' },
+            id: { _neq: post.id },
+            date_published: { _lt: publishedAt },
+          } as any,
+          sort: ['-date_published'] as any[],
+          limit: 1,
+          fields,
+        }),
+      ),
+      directus.request(
+        readItems('posts', {
+          filter: {
+            status: { _eq: 'published' },
+            id: { _neq: post.id },
+            date_published: { _gt: publishedAt },
+          } as any,
+          sort: ['date_published'] as any[],
+          limit: 1,
+          fields,
+        }),
+      ),
+    ]);
+
+    const previousPost = ((previousPosts as unknown as AdjacentPost[])[0] ?? null);
+    const nextPost = ((nextPosts as unknown as AdjacentPost[])[0] ?? null);
+
+    return {
+      previousPost,
+      nextPost,
+    };
+  } catch {
+    throw new Error('Failed to fetch adjacent posts');
   }
 };
 
@@ -659,14 +718,14 @@ export const fetchPostByIdAndVersion = async (
       'title',
       'content',
       'status',
-      'published_at',
+      'date_published',
       'image',
-      'description',
-      'slug',
+      'summary',
+      'Slug',
       'seo',
-      {
-        author: ['id', 'first_name', 'last_name', 'avatar'],
-      },
+      { tags: [{ tags_id: ['name', 'slug'] }] },
+      { category: ['id', 'title', 'color', 'slug'] },
+      { author: ['id', 'name', 'image', 'bio'] },
     ] as const;
 
     const [postData, relatedPosts] = await Promise.all([

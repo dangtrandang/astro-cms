@@ -7,7 +7,6 @@ import BaseText from '@/components/ui/Text';
 import { Separator } from '@/components/ui/separator';
 import ShareDialog from '@/components/ui/ShareDialog';
 import Headline from '@/components/ui/Headline';
-import Container from '@/components/ui/Container';
 import { cn } from '@/lib/utils';
 import type { Post, Team } from '@/types/directus-schema';
 import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
@@ -22,6 +21,8 @@ interface TocItem {
 interface BlogPostClientProps {
   initialPost: Post;
   relatedPosts: Post[];
+  previousPost?: Pick<Post, 'id' | 'title' | 'Slug'> | null;
+  nextPost?: Pick<Post, 'id' | 'title' | 'Slug'> | null;
   author?: Team | null;
   authorName: string;
   postUrl: string;
@@ -38,6 +39,8 @@ interface BlogPostClientProps {
 export default function BlogPostClient({
   initialPost,
   relatedPosts,
+  previousPost,
+  nextPost,
   author,
   authorName,
   postUrl,
@@ -100,6 +103,7 @@ export default function BlogPostClient({
   // --- Table of Contents: Scroll Spy ---
   const [activeId, setActiveId] = useState<string>('');
   const tocNavRef = useRef<HTMLElement>(null);
+  const visibleHeadingsRef = useRef<string[]>([]);
 
   const handleTocClick = useCallback((e: React.MouseEvent, id: string) => {
     e.preventDefault();
@@ -122,33 +126,46 @@ export default function BlogPostClient({
 
     if (headingElements.length === 0) return;
 
-    // Map id → element để tra nhanh
-    const headingMap = new Map<string, HTMLElement>();
-    headingElements.forEach((el) => headingMap.set(el.id, el));
+    visibleHeadingsRef.current = [];
+
+    const getClosestHeadingId = () => {
+      const sortedByTop = [...headingElements].sort(
+        (a, b) => Math.abs(a.getBoundingClientRect().top - 100) - Math.abs(b.getBoundingClientRect().top - 100),
+      );
+
+      return sortedByTop[0]?.id ?? activeId;
+    };
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Tìm heading đang intersect có boundingClientRect.top nhỏ nhất
-        // (gần đỉnh viewport nhất, tức là heading mà người dùng đang đọc)
-        const intersecting = entries.filter((e) => e.isIntersecting);
-        if (intersecting.length === 0) return;
+        for (const entry of entries) {
+          const headingId = (entry.target as HTMLElement).id;
 
-        let closest: IntersectionObserverEntry | null = null;
-        let minTop = Infinity;
-        for (const entry of intersecting) {
-          const top = entry.boundingClientRect.top;
-          if (top < minTop) {
-            minTop = top;
-            closest = entry;
+          if (entry.isIntersecting) {
+            if (!visibleHeadingsRef.current.includes(headingId)) {
+              visibleHeadingsRef.current.push(headingId);
+            }
+          } else {
+            visibleHeadingsRef.current = visibleHeadingsRef.current.filter((id) => id !== headingId);
           }
         }
-        if (closest) {
-          setActiveId(closest.target.id);
+
+        const orderedVisibleIds = tocItems
+          .map((item) => item.id)
+          .filter((id) => visibleHeadingsRef.current.includes(id));
+
+        if (orderedVisibleIds.length > 0) {
+          setActiveId(orderedVisibleIds[0]);
+          return;
+        }
+
+        const fallbackId = getClosestHeadingId();
+        if (fallbackId) {
+          setActiveId(fallbackId);
         }
       },
       {
-        // Chỉ kích hoạt khi heading chạm vùng dưới header sticky (96px)
-        rootMargin: '-96px 0px -60% 0px',
+        rootMargin: '-100px 0px -70% 0px',
         threshold: 0,
       },
     );
@@ -157,8 +174,9 @@ export default function BlogPostClient({
 
     return () => {
       observer.disconnect();
+      visibleHeadingsRef.current = [];
     };
-  }, [tocItems, enrichedContent]);
+  }, [tocItems, enrichedContent, activeId]);
 
   // Render content: ưu tiên enrichedContent (có ID headings), fallback post.content
   const displayContent = enrichedContent || post.content || '';
@@ -167,96 +185,114 @@ export default function BlogPostClient({
 
   return (
     <>
-      <Container className="py-12">
-        {post.image && (
-          <div className="mb-8">
-            <div
-              className="relative w-full h-[400px] overflow-hidden rounded-lg"
-              data-directus={setAttr({
-                collection: 'posts',
-                item: post.id,
-                fields: ['image', 'meta_header_image'],
-                mode: 'modal',
-              })}
-            >
-              <DirectusImage
-                uuid={post.image as string}
-                alt={post.title || 'post header image'}
-                className="object-cover"
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
-              />
+      <div className="mx-auto max-w-7xl px-4 py-12 md:px-8">
+        <div className="mb-8 overflow-hidden rounded-2xl">
+          <div
+            className="group relative h-[320px] w-full overflow-hidden rounded-2xl sm:h-[380px] md:h-[480px]"
+            data-directus={setAttr({
+              collection: 'posts',
+              item: post.id,
+              fields: ['title', 'slug', 'summary', 'image', 'meta_header_image', 'author', 'date_published', 'tags', 'category'],
+              mode: 'modal',
+            })}
+          >
+            <div className="absolute inset-0 bg-[#F2D1D1]">
+              {post.image && (
+                <DirectusImage
+                  uuid={post.image as string}
+                  alt={post.title || 'post header image'}
+                  className="object-cover"
+                  fill
+                  sizes="100vw"
+                />
+              )}
+            </div>
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/20" />
+
+            <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-4 sm:gap-4 sm:p-6 md:p-8">
+              {categoryName && (
+                <a
+                  href={categorySlug ? `/blog?category=${categorySlug}` : '#'}
+                  className="w-fit rounded-full bg-[#C6DCE4]/90 px-2.5 py-0.5 text-[11px] font-semibold text-[#850E35] backdrop-blur-sm sm:px-3 sm:py-1 sm:text-xs"
+                >
+                  {categoryName}
+                </a>
+              )}
+
+              <div className="flex items-start justify-between gap-4">
+                <Headline
+                  as="h1"
+                  headline={post.title}
+                  className="max-w-[80rem] !font-serif text-[1.7rem] font-semibold leading-tight !text-[#f5dcda] sm:text-4xl md:text-5xl"
+                  data-directus={setAttr({
+                    collection: 'posts',
+                    item: post.id,
+                    fields: ['title', 'slug'],
+                    mode: 'popover',
+                  })}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6">
+                {authorName && (
+                  <div className="flex items-center gap-2 sm:flex-col sm:items-start sm:gap-1">
+                    <p className="hidden text-[11px] font-semibold text-white/60 sm:block sm:text-xs">Tác giả</p>
+                    <div className="flex items-center gap-2">
+                      <div className="relative h-8 w-8 overflow-hidden rounded-full ring-2 ring-white/40">
+                        {author?.image ? (
+                          <DirectusImage
+                            uuid={typeof author.image === 'string' ? author.image : (author.image as any)?.id}
+                            alt={authorName}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <span className="flex h-full w-full items-center justify-center bg-[#850E35] text-[11px] font-bold text-white sm:text-xs">
+                            {authorName.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs font-semibold text-white sm:text-sm">{authorName}</p>
+                    </div>
+                  </div>
+                )}
+
+                {datePublished && (
+                  <div className="hidden sm:flex sm:flex-col sm:gap-1">
+                    <p className="text-[11px] font-semibold text-white/60 sm:text-xs">Ngày đăng</p>
+                    <time dateTime={post.date_published ?? undefined} className="text-xs font-semibold text-white sm:text-sm">
+                      {datePublished}
+                    </time>
+                  </div>
+                )}
+
+                {tags && tags.length > 0 && (
+                  <div className="flex items-center gap-2 sm:flex-col sm:items-start sm:gap-1">
+                    <p className="hidden text-[11px] font-semibold text-white/60 sm:block sm:text-xs">Từ khoá</p>
+                    <ul className="flex flex-wrap gap-1.5 sm:gap-2">
+                      {tags.slice(0, 3).map((tag) => (
+                        <li key={tag.slug}>
+                          <a
+                            href={`/blog?tag=${encodeURIComponent(tag.slug)}`}
+                            className="inline-block rounded-full px-2 py-0.5 text-[11px] font-medium text-white ring-1 ring-white/40 transition-colors duration-200 hover:bg-white/10 sm:px-2.5 sm:text-xs"
+                          >
+                            {tag.name}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        )}
-
-        <Headline
-          as="h1"
-          headline={post.title}
-          className="!text-[#850E35] font-serif text-4xl lg:text-5xl mb-4"
-          data-directus={setAttr({
-            collection: 'posts',
-            item: post.id,
-            fields: ['title', 'slug'],
-            mode: 'popover',
-          })}
-        />
-
-        {/* Meta Data – TẤT CẢ dưới tiêu đề: Danh mục + Từ khoá + Ngày đăng + Tác giả */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm mb-6">
-          {categoryName && (
-            <span className="inline-flex items-center gap-1.5">
-              <span className="text-gray-400 font-medium">Danh mục:</span>
-              <a
-                href={categorySlug ? `/blog?category=${categorySlug}` : '#'}
-                className="inline-block px-3 py-1 rounded-full text-xs font-medium tracking-wide uppercase transition-colors duration-200"
-                style={{
-                  backgroundColor: categoryColor ? `${categoryColor}20` : '#F2D1D1',
-                  color: categoryColor || '#850E35',
-                  border: `1px solid ${categoryColor || '#850E35'}40`,
-                }}
-              >
-                {categoryName}
-              </a>
-            </span>
-          )}
-          {tags && tags.length > 0 && (
-            <span className="inline-flex items-center gap-1.5">
-              <span className="text-gray-400 font-medium">Từ khoá:</span>
-              <span className="inline-flex flex-wrap gap-1">
-                {tags.map((tag) => (
-                  <a
-                    key={tag.slug}
-                    href={`/blog?tag=${encodeURIComponent(tag.slug)}`}
-                    className="inline-block px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 border border-gray-200 hover:bg-[#F2D1D1] hover:text-[#850E35] hover:border-[#850E35]/30 transition-colors duration-200"
-                  >
-                    {tag.name}
-                  </a>
-                ))}
-              </span>
-            </span>
-          )}
-          {datePublished && (
-            <span className="inline-flex items-center gap-1.5 text-gray-500">
-              <span className="text-gray-400 font-medium">Ngày đăng:</span>
-              <time dateTime={post.date_published ?? undefined}>
-                {datePublished}
-              </time>
-            </span>
-          )}
-          {authorName && (
-            <span className="inline-flex items-center gap-1.5 text-gray-500">
-              <span className="text-gray-400 font-medium">Tác giả:</span>
-              <span>{authorName}</span>
-            </span>
-          )}
         </div>
 
-        {/* Full-width Separator – kéo dài hết container, chia tách tiêu đề + grid */}
-        <hr className="border-0 border-t border-[#F2D1D1] mb-8" />
+        <div className="mb-8 h-[2px] w-full bg-[#f8e7e3]" />
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,_2fr)_400px] gap-12 lg:items-start">
-          <main className="text-left">
+          <main className="text-justify">
             <BaseText
               content={displayContent}
               data-directus={setAttr({
@@ -266,13 +302,45 @@ export default function BlogPostClient({
                 mode: 'drawer',
               })}
             />
+
+            {(previousPost || nextPost) && (
+              <div className="mt-10 grid grid-cols-2 gap-3 border-t border-[#f8e7e3] pt-6 sm:gap-6">
+                {previousPost ? (
+                  <a href={`/blog/${previousPost.Slug}`} className="group block">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#f8e7e3] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#850E35] transition-colors group-hover:bg-[#F2D1D1]">
+                      <span aria-hidden="true">←</span>
+                      <span>Bài trước</span>
+                    </span>
+                    <span className="mt-2 hidden font-serif text-sm text-gray-500 transition-colors group-hover:text-[#850E35] sm:block">
+                      {previousPost.title.length > 35 ? `${previousPost.title.slice(0, 35)}...` : previousPost.title}
+                    </span>
+                  </a>
+                ) : (
+                  <div />
+                )}
+
+                {nextPost ? (
+                  <a href={`/blog/${nextPost.Slug}`} className="group block text-right">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#f8e7e3] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#850E35] transition-colors group-hover:bg-[#F2D1D1]">
+                      <span>Bài sau</span>
+                      <span aria-hidden="true">→</span>
+                    </span>
+                    <span className="mt-2 hidden font-serif text-sm text-gray-500 transition-colors group-hover:text-[#850E35] sm:block">
+                      {nextPost.title.length > 35 ? `${nextPost.title.slice(0, 35)}...` : nextPost.title}
+                    </span>
+                  </a>
+                ) : (
+                  <div />
+                )}
+              </div>
+            )}
           </main>
 
-          <aside className="p-6 rounded-xl max-w-[496px] bg-[#F2D1D1]/40 border border-[#F2D1D1] lg:sticky lg:top-24 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-            {/* Author + Title – không sticky, trên cùng */}
+          <aside className="p-6 rounded-xl max-w-[496px] bg-[#F2D1D1]/40 lg:sticky lg:top-24">
+            {/* Author box */}
             {author && (
               <div
-                className="flex items-center space-x-4 mb-4"
+                className="mb-5 rounded-xl border border-[#F2D1D1] bg-[#f8e7e3] p-5"
                 data-directus={setAttr({
                   collection: 'posts',
                   item: post.id,
@@ -280,31 +348,32 @@ export default function BlogPostClient({
                   mode: 'popover',
                 })}
               >
-                {author.image && (
-                  <DirectusImage
-                    uuid={typeof author.image === 'string' ? author.image : author.image.id}
-                    alt={authorName || 'author avatar'}
-                    className="rounded-full object-cover"
-                    width={48}
-                    height={48}
+                <div className="flex items-center gap-4">
+                  {author.image ? (
+                    <DirectusImage
+                      uuid={typeof author.image === 'string' ? author.image : author.image.id}
+                      alt={authorName || 'author avatar'}
+                      className="h-16 w-16 rounded-full object-cover shrink-0"
+                      width={64}
+                      height={64}
+                    />
+                  ) : (
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#850E35] text-lg font-bold text-white">
+                      {authorName.charAt(0)}
+                    </div>
+                  )}
+
+                  <div className="min-w-0">
+                    {authorName && <p className="font-serif text-xl font-semibold text-[#850E35]">{authorName}</p>}
+                  </div>
+                </div>
+
+                {author.bio && (
+                  <div
+                    className="mt-4 text-sm text-gray-700 [&_p]:mt-0 [&_p]:mb-3 [&_p:last-child]:mb-0"
+                    dangerouslySetInnerHTML={{ __html: author.bio }}
                   />
                 )}
-                <div>
-                  {authorName && <p className="font-bold text-gray-800">{authorName}</p>}
-                  {post.summary && (
-                    <p
-                      className="text-sm text-gray-500 mt-0.5"
-                      data-directus={setAttr({
-                        collection: 'posts',
-                        item: post.id,
-                        fields: ['summary'],
-                        mode: 'popover',
-                      })}
-                    >
-                      {post.summary}
-                    </p>
-                  )}
-                </div>
               </div>
             )}
 
@@ -390,10 +459,31 @@ export default function BlogPostClient({
                   })}
                 </div>
               </div>
+
+              {tags && tags.length > 0 && (
+                <>
+                  <Separator className="border-[#F2D1D1]" />
+                  <div>
+                    <h3 className="mb-3 font-serif text-xl font-bold text-[#850E35]">Từ khoá</h3>
+                    <ul className="flex flex-wrap gap-2">
+                      {tags.map((tag) => (
+                        <li key={tag.slug}>
+                          <a
+                            href={`/blog?tag=${encodeURIComponent(tag.slug)}`}
+                            className="inline-flex rounded-full bg-[#f8e7e3] px-3 py-1 text-xs font-medium text-[#850E35] transition-colors hover:bg-[#F2D1D1]"
+                          >
+                            {tag.name}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
             </div>
           </aside>
         </div>
-      </Container>
+      </div>
     </>
   );
 }
