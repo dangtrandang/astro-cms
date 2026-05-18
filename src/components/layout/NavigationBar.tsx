@@ -137,7 +137,7 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
 
       {/* Mobile menu drawer — outside <header> stacking context */}
       <div
-        className={`lg:hidden fixed top-0 right-0 bottom-0 z-[70] w-[85%] max-w-sm bg-white/95 backdrop-blur-xl shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${menuOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`lg:hidden fixed top-0 right-0 bottom-0 z-[70] w-[85%] max-w-sm bg-white/95 backdrop-blur-xl shadow-2xl transition-transform duration-500 ease-[transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${menuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
       >
         <div className="flex flex-col h-full pt-24 px-8 pb-8">
