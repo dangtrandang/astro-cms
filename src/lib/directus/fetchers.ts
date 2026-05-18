@@ -163,7 +163,7 @@ const blogArchivePostFields = [
   'Slug',
   'image',
   'date_published',
-  'tags',
+  { tags: [{ tags_id: ['name', 'slug'] }] },
   { category: ['id', 'title', 'slug'] },
   { author: ['id', 'name', 'image'] },
 ] as any[];
@@ -377,6 +377,8 @@ export const fetchPostBySlug = async (slug: string, draft = false, token?: strin
           'summary',
           'Slug',
           'seo',
+          { tags: [{ tags_id: ['name', 'slug'] }] },
+          { category: ['id', 'title', 'color', 'slug'] },
         ] as any[],
       }),
     )) as unknown as Post[];
@@ -402,7 +404,7 @@ export const fetchRelatedPosts = async (excludeId: string) => {
     const relatedPosts = (await directus.request(
       readItems('posts', {
         filter: { status: { _eq: 'published' }, id: { _neq: excludeId } },
-        fields: ['id', 'title', 'image', 'Slug', 'seo'] as any[],
+        fields: ['id', 'title', { image: ['id'] }, 'Slug', 'seo'] as any[],
         limit: 2,
       }),
     )) as unknown as Post[];

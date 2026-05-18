@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import DirectusImage from '@/components/shared/DirectusImage';
 import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
+import { decodeHtmlEntities } from '@/lib/html-entities';
 
 // ─── Types mapped từ schema thực tế ───────────────────────────────────────────
 
@@ -26,7 +27,7 @@ interface Post {
   Slug: string; // ⚠️ S hoa — PostgreSQL case-sensitive
   image?: string | null;
   date_published?: string | null;
-  tags?: string[] | null;
+  tags?: Array<{ tags_id?: { name?: string; slug?: string } }> | null;
   category?: Category | null;
   author?: Author | null;
 }
@@ -59,9 +60,8 @@ function formatDate(dateStr: string | null | undefined): string {
 
 function stripHtml(html: string | null | undefined): string {
   if (!html) return '';
-  return html
+  return decodeHtmlEntities(html)
     .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -90,7 +90,7 @@ function PostCard({ post }: { post: Post }) {
   return (
     <a
       href={slug ? `/blog/${slug}` : '#'}
-      className="group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-[#F2D1D1] transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+      className="group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-[#F2D1D1] transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-md"
     >
       {/* Thumbnail */}
       <div className="relative h-52 w-full overflow-hidden rounded-t-xl bg-[#F2D1D1]">
@@ -143,10 +143,10 @@ function PostCard({ post }: { post: Post }) {
           <div className="flex flex-wrap gap-1.5">
             {post.tags.slice(0, 3).map((tag) => (
               <span
-                key={tag}
+                key={tag.tags_id?.slug || tag.tags_id?.name}
                 className="rounded-full bg-[#FCF5EE] px-2.5 py-0.5 text-xs text-gray-500 ring-1 ring-[#F2D1D1]"
               >
-                {tag}
+                {tag.tags_id?.name || ''}
               </span>
             ))}
           </div>
@@ -272,14 +272,14 @@ function FeaturedPost({ post }: { post: Post }) {
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
             <div className="flex flex-col gap-1">
-              <p className="text-xs font-semibold text-white/60">Chủ đề</p>
+              <p className="text-xs font-semibold text-white/60">Từ khoá</p>
               <ul className="flex gap-2">
                 {post.tags.slice(0, 3).map((tag) => (
                   <li
-                    key={tag}
+                    key={tag.tags_id?.slug || tag.tags_id?.name}
                     className="rounded-full px-2.5 py-0.5 text-xs font-medium text-white ring-1 ring-white/40"
                   >
-                    {tag}
+                    {tag.tags_id?.name || ''}
                   </li>
                 ))}
               </ul>

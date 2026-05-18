@@ -109,6 +109,14 @@ export interface BlockForm {
 	/** @primaryKey */
 	id: string;
 	title?: string | null;
+	image?: BlockFormFile[] | string[];
+}
+
+export interface BlockFormFile {
+	/** @primaryKey */
+	id: number;
+	block_form_id?: BlockForm | string | null;
+	directus_files_id?: DirectusFile | string | null;
 }
 
 export interface BlockGallery {
@@ -116,7 +124,10 @@ export interface BlockGallery {
 	/** @primaryKey */
 	id: string;
 	title?: string | null;
-	variant?: 'grid' | 'accordion' | null;
+	variant?: 'accordion' | 'grid' | 'floating' | null;
+	background_color?: `#FCF5EE` | `#F2D1D1` | `#C6DCE4` | `#850E35` | null;
+	background_image?: DirectusFile | string | null;
+	background_video?: DirectusFile | string | null;
 	gallery_items?: BlockGalleryFile[] | string[];
 }
 
@@ -130,6 +141,15 @@ export interface BlockGalleryFile {
 	date_updated?: string | null;
 	block_gallery_id?: BlockGallery | string | null;
 	directus_files_id?: DirectusFile | string | null;
+	/** @description Kích thước ảnh cho floating gallery */
+	size?: 'small' | 'medium' | 'large' | null;
+}
+
+export interface BlockGalleryFiles1 {
+	/** @primaryKey */
+	id: number;
+	block_gallery_id?: string | null;
+	directus_files_id?: string | null;
 }
 
 export interface BlockHero {
@@ -138,12 +158,12 @@ export interface BlockHero {
 	/** @primaryKey */
 	id: string;
 	image?: DirectusFile | string | null;
-	video?: DirectusFile | string | null;
 	title?: string | null;
 	image_position?: 'left' | 'right' | null;
 	button_group?: BlockButtonGroup | string | null;
 	/** @description Select which hero variant the frontend should render. */
 	variant?: 'default' | 'video' | 'linkflow' | null;
+	video?: DirectusFile | string | null;
 }
 
 export interface BlockHtml {
@@ -195,6 +215,8 @@ export interface BlockStepItem {
 	block_steps?: BlockStep | string | null;
 	sort?: number | null;
 	button_group?: BlockButtonGroup | string | null;
+	/** @description Màu nền của card bước */
+	bg_color?: `bg-[#1c1917]` | `bg-[#7f1d1d]` | `bg-[#0f172a]` | `bg-[#FCF5EE]` | null;
 }
 
 export interface BlockStep {
@@ -206,6 +228,9 @@ export interface BlockStep {
 	/** @description Show the step numbers on the website. For example: (Step 1, Step 2, etc) */
 	show_step_numbers?: boolean | null;
 	title?: string | null;
+	/** @description Nhãn hiển thị phía trên tiêu đề (vd: Quy trình làm việc) */
+	badge_text?: string | null;
+	author_image?: DirectusFile | string | null;
 	steps?: BlockStepItem[] | string[];
 }
 
@@ -249,16 +274,25 @@ export interface BlockVideo {
 
 export interface BlockWhoIAm {
 	/** @primaryKey */
-	id: string;
+	id: number;
+	/** @description Nhan dien noi bo cho block */
 	title?: string | null;
+	/** @description Dong nhan nho phia tren, vi du WHO AM I */
 	eyebrow?: string | null;
-	headline?: string | null;
+	/** @description Tieu de lon cot ben trai @required */
+	headline: string;
+	/** @description Doan gioi thieu chinh */
 	content?: string | null;
+	/** @description Hinh chu the o cot giua */
 	portrait_image?: DirectusFile | string | null;
+	/** @description Nhan nho trang tri neu can */
 	center_badge?: string | null;
-	right_items?: Array<{ icon?: string; title: string; content?: string }> | null;
-	social_links?: Array<{ platform: string; url?: string }> | null;
-	theme_variant?: 'blue-mystic' | 'default' | null;
+	/** @description Danh sach 3 muc ben phai: icon, title, content */
+	right_items?: Array<{ icon: string; title: string; content: string }> | null;
+	/** @description Lien ket mang xa hoi hien thi ben duoi cot trai */
+	social_links?: Array<{ platform: string; url: string }> | null;
+	/** @description Giao dien mau cho block */
+	theme_variant?: `blue-mystic` | 'default' | null;
 }
 
 export interface Category {
@@ -309,6 +343,15 @@ export interface Conversation {
 	user_updated?: DirectusUser | string | null;
 	organization?: Organization | string | null;
 	messages?: Message[] | string[];
+}
+
+export interface FormSubmission {
+	/** @primaryKey */
+	id: string;
+	/** @description Submitted form values payload @required */
+	values: Record<string, any>;
+	date_created?: string | null;
+	form?: Form | string | null;
 }
 
 export interface Form {
@@ -985,9 +1028,16 @@ export interface Post {
 	type?: 'blog' | 'project' | 'video' | null;
 	video_url?: string | null;
 	Slug?: string | null;
-	/** @description Nhập từ khoá và nhấn Enter */
-	tags?: string[] | null;
 	gallery?: PostGalleryItem[] | string[];
+	tags?: PostsTag[] | string[];
+}
+
+export interface PostsTag {
+	/** @primaryKey */
+	id: string;
+	posts_id?: Post | string | null;
+	tags_id?: Tag | string | null;
+	sort?: number | null;
 }
 
 export interface Redirect {
@@ -1023,6 +1073,14 @@ export interface Seo {
 	/** @description This entries title, defaults to title. Max 70 characters including the site name. */
 	title?: string | null;
 	og_image?: string | null;
+}
+
+export interface Tag {
+	/** @primaryKey */
+	id: string;
+	/** @required */
+	name: string;
+	slug?: string | null;
 }
 
 export interface Team {
@@ -1562,8 +1620,10 @@ export interface Schema {
 	block_divider: BlockDivider[];
 	block_faqs: BlockFaq[];
 	block_form: BlockForm[];
+	block_form_files: BlockFormFile[];
 	block_gallery: BlockGallery[];
 	block_gallery_files: BlockGalleryFile[];
+	block_gallery_files_1: BlockGalleryFiles1[];
 	block_hero: BlockHero[];
 	block_html: BlockHtml[];
 	block_logocloud: BlockLogocloud[];
@@ -1580,6 +1640,7 @@ export interface Schema {
 	categories: Category[];
 	contacts: Contact[];
 	conversations: Conversation[];
+	form_submissions: FormSubmission[];
 	forms: Form[];
 	globals: Globals;
 	help_articles: HelpArticle[];
@@ -1622,8 +1683,10 @@ export interface Schema {
 	pages_projects: PagesProjects;
 	post_gallery_items: PostGalleryItem[];
 	posts: Post[];
+	posts_tags: PostsTag[];
 	redirects: Redirect[];
 	seo: Seo[];
+	tags: Tag[];
 	team: Team[];
 	testimonials: Testimonial[];
 	directus_access: DirectusAccess[];
@@ -1668,8 +1731,10 @@ export enum CollectionNames {
 	block_divider = 'block_divider',
 	block_faqs = 'block_faqs',
 	block_form = 'block_form',
+	block_form_files = 'block_form_files',
 	block_gallery = 'block_gallery',
 	block_gallery_files = 'block_gallery_files',
+	block_gallery_files_1 = 'block_gallery_files_1',
 	block_hero = 'block_hero',
 	block_html = 'block_html',
 	block_logocloud = 'block_logocloud',
@@ -1686,6 +1751,7 @@ export enum CollectionNames {
 	categories = 'categories',
 	contacts = 'contacts',
 	conversations = 'conversations',
+	form_submissions = 'form_submissions',
 	forms = 'forms',
 	globals = 'globals',
 	help_articles = 'help_articles',
@@ -1728,8 +1794,10 @@ export enum CollectionNames {
 	pages_projects = 'pages_projects',
 	post_gallery_items = 'post_gallery_items',
 	posts = 'posts',
+	posts_tags = 'posts_tags',
 	redirects = 'redirects',
 	seo = 'seo',
+	tags = 'tags',
 	team = 'team',
 	testimonials = 'testimonials',
 	directus_access = 'directus_access',

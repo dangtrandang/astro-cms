@@ -11,7 +11,130 @@ import {
   fetchRelatedPosts,
   getPostIdBySlug,
 } from '@/lib/directus/fetchers';
-import type { DirectusUser, Post } from '@/types/directus-schema';
+import type { DirectusUser, Post, Team } from '@/types/directus-schema';
+
+interface TocItem {
+  id: string;
+  text: string;
+  level: 2 | 3;
+}
+
+/**
+ * Chuyển đổi chuỗi tiếng Việt có dấu thành slug không dấu.
+ * VD: "Học Tarot Cơ Bản" → "hoc-tarot-co-ban"
+ */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a')
+    .replace(/[èéẹẻẽêềếệểễ]/g, 'e')
+    .replace(/[ìíịỉĩ]/g, 'i')
+    .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o')
+    .replace(/[ùúụủũưừứựửữ]/g, 'u')
+    .replace(/[ỳýỵỷỹ]/g, 'y')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[\s]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/**
+ * Parse HTML content, trích xuất H2/H3 để tạo Table of Contents.
+ * Đồng thời inject `id` attribute vào các heading tags để anchor link hoạt động.
+ */
+
+/** Decode tất cả HTML entities (named + numeric + hex) → ký tự Unicode thực */
+function decodeHtmlEntities(str: string): string {
+  // Ưu tiên dùng DOM API nếu có sẵn (client-side)
+  if (typeof document !== 'undefined') {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = str;
+    return textarea.value;
+  }
+  // SSR fallback: decode toàn diện bằng regex
+  return str
+    // Numeric decimal: &#236; → ì
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCharCode(Number(dec)))
+    // Numeric hex: &#xEC; → ì
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex: string) => String.fromCharCode(parseInt(hex, 16)))
+    // Named entities: &igrave; → ì
+    .replace(/&([a-z]+);/gi, (_, name: string) => {
+      const entities: Record<string, string> = {
+        // Tiếng Việt thường
+        aacute: 'á', agrave: 'à', atilde: 'ã', acirc: 'â',
+        eacute: 'é', egrave: 'è', ecirc: 'ê',
+        iacute: 'í', igrave: 'ì', icirc: 'î',
+        oacute: 'ó', ograve: 'ò', otilde: 'õ', ocirc: 'ô',
+        uacute: 'ú', ugrave: 'ù', ucirc: 'û',
+        yacute: 'ý',
+        // Tiếng Việt hoa
+        Aacute: 'Á', Agrave: 'À', Atilde: 'Ã', Acirc: 'Â',
+        Eacute: 'É', Egrave: 'È', Ecirc: 'Ê',
+        Iacute: 'Í', Igrave: 'Ì', Icirc: 'Î',
+        Oacute: 'Ó', Ograve: 'Ò', Otilde: 'Õ', Ocirc: 'Ô',
+        Uacute: 'Ú', Ugrave: 'Ù', Ucirc: 'Û',
+        Yacute: 'Ý',
+        // Chuẩn
+        amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+        // Latin-1 mở rộng
+        aelig: 'æ', AElig: 'Æ',
+        ccedil: 'ç', Ccedil: 'Ç',
+        eth: 'ð', ETH: 'Ð',
+        iuml: 'ï', Iuml: 'Ï',
+        ntilde: 'ñ', Ntilde: 'Ñ',
+        oelig: 'œ', Oelig: 'Œ',
+        oslash: 'ø', Oslash: 'Ø',
+        szlig: 'ß',
+        thorn: 'þ', THORN: 'Þ',
+        uuml: 'ü', Uuml: 'Ü',
+        yuml: 'ÿ', Yuml: 'Ÿ',
+        // Dấu câu + ký hiệu
+        lsquo: '\u2018', rsquo: '\u2019',
+        ldquo: '\u201C', rdquo: '\u201D',
+        ndash: '\u2013', mdash: '\u2014',
+        hellip: '\u2026',
+        laquo: '\u00AB', raquo: '\u00BB',
+        copy: '\u00A9', reg: '\u00AE', trade: '\u2122',
+        euro: '\u20AC', pound: '\u00A3', yen: '\u00A5', cent: '\u00A2',
+        deg: '\u00B0', micro: '\u00B5',
+      };
+      return entities[name] ?? `&${name};`;
+    });
+}
+
+function generateToc(html: string): { tocItems: TocItem[]; enrichedContent: string } {
+  const tocItems: TocItem[] = [];
+  let counter = 0;
+
+  const enrichedContent = html.replace(
+    /<h([23])([^>]*)>(.*?)<\/h[23]>/gi,
+    (_match, level: string, attrs: string, innerHTML: string) => {
+      const rawText = innerHTML.replace(/<[^>]*>/g, '').trim();
+      if (!rawText) return _match;
+      const textContent = decodeHtmlEntities(rawText);
+
+      const numLevel = parseInt(level, 10) as 2 | 3;
+      let id = slugify(textContent);
+      if (!id) {
+        id = `heading-${++counter}`;
+      }
+
+      // Đảm bảo ID không trùng (append counter nếu cần)
+      const exists = tocItems.some((item) => item.id === id);
+      if (exists) {
+        id = `${id}-${++counter}`;
+      }
+
+      tocItems.push({ id, text: textContent, level: numLevel });
+
+      // Inject id + scroll-margin-top để tránh bị header sticky che khi scroll tới
+      return `<h${level}${attrs} id="${id}" style="scroll-margin-top:6rem">${innerHTML}</h${level}>`;
+    },
+  );
+
+  return { tocItems, enrichedContent };
+}
 
 const slugParam = Astro.params.slug;
 const slug = Array.isArray(slugParam) ? slugParam.join('/') : typeof slugParam === 'string' ? slugParam : '';
@@ -50,9 +173,35 @@ if (!post) {
   return Astro.redirect('/404');
 }
 
+const { tocItems, enrichedContent } = generateToc(post.content || '');
+
 const relatedPosts = await fetchRelatedPosts(post.id);
-const author = post.author && typeof post.author === 'object' ? (post.author as DirectusUser) : null;
-const authorName = [author?.first_name, author?.last_name].filter(Boolean).join(' ');
+const author = post.author && typeof post.author === 'object' ? (post.author as Team) : null;
+const authorName = (author as Team)?.name || '';
+
+// Category + Meta Data
+const category = typeof post.category === 'object' && post.category !== null ? post.category : null;
+const categoryName = (category as any)?.title ?? null;
+const categoryColor = (category as any)?.color ?? null;
+const categorySlug = (category as any)?.slug ?? null;
+
+// M2M relation: post.tags là PostTagItem[], mỗi item có .tags_id là object { name, slug }
+const tags: Array<{ name: string; slug: string }> | null =
+  Array.isArray(post.tags)
+    ? (post.tags as any[])
+        .map((jt: any) => ({
+          name: jt?.tags_id?.name || '',
+          slug: jt?.tags_id?.slug || '',
+        }))
+        .filter((t: { name: string; slug: string }) => t.name)
+    : null;
+
+const datePublished = post.date_published ? new Date(post.date_published).toLocaleDateString('vi-VN', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+}) : null;
+
 const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
 const postUrl = `${siteURL}/blog/${slug}`;
 const ogImage = post.image ? getDirectusAssetURL(post.image as string) : null;
@@ -91,5 +240,12 @@ if (Astro.cache && Astro.cache.enabled && !import.meta.env.DEV) {
     authorName={authorName}
     postUrl={postUrl}
     slug={slug}
+    tocItems={tocItems}
+    enrichedContent={enrichedContent}
+    categoryName={categoryName}
+    categoryColor={categoryColor}
+    categorySlug={categorySlug}
+    datePublished={datePublished}
+    tags={tags}
   />
 </Layout>

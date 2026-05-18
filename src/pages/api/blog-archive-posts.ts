@@ -15,6 +15,7 @@ export const GET: APIRoute = async ({ url }) => {
     const authorId = url.searchParams.get('author_id') ?? '';
     const sortMode = url.searchParams.get('sort') ?? 'newest';
     const filterMonth = url.searchParams.get('month') ?? ''; // format: "2025-07"
+    const tag = url.searchParams.get('tag') ?? '';
     const categoryIds = (url.searchParams.get('category_ids') ?? '')
       .split(',')
       .map((value) => value.trim())
@@ -44,37 +45,71 @@ export const GET: APIRoute = async ({ url }) => {
       }
     }
 
+    // Tag filter: dùng Directus nested M2M deep filter thay vì client-side
+    if (tag) {
+      andConditions.push({
+        tags: {
+          tags_id: { slug: { _eq: tag } },
+        },
+      });
+    }
+
     const filter = andConditions.length > 1 ? { _and: andConditions } : andConditions[0];
     const sortDir = sortMode === 'oldest' ? 'date_published' : '-date_published';
 
-    const [posts, countResponse] = await Promise.all([
-      client.request(
-        readItems('posts', {
-          filter: filter as any,
-          sort: [sortDir] as any[],
-          limit,
-          page,
-          fields: [
-            'id',
-            'title',
-            'summary',
-            'content',
-            'Slug',
-            'image',
-            'date_published',
-            'tags',
-            { category: ['id', 'title', 'slug'] },
-            { author: ['id', 'name', 'image'] },
-          ] as any[],
-        }),
-      ),
+    // Directus aggregate() không hỗ trợ deep nested filter (M2M).
+    // → Khi có tag, fetch toàn bộ rồi đếm + paginate client-side.
+    const hasTagFilter = !!tag;
+
+    const readParams: any = {
+      filter: filter as any,
+      sort: [sortDir] as any[],
+      limit: hasTagFilter ? -1 : limit,
+      page: hasTagFilter ? 1 : page,
+      fields: [
+        'id',
+        'title',
+        'summary',
+        'content',
+        'Slug',
+        'image',
+        'date_published',
+        { tags: [{ tags_id: ['name', 'slug'] }] },
+        { category: ['id', 'title', 'slug'] },
+        { author: ['id', 'name', 'image'] },
+      ],
+    };
+
+    // aggregate dùng filter KHÔNG có nested tag filter để tránh lỗi
+    const aggregateFilter = hasTagFilter
+      ? andConditions.filter((c: any) => !c.tags).length > 1
+        ? { _and: andConditions.filter((c: any) => !c.tags) }
+        : andConditions.filter((c: any) => !c.tags)[0]
+      : filter;
+
+    const [rawPosts, countResponse] = await Promise.all([
+      client.request(readItems('posts', readParams)),
       client.request(
         aggregate('posts', {
           aggregate: { count: '*' },
-          filter: filter as any,
+          filter: aggregateFilter as any,
         }),
       ),
     ]);
+
+    let posts: any[] = rawPosts as any[];
+
+    if (hasTagFilter) {
+      const totalCount = posts.length;
+      const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+      const offset = (page - 1) * limit;
+      posts = posts.slice(offset, offset + limit);
+
+      return new Response(JSON.stringify({ posts, totalCount, totalPages }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     const totalCount = Number((countResponse as any)[0]?.count ?? 0);
     const totalPages = Math.max(1, Math.ceil(totalCount / limit));
