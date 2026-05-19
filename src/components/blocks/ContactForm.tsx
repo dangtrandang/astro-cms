@@ -99,13 +99,8 @@ export default function ContactForm({ data }: ContactFormBlockProps) {
                     {/* Right Column — Single floating image (40%) */}
                     <div className="lg:w-2/5 flex items-center justify-center">
                         {firstImage && (
-                            <div
-                                className="w-full max-w-md aspect-[4/5] rounded-xl overflow-hidden animate-float"
-                                style={{
-                                    boxShadow: '0 20px 50px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.08)',
-                                }}
-                            >
-                                <DirectusImage uuid={firstImage} />
+                            <div className="w-full max-w-md rounded-xl animate-float">
+                                <DirectusImage uuid={firstImage} className="w-full h-auto rounded-xl" />
                             </div>
                         )}
                     </div>
