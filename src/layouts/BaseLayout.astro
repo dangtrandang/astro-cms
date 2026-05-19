@@ -35,8 +35,123 @@ const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTit
     )}
 
     <ClientRouter />
+
+    <style is:inline>
+      /* ── Top Progress Bar (Gradient Pill) ── */
+      #top-progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 4px;
+        width: 0;
+        border-radius: 0 100px 100px 0;
+        background: linear-gradient(to right, #c0395b 0%, #e8676b 40%, #f1907c 75%, #f5b7a8 100%) !important;
+        box-shadow:
+          0 0 6px rgba(232, 103, 107, 0.45),
+          0 0 14px rgba(192, 57, 91, 0.25),
+          0 0 22px rgba(192, 57, 91, 0.12);
+        z-index: 999999;
+        pointer-events: none;
+        opacity: 0;
+        transition: width 0.3s ease, opacity 0.25s ease;
+      }
+      #top-progress-bar.active {
+        opacity: 1;
+      }
+    </style>
+
+    <script is:inline>
+      // ── Top Progress Bar (trickle algorithm) ──
+      (function () {
+        var timer = null;
+        var w = 0;
+        var TRICKLE_RATE = 0.08;
+        var TRICKLE_INTERVAL = 400;
+        var DONE_HOLD = 200;
+        var FADE_RESET = 300;
+
+        // Lookup bar mỗi lần gọi vì script nằm trong <head>, body chưa parse
+        function getBar() {
+          return document.getElementById('top-progress-bar');
+        }
+
+        function clear() {
+          if (timer) { clearTimeout(timer); timer = null; }
+        }
+
+        function trickle() {
+          var bar = getBar();
+          if (!bar) return;
+          if (w < 85) {
+            w += (100 - w) * TRICKLE_RATE;
+            bar.style.width = w + '%';
+            timer = setTimeout(trickle, TRICKLE_INTERVAL);
+          }
+        }
+
+        function start() {
+          clear();
+          w = 0;
+          var bar = getBar();
+          if (!bar) return;
+          bar.classList.add('active');
+          bar.style.width = '0';
+          bar.offsetHeight; // force reflow
+          trickle();
+        }
+
+        function done() {
+          clear();
+          var bar = getBar();
+          if (!bar) return;
+          bar.style.width = '100%';
+          setTimeout(function () {
+            var b = getBar();
+            if (!b) return;
+            b.classList.remove('active');
+            setTimeout(function () {
+              var b2 = getBar();
+              if (b2) b2.style.width = '0';
+            }, FADE_RESET);
+          }, DONE_HOLD);
+        }
+
+        // ── SPA: attach listener ngay, không cần DOM sẵn sàng ──
+        document.addEventListener('astro:before-preparation', start);
+        document.addEventListener('astro:page-load', done);
+
+        // ── Cold load / SPA swap: đợi DOM sẵn sàng ──
+        if (!window._barColdStarted) {
+          // Lần đầu tiên (cold load): đợi DOM rồi start
+          window._barColdStarted = true;
+          function coldStart() {
+            if (document.readyState === 'complete') return; // cache load
+            start();
+            if (document.readyState === 'complete') { done(); }
+            else { window.addEventListener('load', done); }
+          }
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', coldStart);
+          } else {
+            coldStart();
+          }
+        } else {
+          // SPA swap: page mới có thể đã load xong, gọi done() ngay
+          // Nếu chưa load xong, astro:page-load sẽ gọi done()
+          if (document.readyState === 'complete') {
+            // Page đã load xong — nhưng astro:before-preparation đã fire
+            // ở page cũ. Page mới không cần start, chỉ cần done.
+            done();
+          }
+        }
+      })();
+    </script>
+
   </head>
   <body class="antialiased font-sans flex flex-col min-h-screen bg-[#FCF5EE] text-gray-800">
+    <!-- Top Progress Bar: ngay sau mở body, trước mọi nội dung -->
+    <div id="top-progress-bar"></div>
+
     <VisualEditingLayout
       headerNavigation={headerNavigation}
       footerNavigation={footerNavigation}
@@ -48,5 +163,6 @@ const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTit
         <slot />
       </main>
     </VisualEditingLayout>
+
   </body>
 </html>

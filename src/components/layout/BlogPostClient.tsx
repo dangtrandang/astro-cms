@@ -370,7 +370,7 @@ export default function BlogPostClient({
             {/* Author box */}
             {author && (
               <div
-                className="mb-12 rounded-xl border border-[#F2D1D1] bg-[#f8e7e3] p-5"
+                className="mb-[4.2rem] rounded-xl border border-[#F2D1D1] bg-[#f8e7e3] p-5"
                 data-directus={setAttr({
                   collection: 'posts',
                   item: post.id,
