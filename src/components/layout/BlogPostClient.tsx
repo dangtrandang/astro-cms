@@ -259,8 +259,8 @@ export default function BlogPostClient({
                 )}
 
                 {datePublished && (
-                  <div className="hidden sm:flex sm:flex-col sm:gap-1">
-                    <p className="text-[11px] font-semibold text-white/60 sm:text-xs">Ngày đăng</p>
+                  <div className="flex flex-col gap-0.5 sm:gap-1">
+                    <p className="text-[10px] font-semibold text-white/60 sm:text-xs">Ngày đăng</p>
                     <time dateTime={post.date_published ?? undefined} className="text-xs font-semibold text-white sm:text-sm">
                       {datePublished}
                     </time>
@@ -269,7 +269,7 @@ export default function BlogPostClient({
 
                 {tags && tags.length > 0 && (
                   <div className="flex items-center gap-2 sm:flex-col sm:items-start sm:gap-1">
-                    <p className="hidden text-[11px] font-semibold text-white/60 sm:block sm:text-xs">Từ khoá</p>
+                    <p className="text-[10px] font-semibold text-white/60 sm:text-xs">Từ khoá</p>
                     <ul className="flex flex-wrap gap-1.5 sm:gap-2">
                       {tags.slice(0, 3).map((tag) => (
                         <li key={tag.slug}>
@@ -293,6 +293,36 @@ export default function BlogPostClient({
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,_2fr)_400px] gap-12 lg:items-start">
           <main className="text-justify">
+            {/* ToC in content area */}
+            {tocItems && tocItems.length > 0 && (
+              <nav aria-label="Mục lục bài viết" className="mb-10 p-5 rounded-xl bg-[#F2D1D1]/40">
+                <h3 className="font-serif text-lg font-bold text-[#850E35] mb-3">
+                  Nội dung bài viết
+                </h3>
+                <ul className="space-y-0.5">
+                  {tocItems.map((item) => {
+                    const isActive = activeId === item.id;
+                    return (
+                      <li key={item.id} className={item.level === 3 ? 'pl-4' : ''}>
+                        <a
+                          href={`#${item.id}`}
+                          onClick={(e) => handleTocClick(e, item.id)}
+                          className={cn(
+                            'block py-1.5 text-sm transition-colors duration-200 border-l-2',
+                            isActive
+                              ? 'text-[#850E35] font-medium border-[#850E35]'
+                              : 'text-gray-600 hover:text-[#850E35] border-transparent',
+                          )}
+                        >
+                          {item.text}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+            )}
+
             <BaseText
               content={displayContent}
               data-directus={setAttr({
@@ -340,7 +370,7 @@ export default function BlogPostClient({
             {/* Author box */}
             {author && (
               <div
-                className="mb-5 rounded-xl border border-[#F2D1D1] bg-[#f8e7e3] p-5"
+                className="mb-12 rounded-xl border border-[#F2D1D1] bg-[#f8e7e3] p-5"
                 data-directus={setAttr({
                   collection: 'posts',
                   item: post.id,
@@ -377,8 +407,8 @@ export default function BlogPostClient({
               </div>
             )}
 
-            {/* ToC + Share + Related Posts */}
-            <div className="space-y-5">
+            {/* ToC + Related Posts */}
+            <div className="space-y-8">
               {/* Table of Contents */}
               {tocItems && tocItems.length > 0 && (
                 <nav ref={tocNavRef} aria-label="Mục lục bài viết">
@@ -409,18 +439,9 @@ export default function BlogPostClient({
                 </nav>
               )}
 
-              <Separator className="border-[#F2D1D1]" />
-
-              {/* Share */}
-              <div className="flex justify-start">
-                <ShareDialog postUrl={postUrl} postTitle={post.title} />
-              </div>
-
-              <Separator className="border-[#F2D1D1]" />
-
               {/* Related Posts */}
               <div>
-                <h3 className="font-bold font-serif text-xl text-[#850E35] mb-3">Bài viết liên quan</h3>
+                <h3 className="font-serif text-lg font-bold text-[#850E35] mb-3">Bài viết liên quan</h3>
                 <div className="space-y-3">
                   {relatedPosts.map((relatedPost) => {
                     const postLink = `/blog/${(relatedPost as any).Slug || (relatedPost as any).slug}`;
@@ -440,7 +461,7 @@ export default function BlogPostClient({
                         <div className="flex-1 min-w-0">
                           <a
                             href={postLink}
-                            className="font-serif text-base font-normal text-gray-800 transition-colors hover:text-[#850E35] line-clamp-2"
+                            className="text-base font-normal text-gray-800 transition-colors hover:text-[#850E35] line-clamp-2 [font-family:inherit]"
                             title={relatedPost.title ?? undefined}
                           >
                             {relatedPost.title && relatedPost.title.length > 55
@@ -461,24 +482,21 @@ export default function BlogPostClient({
               </div>
 
               {tags && tags.length > 0 && (
-                <>
-                  <Separator className="border-[#F2D1D1]" />
-                  <div>
-                    <h3 className="mb-3 font-serif text-xl font-bold text-[#850E35]">Từ khoá</h3>
-                    <ul className="flex flex-wrap gap-2">
-                      {tags.map((tag) => (
-                        <li key={tag.slug}>
-                          <a
-                            href={`/blog?tag=${encodeURIComponent(tag.slug)}`}
-                            className="inline-flex rounded-full bg-[#f8e7e3] px-3 py-1 text-xs font-medium text-[#850E35] transition-colors hover:bg-[#F2D1D1]"
-                          >
-                            {tag.name}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </>
+                <div>
+                  <h3 className="mb-3 font-serif text-lg font-bold text-[#850E35]">Từ khoá</h3>
+                  <ul className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <li key={tag.slug}>
+                        <a
+                          href={`/blog?tag=${encodeURIComponent(tag.slug)}`}
+                          className="inline-flex rounded-full bg-[#f8e7e3] px-3 py-1 text-xs font-medium text-[#850E35] transition-colors hover:bg-[#F2D1D1]"
+                        >
+                          {tag.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           </aside>
