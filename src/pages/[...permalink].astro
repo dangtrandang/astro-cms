@@ -59,17 +59,17 @@ const metadata = page
 
 const hideGlobalChrome = false;
 const isHomepage = resolvedPermalink === '/';
+
+if (!page) {
+  return Astro.redirect('/404');
+}
 ---
 
 <Layout metadata={metadata} hideGlobalChrome={hideGlobalChrome} headerVariant={isHomepage ? 'overlay' : 'default'}>
-  {page ? (
-    <PageClient
-      client:load
-      permalink={resolvedPermalink}
-      initialSections={blocks}
-      pageId={page.id}
-    />
-  ) : (
-    <div class="text-center text-xl mt-20">404 - Page Not Found</div>
-  )}
+  <PageClient
+    client:load
+    permalink={resolvedPermalink}
+    initialSections={blocks}
+    pageId={page.id}
+  />
 </Layout>

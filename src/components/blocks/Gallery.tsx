@@ -201,17 +201,24 @@ const Gallery = ({ data }: GalleryProps) => {
 
                     <div className="absolute inset-x-4 bottom-4 md:inset-x-8 md:bottom-8">
                       <div className="flex items-center gap-2 text-[#F2D1D1] md:gap-4">
-                        <button
-                          type="button"
-                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#F2D1D1] bg-black/14 backdrop-blur-[2px] transition hover:bg-black/24 md:h-11 md:w-11"
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#F2D1D1] bg-black/14 backdrop-blur-[2px] transition hover:bg-black/24 md:h-11 md:w-11"
                           onClick={(event) => {
                             event.stopPropagation();
                             openLightbox(index);
                           }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              openLightbox(index);
+                            }
+                          }}
                           aria-label={`Xem full anh ${index + 1}`}
                         >
                           <Eye className="size-3.5 md:size-4" />
-                        </button>
+                        </span>
                         <div className="min-w-0 border-l border-[#F2D1D1] pl-3 md:pl-4">
                           {item.title && (
                             <p className="font-heading text-sm font-medium leading-tight text-[#F2D1D1] md:text-2xl">

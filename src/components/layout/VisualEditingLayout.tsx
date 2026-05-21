@@ -103,6 +103,10 @@ export default function VisualEditingLayout({
           items: (layoutData.footerNavigation.items || []).map((item: any) => ({
             ...item,
             page: item.page ? { permalink: item.page.permalink || null } : undefined,
+            children: (item.children || []).map((child: any) => ({
+              ...child,
+              page: child.page ? { permalink: child.page.permalink || null } : undefined,
+            })),
           })),
         }}
         globals={{

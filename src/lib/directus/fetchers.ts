@@ -101,6 +101,7 @@ const pageFields = [
               gallery_items: ['id', 'sort', 'size', { directus_files_id: ['id', 'title', 'description', 'width', 'height'] }],
             },
           ] as any,
+          block_richtext: ['id', 'title', 'headline', 'content', 'alignment'] as any,
           block_quote: ['id', 'title', 'subtitle', 'content'] as any,
           block_who_i_am: [
             'id',
@@ -292,7 +293,7 @@ export const fetchSiteData = async () => {
   }
 
   try {
-    const [globals, headerNavigation, footerNavigation] = await Promise.all([
+    const [globals, headerNavigation, footerItems] = await Promise.all([
       directus.request(
         readSingleton('globals', {
           fields: ['id', 'title', 'description', 'social_links', 'logo_on_light_bg', 'logo_on_dark_bg'] as any,
@@ -319,25 +320,36 @@ export const fetchSiteData = async () => {
         }),
       ),
       directus.request(
-        readItem('navigation', 'footer', {
-          fields: [
-            'id',
-            'title',
-            {
-              items: [
-                'id',
-                'title',
-                'url',
-                {
-                  page: ['permalink'],
-                  children: ['id', 'title', 'url', { page: ['permalink'] }],
-                },
-              ],
-            },
-          ],
+        readItems('navigation_items', {
+          fields: ['id', 'title', 'url', 'sort', 'parent', { page: ['permalink'] }],
+          filter: { navigation: { _eq: 'footer' } },
+          sort: ['sort'],
+          limit: -1,
         }),
       ),
     ]);
+
+    // Build parent-child tree for footer navigation
+    const footerNavItems = footerItems as any[];
+    const getParentId = (item: any) => (item.parent === null ? null : typeof item.parent === 'string' ? item.parent : item.parent?.id ?? null);
+    const parents = footerNavItems.filter((item) => getParentId(item) === null);
+    const children = footerNavItems.filter((item) => getParentId(item) !== null);
+
+    const footerNavigation = {
+      id: 'footer',
+      title: 'Footer Navigation',
+      items: parents.map((parent) => ({
+        ...parent,
+        children: children
+          .filter((child) => getParentId(child) === parent.id)
+          .map((child) => ({
+            id: child.id,
+            title: child.title,
+            url: child.url,
+            page: child.page,
+          })),
+      })),
+    };
 
     return { globals, headerNavigation, footerNavigation };
   } catch (error) {

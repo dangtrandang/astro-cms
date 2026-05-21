@@ -191,6 +191,7 @@ const config: Config = {
     'grid-cols-1',
     'sm:grid-cols-2',
     'lg:grid-cols-3',
+    'lg:grid-cols-4',
     'hover:bg-[#f5e1e0]',
     'hover:bg-[#850e35]',
     'active:bg-[#850e35]',
@@ -213,6 +214,15 @@ const config: Config = {
     'ring-white',
     'rounded-[1.75rem]',
     'min-h-[200px]',
+    'bg-[#FCF5EE]/10',
+    'hover:bg-[#C6DCE4]/20',
+    'border-[#FCF5EE]/20',
+    'text-[#FCF5EE]/80',
+    'text-[#FCF5EE]/70',
+    'text-[#FCF5EE]/50',
+    'focus:ring-[#C6DCE4]',
+    'hover:text-[#C6DCE4]',
+    'lg:grid-cols-[35%_20%_20%_25%]',
   ],
 };
 

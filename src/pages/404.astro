@@ -1,21 +1,43 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-
-import { buttonVariants } from '@/components/ui/button';
 ---
 
 <BaseLayout
-  title="404 - Not Found"
-  description="404 Error — this page was not found"
+  title="404 - Không tìm thấy"
+  description="Trang bạn tìm kiếm không tồn tại"
 >
-  <div class="mt-32 flex flex-col items-center justify-center px-8">
-    <p class="text-muted-foreground text-sm">404</p>
-    <h1 class="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl font-heading">
-      Page not found
+  <div class="mt-28 mb-20 flex flex-col items-center justify-center px-6 text-center">
+    <!-- Số 404 với font accent -->
+    <span class="font-accent text-[clamp(6rem,15vw,10rem)] leading-none text-[#850E35] select-none"
+      style="opacity:0.25;">
+      404
+    </span>
+
+    <!-- Tiêu đề -->
+    <h1 class="font-heading text-[clamp(1.75rem,4vw,2.5rem)] font-normal text-[#850E35] -mt-6 mb-4">
+      Trang không tìm thấy
     </h1>
-    <p class="mb-4 leading-7 [&:not(:first-child)]:mt-6">
-      Sorry, we couldn't find the page you're looking for.
+
+    <!-- Mô tả phụ: font accent highlight một từ -->
+    <p class="max-w-md mb-10 font-body text-base leading-relaxed text-gray-700">
+      Có vẻ như trang bạn đang tìm đã bị ẩn vào một cõi huyền học nào đó.
+      <br />
+      Hãy để chúng tôi dẫn bạn quay về.
     </p>
-    <a href="/" rel="noreferrer" class={buttonVariants()}> Go back home</a>
+
+    <!-- Nút quay về -->
+    <a
+      href="/"
+      rel="noreferrer"
+      class="inline-flex items-center justify-center rounded-xl px-8 py-3.5
+             text-base font-semibold tracking-wide
+             bg-[#850E35] text-[#FCF5EE]
+             transition-all duration-300 ease-out
+             hover:shadow-[0_0_28px_rgba(133,14,53,0.35)]
+             hover:scale-[1.03]
+             active:scale-[0.98]"
+    >
+      Quay về trang chủ
+    </a>
   </div>
 </BaseLayout>
