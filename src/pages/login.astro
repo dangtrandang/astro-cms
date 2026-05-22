@@ -51,7 +51,7 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'session' }),
+        body: JSON.stringify({ mode: 'json' }),
       });
 
       if (!refreshRes.ok) {
@@ -63,7 +63,7 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
       const refreshJson = await refreshRes.json();
       const accessToken = refreshJson?.data?.access_token;
       if (!accessToken) {
-        console.error('[login] No access token in refresh response');
+        console.error('[login] No access token in refresh response:', refreshJson);
 
         return;
       }
