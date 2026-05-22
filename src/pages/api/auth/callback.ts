@@ -4,7 +4,7 @@ import { createUserClient } from '@/lib/directus/directus';
 import type { Schema } from '@/types/directus-schema';
 
 export const GET: APIRoute = async ({ url, redirect }) => {
-  const accessToken = url.searchParams.get('access_token');
+  const accessToken = url.searchParams.get('access_token') || url.searchParams.get('token');
 
   if (!accessToken) {
     return redirect('/login?error=missing_token');
