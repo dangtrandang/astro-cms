@@ -47,6 +47,13 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
     try {
       await new Promise((r) => setTimeout(r, 300));
 
+      await fetch(`${DIRECTUS_URL}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'session' }),
+      });
+
       const refreshRes = await fetch(`${DIRECTUS_URL}/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
@@ -54,19 +61,11 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
         body: JSON.stringify({ mode: 'json' }),
       });
 
-      if (!refreshRes.ok) {
-        console.error('[login] Refresh failed:', refreshRes.status, await refreshRes.text().catch(() => null));
-
-        return;
-      }
+      if (!refreshRes.ok) return;
 
       const refreshJson = await refreshRes.json();
       const accessToken = refreshJson?.data?.access_token;
-      if (!accessToken) {
-        console.error('[login] No access token in refresh response:', refreshJson);
-
-        return;
-      }
+      if (!accessToken) return;
 
       if (title) title.textContent = 'Đang xử lý đăng nhập...';
       if (msg) msg.textContent = 'Đang chuyển sang bước xác thực nội bộ';
