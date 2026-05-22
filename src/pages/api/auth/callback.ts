@@ -4,13 +4,29 @@ import { createUserClient } from '@/lib/directus/directus';
 import type { Schema } from '@/types/directus-schema';
 
 export const GET: APIRoute = async ({ url, redirect }) => {
-  const accessToken = url.searchParams.get('access_token') || url.searchParams.get('token');
-
-  if (!accessToken) {
-    return redirect('/login?error=missing_token');
-  }
+  const directusUrl = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 
   try {
+    // Gọi /auth/refresh với mode=session để đổi session cookie lấy access_token.
+    // Directus SSO không truyền token qua URL — nó set session cookie
+    // cho domain .hongngochuyenhoc.com, và client phải gọi refresh để lấy token.
+    const refreshRes = await fetch(`${directusUrl}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'session' }),
+    });
+
+    if (!refreshRes.ok) {
+      return redirect('/login?error=missing_token');
+    }
+
+    const refreshData = (await refreshRes.json()) as any;
+    const accessToken = refreshData?.data?.access_token;
+
+    if (!accessToken) {
+      return redirect('/login?error=missing_token');
+    }
+
     // Dùng Admin Token (DIRECTUS_SERVER_TOKEN) để đọc/ghi contacts —
     // user mới (role Customer) chưa có quyền create trên collection contacts
     const adminToken = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
@@ -60,7 +76,7 @@ export const GET: APIRoute = async ({ url, redirect }) => {
       ? '/tai-khoan'
       : '/tai-khoan/cap-nhat-thong-tin';
 
-    const cookieValue = `auth_token=${accessToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800`;
+    const cookieValue = `auth_token=${accessToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=604800`;
 
     return new Response(null, {
       status: 302,
