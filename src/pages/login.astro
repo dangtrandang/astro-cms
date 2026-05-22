@@ -40,7 +40,26 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
   // Cookie directus_session_token là HttpOnly nên không đọc được qua document.cookie,
   // nhưng fetch với credentials: "include" sẽ tự động gửi kèm nếu có.
   (async () => {
+    const title = document.getElementById('login-title');
+    const msg = document.getElementById('login-msg');
+    const err = document.getElementById('login-err');
+    const btn = document.getElementById('login-btn') as HTMLAnchorElement | null;
+
+    const showError = (message: string, detail?: unknown) => {
+      if (msg) msg.textContent = 'Đăng nhập Google chưa hoàn tất';
+      if (err) {
+        err.textContent = message;
+        err.classList.remove('hidden');
+      }
+      if (btn) btn.style.display = '';
+      console.error('[login] Google SSO failed:', message, detail);
+    };
+
     try {
+      if (btn) btn.style.display = 'none';
+      if (title) title.textContent = 'Đang kiểm tra phiên đăng nhập...';
+      if (msg) msg.textContent = 'Vui lòng chờ trong giây lát';
+
       const refreshRes = await fetch(`${directusUrl}/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
@@ -48,20 +67,22 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
         body: JSON.stringify({ mode: 'session' }),
       });
 
-      // Không có session cookie → giữ nguyên trang login, không làm gì
-      if (!refreshRes.ok) return;
+      if (!refreshRes.ok) {
+        showError(`Refresh session thất bại (${refreshRes.status})`, await refreshRes.text().catch(() => null));
 
-      const { data } = await refreshRes.json();
-      const accessToken = data?.access_token;
-      if (!accessToken) return;
+        return;
+      }
 
-      // Có token → hiển thị trạng thái và gửi về server
-      const title = document.getElementById('login-title');
-      const msg = document.getElementById('login-msg');
-      const btn = document.getElementById('login-btn');
+      const refreshJson = await refreshRes.json();
+      const accessToken = refreshJson?.data?.access_token;
+      if (!accessToken) {
+        showError('Directus không trả về access token', refreshJson);
+
+        return;
+      }
+
       if (title) title.textContent = 'Đang xử lý đăng nhập...';
-      if (msg) msg.textContent = 'Vui lòng chờ trong giây lát';
-      if (btn) btn.style.display = 'none';
+      if (msg) msg.textContent = 'Đang chuyển sang bước xác thực nội bộ';
 
       const form = document.createElement('form');
       form.method = 'POST';
@@ -73,8 +94,8 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
       form.appendChild(input);
       document.body.appendChild(form);
       form.submit();
-    } catch {
-      // Lỗi mạng → giữ nguyên trang login
+    } catch (error) {
+      showError('Không thể kết nối tới Directus để hoàn tất đăng nhập', error);
     }
   })();
 </script>
