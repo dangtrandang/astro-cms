@@ -2,18 +2,21 @@
 import Layout from '@/layouts/BaseLayout.astro';
 
 const directusUrl = import.meta.env.PUBLIC_DIRECTUS_URL as string;
+const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
 ---
 
 <Layout metadata={{ title: 'Đăng nhập', description: 'Đăng nhập vào tài khoản Hồng Ngọc Huyền Học' }}>
   <div class="min-h-[70vh] flex items-center justify-center px-4 py-16">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-[#f5e1e0]">
       <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold text-[#1f2a1d] mb-2">Đăng nhập</h1>
-        <p class="text-sm text-[#6b7a65]">Chào mừng bạn quay lại Hồng Ngọc Huyền Học</p>
+        <h1 id="login-title" class="text-2xl font-bold text-[#1f2a1d] mb-2">Đăng nhập</h1>
+        <p id="login-msg" class="text-sm text-[#6b7a65]">Chào mừng bạn quay lại Hồng Ngọc Huyền Học</p>
+        <div id="login-err" class="text-sm text-red-500 mt-2 hidden"></div>
       </div>
 
       <a
-        href={`${directusUrl}/auth/login/google?redirect=${encodeURIComponent(`${import.meta.env.PUBLIC_SITE_URL}/api/auth/callback`)}`}
+        id="login-btn"
+        href={`${directusUrl}/auth/login/google?redirect=${encodeURIComponent(`${siteUrl}/login`)}`}
         class="flex items-center justify-center gap-3 w-full bg-white border border-gray-300 hover:border-gray-400 hover:shadow-sm text-gray-700 font-medium py-3 px-4 rounded-xl transition-all"
       >
         <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -31,3 +34,64 @@ const directusUrl = import.meta.env.PUBLIC_DIRECTUS_URL as string;
     </div>
   </div>
 </Layout>
+
+<script>
+  // Khi có cookie directus_session_token (sau OAuth redirect), tự động gọi /auth/refresh
+  (async () => {
+    const hasSessionCookie = document.cookie.includes('directus_session_token=');
+    if (!hasSessionCookie) return;
+
+    const title = document.getElementById('login-title');
+    const msg = document.getElementById('login-msg');
+    const err = document.getElementById('login-err');
+    const btn = document.getElementById('login-btn');
+    if (title) title.textContent = 'Đang xử lý đăng nhập...';
+    if (msg) msg.textContent = 'Vui lòng chờ trong giây lát';
+    if (btn) btn.style.display = 'none';
+
+    try {
+      const refreshRes = await fetch(`${directusUrl}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'session' }),
+      });
+
+      if (!refreshRes.ok) {
+        if (err) { err.classList.remove('hidden'); err.textContent = 'Đăng nhập thất bại, vui lòng thử lại'; }
+        if (title) title.textContent = 'Đăng nhập';
+        if (msg) msg.textContent = 'Chào mừng bạn quay lại Hồng Ngọc Huyền Học';
+        if (btn) btn.style.display = '';
+        return;
+      }
+
+      const { data } = await refreshRes.json();
+      const accessToken = data?.access_token;
+
+      if (!accessToken) {
+        if (err) { err.classList.remove('hidden'); err.textContent = 'Không nhận được token, vui lòng thử lại'; }
+        if (title) title.textContent = 'Đăng nhập';
+        if (msg) msg.textContent = 'Chào mừng bạn quay lại Hồng Ngọc Huyền Học';
+        if (btn) btn.style.display = '';
+        return;
+      }
+
+      // Gửi token về server để xử lý
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `${siteUrl}/api/auth/callback`;
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'token';
+      input.value = accessToken;
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+    } catch {
+      if (err) { err.classList.remove('hidden'); err.textContent = 'Lỗi kết nối, vui lòng thử lại'; }
+      if (title) title.textContent = 'Đăng nhập';
+      if (msg) msg.textContent = 'Chào mừng bạn quay lại Hồng Ngọc Huyền Học';
+      if (btn) btn.style.display = '';
+    }
+  })();
+</script>
