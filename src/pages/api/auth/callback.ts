@@ -3,7 +3,7 @@ import { createDirectus, rest, staticToken, readItems, createItem } from '@direc
 import { createUserClient } from '@/lib/directus/directus';
 import type { Schema } from '@/types/directus-schema';
 
-export const GET: APIRoute = async ({ url, cookies, redirect }) => {
+export const GET: APIRoute = async ({ url, redirect }) => {
   const accessToken = url.searchParams.get('access_token');
 
   if (!accessToken) {
@@ -53,20 +53,22 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
       )) as any;
     }
 
-    // Set HTTP-Only cookie with JWT
-    cookies.set('auth_token', accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
+    // Set HTTP-Only cookie và redirect trong cùng 1 response
+    // Dùng Response thay vì cookies.set() + redirect() để đảm bảo
+    // cookie được set trước khi browser follow redirect
+    const destination = contact?.phone
+      ? '/tai-khoan'
+      : '/tai-khoan/cap-nhat-thong-tin';
 
-    // Redirect to onboarding if phone missing, otherwise dashboard
-    if (!contact.phone) {
-      return redirect('/tai-khoan/cap-nhat-thong-tin');
-    }
-    return redirect('/tai-khoan');
+    const cookieValue = `auth_token=${accessToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800`;
+
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: destination,
+        'Set-Cookie': cookieValue,
+      },
+    });
   } catch (err) {
     console.error('Auth callback error:', err);
     return redirect('/login?error=auth_failed');
