@@ -36,19 +36,10 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
 </Layout>
 
 <script>
-  // Khi có cookie directus_session_token (sau OAuth redirect), tự động gọi /auth/refresh
+  // Luôn thử gọi /auth/refresh khi vào trang login.
+  // Cookie directus_session_token là HttpOnly nên không đọc được qua document.cookie,
+  // nhưng fetch với credentials: "include" sẽ tự động gửi kèm nếu có.
   (async () => {
-    const hasSessionCookie = document.cookie.includes('directus_session_token=');
-    if (!hasSessionCookie) return;
-
-    const title = document.getElementById('login-title');
-    const msg = document.getElementById('login-msg');
-    const err = document.getElementById('login-err');
-    const btn = document.getElementById('login-btn');
-    if (title) title.textContent = 'Đang xử lý đăng nhập...';
-    if (msg) msg.textContent = 'Vui lòng chờ trong giây lát';
-    if (btn) btn.style.display = 'none';
-
     try {
       const refreshRes = await fetch(`${directusUrl}/auth/refresh`, {
         method: 'POST',
@@ -57,26 +48,21 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
         body: JSON.stringify({ mode: 'session' }),
       });
 
-      if (!refreshRes.ok) {
-        if (err) { err.classList.remove('hidden'); err.textContent = 'Đăng nhập thất bại, vui lòng thử lại'; }
-        if (title) title.textContent = 'Đăng nhập';
-        if (msg) msg.textContent = 'Chào mừng bạn quay lại Hồng Ngọc Huyền Học';
-        if (btn) btn.style.display = '';
-        return;
-      }
+      // Không có session cookie → giữ nguyên trang login, không làm gì
+      if (!refreshRes.ok) return;
 
       const { data } = await refreshRes.json();
       const accessToken = data?.access_token;
+      if (!accessToken) return;
 
-      if (!accessToken) {
-        if (err) { err.classList.remove('hidden'); err.textContent = 'Không nhận được token, vui lòng thử lại'; }
-        if (title) title.textContent = 'Đăng nhập';
-        if (msg) msg.textContent = 'Chào mừng bạn quay lại Hồng Ngọc Huyền Học';
-        if (btn) btn.style.display = '';
-        return;
-      }
+      // Có token → hiển thị trạng thái và gửi về server
+      const title = document.getElementById('login-title');
+      const msg = document.getElementById('login-msg');
+      const btn = document.getElementById('login-btn');
+      if (title) title.textContent = 'Đang xử lý đăng nhập...';
+      if (msg) msg.textContent = 'Vui lòng chờ trong giây lát';
+      if (btn) btn.style.display = 'none';
 
-      // Gửi token về server để xử lý
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = `${siteUrl}/api/auth/callback`;
@@ -88,10 +74,7 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
       document.body.appendChild(form);
       form.submit();
     } catch {
-      if (err) { err.classList.remove('hidden'); err.textContent = 'Lỗi kết nối, vui lòng thử lại'; }
-      if (title) title.textContent = 'Đăng nhập';
-      if (msg) msg.textContent = 'Chào mừng bạn quay lại Hồng Ngọc Huyền Học';
-      if (btn) btn.style.display = '';
+      // Lỗi mạng → giữ nguyên trang login
     }
   })();
 </script>
