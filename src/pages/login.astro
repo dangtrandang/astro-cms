@@ -6,7 +6,7 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
 ---
 
 <Layout metadata={{ title: 'Đăng nhập', description: 'Đăng nhập vào tài khoản Hồng Ngọc Huyền Học' }}>
-  <div class="min-h-[70vh] flex items-center justify-center px-4 py-16">
+  <div id="login-page" data-directus-url={directusUrl} data-site-url={siteUrl} class="min-h-[70vh] flex items-center justify-center px-4 py-16">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-[#f5e1e0]">
       <div class="text-center mb-8">
         <h1 id="login-title" class="text-2xl font-bold text-[#1f2a1d] mb-2">Đăng nhập</h1>
@@ -37,13 +37,15 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
 
 <script>
   (async () => {
+    const page = document.getElementById('login-page');
+    const DIRECTUS_URL = page?.dataset.directusUrl || 'https://cms.hongngochuyenhoc.com';
+    const SITE_URL = page?.dataset.siteUrl || 'https://dev.hongngochuyenhoc.com';
     const title = document.getElementById('login-title');
     const msg = document.getElementById('login-msg');
-    const err = document.getElementById('login-err');
     const btn = document.getElementById('login-btn') as HTMLAnchorElement | null;
 
     try {
-      const refreshRes = await fetch(`${directusUrl}/auth/refresh`, {
+      const refreshRes = await fetch(`${DIRECTUS_URL}/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -62,7 +64,7 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
 
       const form = document.createElement('form');
       form.method = 'POST';
-      form.action = `${siteUrl}/api/auth/callback`;
+      form.action = `${SITE_URL}/api/auth/callback`;
       const input = document.createElement('input');
       input.type = 'hidden';
       input.name = 'token';
