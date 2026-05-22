@@ -16,7 +16,7 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
 
       <a
         id="login-btn"
-        href={`${directusUrl}/auth/login/google?redirect=${encodeURIComponent(`${siteUrl}/api/auth/callback`)}`}
+        href={`${directusUrl}/auth/login/google?redirect=${encodeURIComponent(`${siteUrl}/login`)}`}
         class="flex items-center justify-center gap-3 w-full bg-white border border-gray-300 hover:border-gray-400 hover:shadow-sm text-gray-700 font-medium py-3 px-4 rounded-xl transition-all"
       >
         <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -36,4 +36,42 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL as string;
 </Layout>
 
 <script>
+  (async () => {
+    const title = document.getElementById('login-title');
+    const msg = document.getElementById('login-msg');
+    const err = document.getElementById('login-err');
+    const btn = document.getElementById('login-btn') as HTMLAnchorElement | null;
+
+    try {
+      const refreshRes = await fetch(`${directusUrl}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'session' }),
+      });
+
+      if (!refreshRes.ok) return;
+
+      const refreshJson = await refreshRes.json();
+      const accessToken = refreshJson?.data?.access_token;
+      if (!accessToken) return;
+
+      if (title) title.textContent = 'Đang xử lý đăng nhập...';
+      if (msg) msg.textContent = 'Đang chuyển sang bước xác thực nội bộ';
+      if (btn) btn.style.display = 'none';
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `${siteUrl}/api/auth/callback`;
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'token';
+      input.value = accessToken;
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+    } catch (error) {
+      console.error('[login] Google SSO network error:', error);
+    }
+  })();
 </script>
