@@ -5,52 +5,41 @@ import type { Schema } from '@/types/directus-schema';
 
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
-const SITE_URL = import.meta.env.PUBLIC_SITE_URL as string;
 
-export const GET: APIRoute = async () => {
-  const html = `<!DOCTYPE html>
-<html lang="vi">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Đang xử lý đăng nhập...</title></head>
-<body>
-<script>
-(async()=>{
- try{
-  const r=await fetch("${DIRECTUS_URL}/auth/refresh",{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({mode:"session"})});
-  if(!r.ok){window.location.href="/login?error=refresh_failed";return}
-  const d=await r.json();
-  const t=d?.data?.access_token;
-  if(!t){window.location.href="/login?error=missing_token";return}
-  const f=document.createElement("form");
-  f.method="POST";
-  f.action="${SITE_URL}/api/auth/callback";
-  const i=document.createElement("input");
-  i.type="hidden";
-  i.name="token";
-  i.value=t;
-  f.appendChild(i);
-  document.body.appendChild(f);
-  f.submit();
- }catch{window.location.href="/login?error=auth_failed"}
-})();
-</script>
-</body>
-</html>`;
+export const GET: APIRoute = async ({ request, redirect }) => {
+  // Đọc session cookie từ request — cookie có Domain=.hongngochuyenhoc.com
+  // nên trình duyệt sẽ gửi kèm khi request đến dev.hongngochuyenhoc.com
+  const cookieHeader = request.headers.get('cookie') || '';
+  const sessionToken = cookieHeader
+    .split(';')
+    .map((c) => c.trim())
+    .find((c) => c.startsWith('directus_session_token='));
 
-  return new Response(html, {
-    status: 200,
-    headers: { 'Content-Type': 'text/html; charset=utf-8' },
-  });
-};
-
-export const POST: APIRoute = async ({ request, redirect }) => {
-  const formData = await request.formData();
-  const accessToken = (formData.get('token') as string)?.trim();
-
-  if (!accessToken) {
-    return redirect('/login?error=missing_token');
+  if (!sessionToken) {
+    return redirect('/login?error=missing_session');
   }
 
   try {
+    const refreshRes = await fetch(`${DIRECTUS_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: sessionToken,
+      },
+      body: JSON.stringify({ mode: 'session' }),
+    });
+
+    if (!refreshRes.ok) {
+      return redirect('/login?error=refresh_failed');
+    }
+
+    const refreshData = (await refreshRes.json()) as any;
+    const accessToken = refreshData?.data?.access_token;
+
+    if (!accessToken) {
+      return redirect('/login?error=missing_token');
+    }
+
     const adminClient = createDirectus<Schema>(DIRECTUS_URL)
       .with(staticToken(ADMIN_TOKEN))
       .with(rest());
