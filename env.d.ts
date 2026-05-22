@@ -8,3 +8,11 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+declare namespace App {
+  interface Locals {
+    user: { id: string; email?: string; first_name?: string; last_name?: string };
+    contact: { id: string; phone?: string; first_name?: string; last_name?: string } | null;
+    token: string;
+  }
+}

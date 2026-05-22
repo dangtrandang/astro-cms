@@ -8,6 +8,7 @@ import {
   createItem,
   uploadFiles,
   withToken,
+  staticToken,
   aggregate,
 } from '@directus/sdk';
 import type { RestClient } from '@directus/sdk';
@@ -54,3 +55,13 @@ export const useDirectus = () => ({
   withToken,
   aggregate,
 });
+
+/** Tạo Directus client với JWT token của user (dùng trong middleware/API routes có auth) */
+export const createUserClient = (token: string) =>
+  createDirectus<Schema>(directusUrl, {
+    globals: {
+      fetch: (...args) => queue.add(() => fetchRetry(0, ...args)),
+    },
+  })
+    .with(rest())
+    .with(staticToken(token));

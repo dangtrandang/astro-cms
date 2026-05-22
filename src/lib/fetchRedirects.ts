@@ -16,35 +16,36 @@ export async function fetchRedirects(directusUrl: string): Promise<AstroRedirect
 
   try {
     const directus = createDirectus<Schema>(directusUrl).with(rest());
+    const timeoutMs = 5000;
 
-    const redirects = await directus.request(
-      readItems('redirects', {
-        filter: {
-          url_from: { _nnull: true },
-          url_to: { _nnull: true },
-        },
-        // Get all redirects (Directus defaults to 100 for limit)
-        limit: -1,
+    const redirects = await Promise.race([
+      directus.request(
+        readItems('redirects', {
+          filter: {
+            url_old: { _nnull: true },
+            url_new: { _nnull: true },
+          },
+          // Get all redirects (Directus defaults to 100 for limit)
+          limit: -1,
+        }),
+      ),
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error(`Directus redirects request timed out after ${timeoutMs}ms`)), timeoutMs);
       }),
-    );
+    ]);
 
     const processedRedirects: AstroRedirect[] = [];
 
     for (const redirect of redirects) {
-      if (!redirect.url_from || !redirect.url_to) {
+      if (!redirect.url_old || !redirect.url_new) {
         continue;
       }
 
-      // If response code is not set, default to 301
-      let responseCode = redirect.response_code ? parseInt(redirect.response_code) : 301;
-
-      if (responseCode !== 301 && responseCode !== 302) {
-        responseCode = 301;
-      }
+      const responseCode = redirect.response_code === 302 ? 302 : 301;
 
       processedRedirects.push({
-        source: redirect.url_from,
-        destination: redirect.url_to,
+        source: redirect.url_old,
+        destination: redirect.url_new,
         permanent: responseCode === 301,
       });
     }

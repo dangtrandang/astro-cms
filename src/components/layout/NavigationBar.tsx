@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, useEffect, useState } from 'react';
-import { LogIn, UserPlus, Menu, X } from 'lucide-react';
+import { LogIn, Menu, X } from 'lucide-react';
 
 interface NavigationBarProps {
   navigation?: {
@@ -94,18 +94,11 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
           {/* Right side: auth links + hamburger */}
           <div className="flex items-center gap-3 sm:gap-6 text-[#2d3a2a]">
             <a
-              href="#signup"
-              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
-            >
-              <UserPlus className="w-4 h-4" />
-              Sign Me Up!
-            </a>
-            <a
-              href="#login"
+              href="/login"
               className="hidden sm:flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
             >
               <LogIn className="w-4 h-4" />
-              Enter
+              Đăng nhập
             </a>
             <button
               onClick={() => setMenuOpen((v) => !v)}
@@ -162,18 +155,11 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
             style={{ transitionDelay: menuOpen ? '400ms' : '0ms' }}
           >
             <a
-              href="#signup"
-              className="flex items-center gap-2 text-sm font-medium text-[#2d3a2a] sm:hidden"
-            >
-              <UserPlus className="w-4 h-4" />
-              Sign Me Up!
-            </a>
-            <a
-              href="#login"
+              href="/login"
               className="flex items-center gap-2 text-sm font-medium text-[#2d3a2a] sm:hidden"
             >
               <LogIn className="w-4 h-4" />
-              Enter
+              Đăng nhập
             </a>
             <button className="mt-2 bg-[#1f2a1d] hover:bg-[#2a3827] text-white text-sm font-semibold px-5 py-3 rounded-full transition-colors">
               Try it Live
