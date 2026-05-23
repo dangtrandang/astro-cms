@@ -1,6 +1,5 @@
 ---
 import { createDirectus, rest, staticToken, readItems, createItem, updateItem } from '@directus/sdk';
-import { createUserClient } from '@/lib/directus/directus';
 import type { Schema } from '@/types/directus-schema';
 
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
@@ -111,21 +110,24 @@ const processExchange = async (token: string): Promise<AuthResult & { debugStep?
     return { redirect: '', cookieValue: null, error: `refresh_no_token:${JSON.stringify(refreshData).slice(0, 200)}` };
   }
 
-  // Step 3: fetch user
-  const userClient = createUserClient(accessToken);
-  let users: any[];
+  // Step 3: fetch user via /users/me (SDK readItems blocks core collections for non-admin tokens)
+  let user: any;
   try {
-    users = (await userClient.request(
-      readItems('directus_users', {
-        fields: ['id', 'email', 'first_name', 'last_name'],
-        limit: 1,
-      }),
-    )) as any[];
+    const meRes = await fetch(`${DIRECTUS_URL}/users/me`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!meRes.ok) {
+      const errBody = await meRes.text().catch(() => '');
+      return { redirect: '', cookieValue: null, error: `me_http_${meRes.status}:${errBody.slice(0, 200)}` };
+    }
+    const meData = await meRes.json().catch(() => null);
+    user = meData?.data;
   } catch (err: any) {
-    return { redirect: '', cookieValue: null, error: `user_fetch:${err.message}` };
+    return { redirect: '', cookieValue: null, error: `me_network:${err.message}` };
   }
-
-  const user = users[0];
   if (!user) {
     return { redirect: '', cookieValue: null, error: 'user_not_found' };
   }
