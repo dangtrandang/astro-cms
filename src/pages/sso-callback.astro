@@ -1,0 +1,203 @@
+---
+import { createDirectus, rest, staticToken, readItems, createItem, updateItem } from '@directus/sdk';
+import { createUserClient } from '@/lib/directus/directus';
+import type { Schema } from '@/types/directus-schema';
+
+const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
+const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
+const GOOGLE_ROLE_ID = '0ef5375a-2de5-4e25-bcd4-3eecfcca53b8';
+const GOOGLE_POLICY_ID = '32a88764-75b9-4d17-a740-0d9852186858';
+
+interface AuthResult {
+  redirect: string;
+  cookieValue: string | null;
+  error: string | null;
+}
+
+const ensureUserConfig = async (adminClient: any, userId: string) => {
+  const userItem = (await adminClient.request(
+    readItems('directus_users', {
+      fields: ['id', 'role'],
+      filter: { id: { _eq: userId } },
+      limit: 1,
+    }),
+  )) as any[];
+
+  const user = userItem[0];
+  if (!user) return null;
+
+  if (user.role !== GOOGLE_ROLE_ID) {
+    await adminClient.request(
+      updateItem('directus_users', userId, { role: GOOGLE_ROLE_ID }),
+    );
+  }
+
+  const existingPolicyLinks = (await adminClient.request(
+    readItems('directus_access', {
+      fields: ['id'],
+      filter: {
+        user: { _eq: userId },
+        policy: { _eq: GOOGLE_POLICY_ID },
+      },
+      limit: 1,
+    }),
+  )) as any[];
+
+  if (!existingPolicyLinks[0]) {
+    await adminClient.request(
+      createItem('directus_access', {
+        user: userId,
+        role: GOOGLE_ROLE_ID,
+        policy: GOOGLE_POLICY_ID,
+      }),
+    );
+  }
+
+  return user;
+};
+
+const processExchange = async (token: string): Promise<AuthResult> => {
+  const exchangeRes = await fetch(`${DIRECTUS_URL}/token-exchange`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  });
+
+  if (!exchangeRes.ok) {
+    console.error('[sso-callback] /token-exchange failed:', exchangeRes.status);
+    return { redirect: '', cookieValue: null, error: 'token_exchange_failed' };
+  }
+
+  const exchangeData = await exchangeRes.json();
+  const refreshToken = exchangeData?.refreshToken;
+  if (!refreshToken) {
+    console.error('[sso-callback] Missing refreshToken in /token-exchange response');
+    return { redirect: '', cookieValue: null, error: 'no_refresh_token' };
+  }
+
+  const refreshRes = await fetch(`${DIRECTUS_URL}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: refreshToken, mode: 'json' }),
+  });
+
+  if (!refreshRes.ok) {
+    console.error('[sso-callback] /auth/refresh failed:', refreshRes.status);
+    return { redirect: '', cookieValue: null, error: 'refresh_failed' };
+  }
+
+  const refreshData = await refreshRes.json();
+  const accessToken = refreshData?.data?.access_token;
+  if (!accessToken) {
+    console.error('[sso-callback] Missing access_token in /auth/refresh response');
+    return { redirect: '', cookieValue: null, error: 'no_access_token' };
+  }
+
+  const adminClient = createDirectus<Schema>(DIRECTUS_URL)
+    .with(staticToken(ADMIN_TOKEN))
+    .with(rest());
+
+  const userClient = createUserClient(accessToken);
+  const users = (await userClient.request(
+    readItems('directus_users', {
+      fields: ['id', 'email', 'first_name', 'last_name'],
+      limit: 1,
+    }),
+  )) as any[];
+
+  const user = users[0];
+  if (!user) {
+    return { redirect: '', cookieValue: null, error: 'user_not_found' };
+  }
+
+  await ensureUserConfig(adminClient, user.id);
+
+  const existingContacts = (await adminClient.request(
+    readItems('contacts', {
+      fields: ['id', 'phone'],
+      filter: { user: { _eq: user.id } },
+      limit: 1,
+    }),
+  )) as any[];
+
+  let contact = existingContacts[0] ?? null;
+
+  if (!contact) {
+    contact = (await adminClient.request(
+      createItem('contacts', {
+        user: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+      }),
+    )) as any;
+  }
+
+  const destination = contact?.phone
+    ? '/tai-khoan'
+    : '/tai-khoan/cap-nhat-thong-tin';
+
+  const cookieValue = `auth_token=${accessToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=604800`;
+
+  return { redirect: destination, cookieValue, error: null };
+};
+
+const token = Astro.url.searchParams.get('token');
+const type = Astro.url.searchParams.get('type');
+const errorParam = Astro.url.searchParams.get('error');
+const reason = Astro.url.searchParams.get('reason');
+
+let result: AuthResult = { redirect: '', cookieValue: null, error: null };
+
+if (errorParam === 'true') {
+  result.error = reason || 'sso_error';
+} else if (type === 'exchange' && token) {
+  try {
+    result = await processExchange(token);
+  } catch (err) {
+    console.error('[sso-callback] Unexpected error:', err);
+    result.error = 'auth_failed';
+  }
+} else {
+  result.error = 'invalid_request';
+}
+
+if (result.redirect && result.cookieValue) {
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: result.redirect,
+      'Set-Cookie': result.cookieValue,
+    },
+  });
+}
+---
+
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập - Hồng Ngọc Huyền Học</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  </head>
+  <body class="min-h-screen bg-[#faf6f5] flex items-center justify-center font-sans">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-[#f5e1e0] text-center">
+      <h1 class="text-xl font-bold text-[#1f2a1d] mb-4">
+        {result.error ? 'Đăng nhập thất bại' : 'Đang xử lý...'}
+      </h1>
+      <p class="text-sm text-[#6b7a65] mb-6">
+        {result.error
+          ? 'Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại.'
+          : 'Đang xử lý đăng nhập, vui lòng đợi...'}
+      </p>
+      {result.error && (
+        <a
+          href="/login"
+          class="inline-block bg-[#1f2a1d] text-white font-medium py-2 px-6 rounded-xl hover:bg-[#2f3a2d] transition-colors"
+        >
+          Thử lại
+        </a>
+      )}
+    </div>
+  </body>
+</html>

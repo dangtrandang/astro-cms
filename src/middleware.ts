@@ -8,7 +8,7 @@ interface AuthLocals {
   token: string;
 }
 
-const PROTECTED_ROUTES = ['/tai-khoan', '/login'];
+const PROTECTED_ROUTES = ['/tai-khoan', '/login', '/sso-callback'];
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { url, cookies } = context;
@@ -17,6 +17,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const isProtected = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
   if (!isProtected) return next();
+
+  if (pathname === '/sso-callback') return next();
 
   const token = cookies.get('auth_token')?.value;
 
