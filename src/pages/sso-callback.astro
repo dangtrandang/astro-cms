@@ -1,6 +1,4 @@
 ---
-import { createDirectus, rest, staticToken, readItems, createItem, updateItem } from '@directus/sdk';
-import type { Schema } from '@/types/directus-schema';
 
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
@@ -13,43 +11,48 @@ interface AuthResult {
   error: string | null;
 }
 
-const ensureUserConfig = async (adminClient: any, userId: string) => {
-  const userItem = (await adminClient.request(
-    readItems('directus_users', {
-      fields: ['id', 'role'],
-      filter: { id: { _eq: userId } },
-      limit: 1,
-    }),
-  )) as any[];
+const adminFetch = (path: string, init?: RequestInit) =>
+  fetch(`${DIRECTUS_URL}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${ADMIN_TOKEN}`,
+      'Content-Type': 'application/json',
+      ...(init?.headers as Record<string, string> | undefined),
+    },
+  });
 
-  const user = userItem[0];
+const ensureUserConfig = async (userId: string): Promise<any> => {
+  const usersRes = await adminFetch(
+    `/users/${userId}?fields=id,role`,
+  );
+  if (!usersRes.ok) return null;
+
+  const usersData = await usersRes.json().catch(() => null);
+  const user = usersData?.data;
   if (!user) return null;
 
   if (user.role !== GOOGLE_ROLE_ID) {
-    await adminClient.request(
-      updateItem('directus_users', userId, { role: GOOGLE_ROLE_ID }),
-    );
+    await adminFetch(`/users/${userId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role: GOOGLE_ROLE_ID }),
+    });
   }
 
-  const existingPolicyLinks = (await adminClient.request(
-    readItems('directus_access', {
-      fields: ['id'],
-      filter: {
-        user: { _eq: userId },
-        policy: { _eq: GOOGLE_POLICY_ID },
-      },
-      limit: 1,
-    }),
-  )) as any[];
+  const accessRes = await adminFetch(
+    `/items/directus_access?fields=id&filter[user][_eq]=${userId}&filter[policy][_eq]=${GOOGLE_POLICY_ID}&limit=1`,
+  );
+  const accessData = await accessRes.json().catch(() => null);
+  const existingLinks = accessData?.data ?? [];
 
-  if (!existingPolicyLinks[0]) {
-    await adminClient.request(
-      createItem('directus_access', {
+  if (!existingLinks[0]) {
+    await adminFetch('/items/directus_access', {
+      method: 'POST',
+      body: JSON.stringify({
         user: userId,
         role: GOOGLE_ROLE_ID,
         policy: GOOGLE_POLICY_ID,
       }),
-    );
+    });
   }
 
   return user;
@@ -132,42 +135,44 @@ const processExchange = async (token: string): Promise<AuthResult & { debugStep?
   }
 
   // Step 4: ensureUserConfig
-  const adminClient = createDirectus<Schema>(DIRECTUS_URL)
-    .with(staticToken(ADMIN_TOKEN))
-    .with(rest());
-
   try {
-    await ensureUserConfig(adminClient, user.id);
+    await ensureUserConfig(user.id);
   } catch (err: any) {
     return { redirect: '', cookieValue: null, error: `config:${err.message}` };
   }
 
-  // Step 5: contacts
-  let existingContacts: any[];
+  // Step 5: contacts (use adminFetch)
+  let contact: any = null;
   try {
-    existingContacts = (await adminClient.request(
-      readItems('contacts', {
-        fields: ['id', 'phone'],
-        filter: { user: { _eq: user.id } },
-        limit: 1,
-      }),
-    )) as any[];
+    const cRes = await adminFetch(
+      `/items/contacts?fields=id,phone&filter[user][_eq]=${user.id}&limit=1`,
+    );
+    if (!cRes.ok) {
+      return { redirect: '', cookieValue: null, error: `contact_read_http_${cRes.status}` };
+    }
+    const cData = await cRes.json().catch(() => null);
+    contact = cData?.data?.[0] ?? null;
   } catch (err: any) {
     return { redirect: '', cookieValue: null, error: `contact_read:${err.message}` };
   }
 
-  let contact = existingContacts[0] ?? null;
-
   if (!contact) {
     try {
-      contact = (await adminClient.request(
-        createItem('contacts', {
+      const createRes = await adminFetch('/items/contacts', {
+        method: 'POST',
+        body: JSON.stringify({
           user: user.id,
           email: user.email,
           first_name: user.first_name,
           last_name: user.last_name,
         }),
-      )) as any;
+      });
+      if (!createRes.ok) {
+        const errBody = await createRes.text().catch(() => '');
+        return { redirect: '', cookieValue: null, error: `contact_create_http_${createRes.status}:${errBody.slice(0, 200)}` };
+      }
+      const createData = await createRes.json().catch(() => null);
+      contact = createData?.data;
     } catch (err: any) {
       return { redirect: '', cookieValue: null, error: `contact_create:${err.message}` };
     }
