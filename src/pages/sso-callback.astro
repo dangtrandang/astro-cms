@@ -110,13 +110,12 @@ const processExchange = async (token: string): Promise<AuthResult & { debugStep?
     return { redirect: '', cookieValue: null, error: `refresh_no_token:${JSON.stringify(refreshData).slice(0, 200)}` };
   }
 
-  // Step 3: fetch user via /users/me (SDK readItems blocks core collections for non-admin tokens)
+  // Step 3: fetch user via /users/me with explicit fields (Customer role has auto-join on posts causing INVALID_QUERY)
   let user: any;
   try {
-    const meRes = await fetch(`${DIRECTUS_URL}/users/me`, {
+    const meRes = await fetch(`${DIRECTUS_URL}/users/me?fields=id,email,first_name,last_name`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
       },
     });
     if (!meRes.ok) {
