@@ -56,81 +56,120 @@ const ensureUserConfig = async (adminClient: any, userId: string) => {
   return user;
 };
 
-const processExchange = async (token: string): Promise<AuthResult> => {
-  const exchangeRes = await fetch(`${DIRECTUS_URL}/token-exchange`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token }),
-  });
+const processExchange = async (token: string): Promise<AuthResult & { debugStep?: string }> => {
+  const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
+
+  // Step 1: /token-exchange
+  let exchangeRes: Response;
+  try {
+    exchangeRes = await fetch(`${DIRECTUS_URL}/token-exchange`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+  } catch (err: any) {
+    return { redirect: '', cookieValue: null, error: `exchange_network:${err.message}` };
+  }
 
   if (!exchangeRes.ok) {
-    console.error('[sso-callback] /token-exchange failed:', exchangeRes.status);
-    return { redirect: '', cookieValue: null, error: 'token_exchange_failed' };
+    const errBody = await exchangeRes.text().catch(() => '');
+    return { redirect: '', cookieValue: null, error: `exchange_http_${exchangeRes.status}:${errBody.slice(0, 200)}` };
   }
 
-  const exchangeData = await exchangeRes.json();
+  const exchangeData = await exchangeRes.json().catch(() => null);
+  if (!exchangeData) {
+    return { redirect: '', cookieValue: null, error: 'exchange_json_parse_failed' };
+  }
   const refreshToken = exchangeData?.refreshToken;
   if (!refreshToken) {
-    console.error('[sso-callback] Missing refreshToken in /token-exchange response');
-    return { redirect: '', cookieValue: null, error: 'no_refresh_token' };
+    return { redirect: '', cookieValue: null, error: `exchange_no_refresh:${JSON.stringify(exchangeData).slice(0, 200)}` };
   }
 
-  const refreshRes = await fetch(`${DIRECTUS_URL}/auth/refresh`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh_token: refreshToken, mode: 'json' }),
-  });
+  // Step 2: /auth/refresh
+  let refreshRes: Response;
+  try {
+    refreshRes = await fetch(`${DIRECTUS_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken, mode: 'json' }),
+    });
+  } catch (err: any) {
+    return { redirect: '', cookieValue: null, error: `refresh_network:${err.message}` };
+  }
 
   if (!refreshRes.ok) {
-    console.error('[sso-callback] /auth/refresh failed:', refreshRes.status);
-    return { redirect: '', cookieValue: null, error: 'refresh_failed' };
+    const errBody = await refreshRes.text().catch(() => '');
+    return { redirect: '', cookieValue: null, error: `refresh_http_${refreshRes.status}:${errBody.slice(0, 200)}` };
   }
 
-  const refreshData = await refreshRes.json();
+  const refreshData = await refreshRes.json().catch(() => null);
+  if (!refreshData) {
+    return { redirect: '', cookieValue: null, error: 'refresh_json_parse_failed' };
+  }
   const accessToken = refreshData?.data?.access_token;
   if (!accessToken) {
-    console.error('[sso-callback] Missing access_token in /auth/refresh response');
-    return { redirect: '', cookieValue: null, error: 'no_access_token' };
+    return { redirect: '', cookieValue: null, error: `refresh_no_token:${JSON.stringify(refreshData).slice(0, 200)}` };
   }
 
-  const adminClient = createDirectus<Schema>(DIRECTUS_URL)
-    .with(staticToken(ADMIN_TOKEN))
-    .with(rest());
-
+  // Step 3: fetch user
   const userClient = createUserClient(accessToken);
-  const users = (await userClient.request(
-    readItems('directus_users', {
-      fields: ['id', 'email', 'first_name', 'last_name'],
-      limit: 1,
-    }),
-  )) as any[];
+  let users: any[];
+  try {
+    users = (await userClient.request(
+      readItems('directus_users', {
+        fields: ['id', 'email', 'first_name', 'last_name'],
+        limit: 1,
+      }),
+    )) as any[];
+  } catch (err: any) {
+    return { redirect: '', cookieValue: null, error: `user_fetch:${err.message}` };
+  }
 
   const user = users[0];
   if (!user) {
     return { redirect: '', cookieValue: null, error: 'user_not_found' };
   }
 
-  await ensureUserConfig(adminClient, user.id);
+  // Step 4: ensureUserConfig
+  const adminClient = createDirectus<Schema>(DIRECTUS_URL)
+    .with(staticToken(ADMIN_TOKEN))
+    .with(rest());
 
-  const existingContacts = (await adminClient.request(
-    readItems('contacts', {
-      fields: ['id', 'phone'],
-      filter: { user: { _eq: user.id } },
-      limit: 1,
-    }),
-  )) as any[];
+  try {
+    await ensureUserConfig(adminClient, user.id);
+  } catch (err: any) {
+    return { redirect: '', cookieValue: null, error: `config:${err.message}` };
+  }
+
+  // Step 5: contacts
+  let existingContacts: any[];
+  try {
+    existingContacts = (await adminClient.request(
+      readItems('contacts', {
+        fields: ['id', 'phone'],
+        filter: { user: { _eq: user.id } },
+        limit: 1,
+      }),
+    )) as any[];
+  } catch (err: any) {
+    return { redirect: '', cookieValue: null, error: `contact_read:${err.message}` };
+  }
 
   let contact = existingContacts[0] ?? null;
 
   if (!contact) {
-    contact = (await adminClient.request(
-      createItem('contacts', {
-        user: user.id,
-        email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
-      }),
-    )) as any;
+    try {
+      contact = (await adminClient.request(
+        createItem('contacts', {
+          user: user.id,
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+        }),
+      )) as any;
+    } catch (err: any) {
+      return { redirect: '', cookieValue: null, error: `contact_create:${err.message}` };
+    }
   }
 
   const destination = contact?.phone
@@ -147,17 +186,12 @@ const type = Astro.url.searchParams.get('type');
 const errorParam = Astro.url.searchParams.get('error');
 const reason = Astro.url.searchParams.get('reason');
 
-let result: AuthResult = { redirect: '', cookieValue: null, error: null };
+let result: AuthResult & { debugStep?: string } = { redirect: '', cookieValue: null, error: null };
 
 if (errorParam === 'true') {
   result.error = reason || 'sso_error';
 } else if (type === 'exchange' && token) {
-  try {
-    result = await processExchange(token);
-  } catch (err) {
-    console.error('[sso-callback] Unexpected error:', err);
-    result.error = 'auth_failed';
-  }
+  result = await processExchange(token);
 } else {
   result.error = 'invalid_request';
 }
@@ -185,11 +219,17 @@ if (result.redirect && result.cookieValue) {
       <h1 class="text-xl font-bold text-[#1f2a1d] mb-4">
         {result.error ? 'Đăng nhập thất bại' : 'Đang xử lý...'}
       </h1>
-      <p class="text-sm text-[#6b7a65] mb-6">
+      <p class="text-sm text-[#6b7a65] mb-2">
         {result.error
           ? 'Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại.'
           : 'Đang xử lý đăng nhập, vui lòng đợi...'}
       </p>
+      {result.error && (
+        <details class="mb-6">
+          <summary class="text-xs text-red-500 cursor-pointer">Chi tiết lỗi</summary>
+          <p class="text-xs text-red-400 mt-1 bg-red-50 p-2 rounded break-all">{result.error}</p>
+        </details>
+      )}
       {result.error && (
         <a
           href="/login"
