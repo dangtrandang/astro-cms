@@ -7,7 +7,7 @@ const GOOGLE_POLICY_ID = '32a88764-75b9-4d17-a740-0d9852186858';
 
 interface AuthResult {
   redirect: string;
-  cookieValue: string | null;
+  accessToken: string | null;
   error: string | null;
 }
 
@@ -59,7 +59,7 @@ const ensureUserConfig = async (userId: string): Promise<any> => {
   return user;
 };
 
-const processExchange = async (token: string): Promise<AuthResult & { debugStep?: string }> => {
+const processExchange = async (token: string): Promise<AuthResult> => {
   const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 
   // Step 1: /token-exchange
@@ -71,21 +71,21 @@ const processExchange = async (token: string): Promise<AuthResult & { debugStep?
       body: JSON.stringify({ token }),
     });
   } catch (err: any) {
-    return { redirect: '', cookieValue: null, error: `exchange_network:${err.message}` };
+    return { redirect: '', accessToken: null, error: `exchange_network:${err.message}` };
   }
 
   if (!exchangeRes.ok) {
     const errBody = await exchangeRes.text().catch(() => '');
-    return { redirect: '', cookieValue: null, error: `exchange_http_${exchangeRes.status}:${errBody.slice(0, 200)}` };
+    return { redirect: '', accessToken: null, error: `exchange_http_${exchangeRes.status}:${errBody.slice(0, 200)}` };
   }
 
   const exchangeData = await exchangeRes.json().catch(() => null);
   if (!exchangeData) {
-    return { redirect: '', cookieValue: null, error: 'exchange_json_parse_failed' };
+    return { redirect: '', accessToken: null, error: 'exchange_json_parse_failed' };
   }
   const refreshToken = exchangeData?.refreshToken;
   if (!refreshToken) {
-    return { redirect: '', cookieValue: null, error: `exchange_no_refresh:${JSON.stringify(exchangeData).slice(0, 200)}` };
+    return { redirect: '', accessToken: null, error: `exchange_no_refresh:${JSON.stringify(exchangeData).slice(0, 200)}` };
   }
 
   // Step 2: /auth/refresh
@@ -97,21 +97,21 @@ const processExchange = async (token: string): Promise<AuthResult & { debugStep?
       body: JSON.stringify({ refresh_token: refreshToken, mode: 'json' }),
     });
   } catch (err: any) {
-    return { redirect: '', cookieValue: null, error: `refresh_network:${err.message}` };
+    return { redirect: '', accessToken: null, error: `refresh_network:${err.message}` };
   }
 
   if (!refreshRes.ok) {
     const errBody = await refreshRes.text().catch(() => '');
-    return { redirect: '', cookieValue: null, error: `refresh_http_${refreshRes.status}:${errBody.slice(0, 200)}` };
+    return { redirect: '', accessToken: null, error: `refresh_http_${refreshRes.status}:${errBody.slice(0, 200)}` };
   }
 
   const refreshData = await refreshRes.json().catch(() => null);
   if (!refreshData) {
-    return { redirect: '', cookieValue: null, error: 'refresh_json_parse_failed' };
+    return { redirect: '', accessToken: null, error: 'refresh_json_parse_failed' };
   }
   const accessToken = refreshData?.data?.access_token;
   if (!accessToken) {
-    return { redirect: '', cookieValue: null, error: `refresh_no_token:${JSON.stringify(refreshData).slice(0, 200)}` };
+    return { redirect: '', accessToken: null, error: `refresh_no_token:${JSON.stringify(refreshData).slice(0, 200)}` };
   }
 
   // Step 3: fetch user via /users/me with explicit fields (Customer role has auto-join on posts causing INVALID_QUERY)
@@ -124,70 +124,63 @@ const processExchange = async (token: string): Promise<AuthResult & { debugStep?
     });
     if (!meRes.ok) {
       const errBody = await meRes.text().catch(() => '');
-      return { redirect: '', cookieValue: null, error: `me_http_${meRes.status}:${errBody.slice(0, 200)}` };
+      return { redirect: '', accessToken: null, error: `me_http_${meRes.status}:${errBody.slice(0, 200)}` };
     }
     const meData = await meRes.json().catch(() => null);
     user = meData?.data;
   } catch (err: any) {
-    return { redirect: '', cookieValue: null, error: `me_network:${err.message}` };
+    return { redirect: '', accessToken: null, error: `me_network:${err.message}` };
   }
   if (!user) {
-    return { redirect: '', cookieValue: null, error: 'user_not_found' };
+    return { redirect: '', accessToken: null, error: 'user_not_found' };
   }
 
   // Step 4: ensureUserConfig
   try {
     await ensureUserConfig(user.id);
   } catch (err: any) {
-    return { redirect: '', cookieValue: null, error: `config:${err.message}` };
+    return { redirect: '', accessToken: null, error: `config:${err.message}` };
   }
 
-  // Step 5: contacts — find-or-create (user field is unique in contacts)
+  // Step 5: contacts — try POST, if RECORD_NOT_UNIQUE then re-fetch existing
   let contact: any = null;
-  const contactFilter = encodeURIComponent(JSON.stringify({ user: { _eq: user.id } }));
-  const contactUrl = `/items/contacts?fields=id,phone&filter=${contactFilter}&limit=1`;
 
   try {
-    const cRes = await adminFetch(contactUrl);
-    if (!cRes.ok) {
-      const cErr = await cRes.text().catch(() => '');
-      return { redirect: '', cookieValue: null, error: `contact_read_http_${cRes.status}:${cErr.slice(0, 200)}` };
-    }
-    const cData = await cRes.json().catch(() => null);
-    contact = cData?.data?.[0] ?? null;
-  } catch (err: any) {
-    return { redirect: '', cookieValue: null, error: `contact_read:${err.message}` };
-  }
-
-  if (!contact) {
-    try {
-      const createRes = await adminFetch('/items/contacts', {
-        method: 'POST',
-        body: JSON.stringify({
-          user: user.id,
-          email: user.email,
-          first_name: user.first_name,
-          last_name: user.last_name,
-        }),
-      });
-      if (!createRes.ok) {
-        const errBody = await createRes.text().catch(() => '');
-        return { redirect: '', cookieValue: null, error: `contact_create_http_${createRes.status}:${errBody.slice(0, 200)}` };
-      }
+    const createRes = await adminFetch('/items/contacts', {
+      method: 'POST',
+      body: JSON.stringify({
+        user: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+      }),
+    });
+    if (createRes.ok) {
       const createData = await createRes.json().catch(() => null);
       contact = createData?.data;
-    } catch (err: any) {
-      return { redirect: '', cookieValue: null, error: `contact_create:${err.message}` };
+    } else {
+      const errBody = await createRes.text().catch(() => '');
+      if (errBody.includes('RECORD_NOT_UNIQUE')) {
+        const contactFilter = encodeURIComponent(JSON.stringify({ user: { _eq: user.id } }));
+        const cRes = await adminFetch(`/items/contacts?fields=id,phone&filter=${contactFilter}&limit=1`);
+        if (cRes.ok) {
+          const cData = await cRes.json().catch(() => null);
+          contact = cData?.data?.[0] ?? null;
+        }
+      }
+      if (!contact) {
+        return { redirect: '', accessToken: null, error: `contact_http_${createRes.status}:${errBody.slice(0, 200)}` };
+      }
     }
+  } catch (err: any) {
+    return { redirect: '', accessToken: null, error: `contact:${err.message}` };
   }
 
   const destination = contact?.phone
     ? '/tai-khoan'
     : '/tai-khoan/cap-nhat-thong-tin';
 
-  const cookieValue = `auth_token=${accessToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=604800`;
-
-  return { redirect: destination, cookieValue, error: null };
+  return { redirect: destination, accessToken, error: null };
 };
 
 const token = Astro.url.searchParams.get('token');
@@ -195,7 +188,7 @@ const type = Astro.url.searchParams.get('type');
 const errorParam = Astro.url.searchParams.get('error');
 const reason = Astro.url.searchParams.get('reason');
 
-let result: AuthResult & { debugStep?: string } = { redirect: '', cookieValue: null, error: null };
+let result: AuthResult & { debugStep?: string } = { redirect: '', accessToken: null, error: null };
 
 if (errorParam === 'true') {
   result.error = reason || 'sso_error';
@@ -205,14 +198,15 @@ if (errorParam === 'true') {
   result.error = 'invalid_request';
 }
 
-if (result.redirect && result.cookieValue) {
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: result.redirect,
-      'Set-Cookie': result.cookieValue,
-    },
+if (result.redirect && result.accessToken) {
+  Astro.cookies.set('auth_token', result.accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 604800,
   });
+  return Astro.redirect(result.redirect);
 }
 ---
 
