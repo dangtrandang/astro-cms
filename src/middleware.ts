@@ -1,6 +1,4 @@
 import { defineMiddleware } from 'astro:middleware';
-import { createUserClient } from '@/lib/directus/directus';
-import { readItems } from '@directus/sdk';
 
 interface AuthLocals {
   user: { id: string; email?: string; first_name?: string; last_name?: string };
@@ -9,6 +7,12 @@ interface AuthLocals {
 }
 
 const PROTECTED_ROUTES = ['/tai-khoan', '/login', '/sso-callback'];
+const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
+
+const userFetch = (token: string, path: string) =>
+  fetch(`${DIRECTUS_URL}${path}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { url, cookies } = context;
@@ -28,26 +32,31 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   try {
-    const client = createUserClient(token);
-    const [users, contactList] = await Promise.all([
-      client.request(
-        readItems('directus_users', { fields: ['id', 'email', 'first_name', 'last_name'], limit: 1 }),
-      ) as Promise<any[]>,
-      client.request(
-        readItems('contacts', {
-          fields: ['id', 'phone', 'first_name', 'last_name'],
-          limit: 1,
-        }),
-      ) as Promise<any[]>,
-    ]);
-
-    const user = users[0] ?? null;
+    const meRes = await userFetch(token, '/users/me?fields=id,email,first_name,last_name');
+    if (!meRes.ok) {
+      console.error('[middleware] /users/me failed:', meRes.status, await meRes.text().catch(() => ''));
+      cookies.delete('auth_token', { path: '/' });
+      return context.redirect('/login');
+    }
+    const meData = await meRes.json();
+    const user = meData?.data;
     if (!user) {
+      console.error('[middleware] /users/me returned no data');
       cookies.delete('auth_token', { path: '/' });
       return context.redirect('/login');
     }
 
-    const contact = contactList[0] ?? null;
+    let contact: any = null;
+    try {
+      const contactFilter = encodeURIComponent(JSON.stringify({ user: { _eq: user.id } }));
+      const cRes = await userFetch(token, `/items/contacts?fields=id,phone,first_name,last_name&filter=${contactFilter}&limit=1`);
+      if (cRes.ok) {
+        const cData = await cRes.json().catch(() => null);
+        contact = cData?.data?.[0] ?? null;
+      }
+    } catch (cErr) {
+      console.error('[middleware] contacts fetch error:', cErr);
+    }
 
     locals.user = user;
     locals.contact = contact;
@@ -66,7 +75,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
 
     return next();
-  } catch {
+  } catch (err) {
+    console.error('[middleware] auth check failed:', err);
     cookies.delete('auth_token', { path: '/' });
     return context.redirect('/login');
   }
