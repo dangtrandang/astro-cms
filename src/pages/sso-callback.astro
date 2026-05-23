@@ -38,8 +38,9 @@ const ensureUserConfig = async (userId: string): Promise<any> => {
     });
   }
 
+  const accessFilter = encodeURIComponent(JSON.stringify({ user: { _eq: userId }, policy: { _eq: GOOGLE_POLICY_ID } }));
   const accessRes = await adminFetch(
-    `/items/directus_access?fields=id&filter[user][_eq]=${userId}&filter[policy][_eq]=${GOOGLE_POLICY_ID}&limit=1`,
+    `/items/directus_access?fields=id&filter=${accessFilter}&limit=1`,
   );
   const accessData = await accessRes.json().catch(() => null);
   const existingLinks = accessData?.data ?? [];
@@ -141,14 +142,16 @@ const processExchange = async (token: string): Promise<AuthResult & { debugStep?
     return { redirect: '', cookieValue: null, error: `config:${err.message}` };
   }
 
-  // Step 5: contacts (use adminFetch)
+  // Step 5: contacts — find-or-create (user field is unique in contacts)
   let contact: any = null;
+  const contactFilter = encodeURIComponent(JSON.stringify({ user: { _eq: user.id } }));
+  const contactUrl = `/items/contacts?fields=id,phone&filter=${contactFilter}&limit=1`;
+
   try {
-    const cRes = await adminFetch(
-      `/items/contacts?fields=id,phone&filter[user][_eq]=${user.id}&limit=1`,
-    );
+    const cRes = await adminFetch(contactUrl);
     if (!cRes.ok) {
-      return { redirect: '', cookieValue: null, error: `contact_read_http_${cRes.status}` };
+      const cErr = await cRes.text().catch(() => '');
+      return { redirect: '', cookieValue: null, error: `contact_read_http_${cRes.status}:${cErr.slice(0, 200)}` };
     }
     const cData = await cRes.json().catch(() => null);
     contact = cData?.data?.[0] ?? null;
