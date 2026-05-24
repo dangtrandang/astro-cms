@@ -493,6 +493,9 @@ function SecurityTab({ user }: { user: User }) {
 			if (res.ok) {
 				setSuccess(true);
 				setDone(true);
+				setTimeout(() => {
+					window.location.reload();
+				}, 1500);
 			} else {
 				setError(data?.error || 'Không thể cập nhật tài khoản');
 			}
