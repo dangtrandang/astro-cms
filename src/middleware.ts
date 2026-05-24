@@ -8,10 +8,16 @@ interface AuthLocals {
 
 const PROTECTED_ROUTES = ['/tai-khoan', '/login', '/sso-callback'];
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
+const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
 
 const userFetch = (token: string, path: string) =>
   fetch(`${DIRECTUS_URL}${path}`, {
     headers: { Authorization: `Bearer ${token}` },
+  });
+
+const adminFetch = (path: string) =>
+  fetch(`${DIRECTUS_URL}${path}`, {
+    headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
   });
 
 export const onRequest = defineMiddleware(async (context, next) => {
@@ -32,16 +38,30 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   try {
-    const meRes = await userFetch(token, '/users/me?fields=id,email,first_name,last_name,avatar,provider,external_identifier');
+    const meRes = await userFetch(token, '/users/me?fields=id');
     if (!meRes.ok) {
       console.error('[middleware] /users/me failed:', meRes.status, await meRes.text().catch(() => ''));
       cookies.delete('auth_token', { path: '/' });
       return context.redirect('/login');
     }
     const meData = await meRes.json();
-    const user = meData?.data;
-    if (!user) {
+    const userId = meData?.data?.id;
+    if (!userId) {
       console.error('[middleware] /users/me returned no data');
+      cookies.delete('auth_token', { path: '/' });
+      return context.redirect('/login');
+    }
+
+    const adminUserRes = await adminFetch(`/users/${userId}?fields=id,email,first_name,last_name,provider,external_identifier`);
+    if (!adminUserRes.ok) {
+      console.error('[middleware] admin /users/:id failed:', adminUserRes.status, await adminUserRes.text().catch(() => ''));
+      cookies.delete('auth_token', { path: '/' });
+      return context.redirect('/login');
+    }
+    const adminUserData = await adminUserRes.json();
+    const user = adminUserData?.data;
+    if (!user) {
+      console.error('[middleware] admin /users/:id returned no data');
       cookies.delete('auth_token', { path: '/' });
       return context.redirect('/login');
     }

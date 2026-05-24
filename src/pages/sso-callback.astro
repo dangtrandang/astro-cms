@@ -114,10 +114,10 @@ const processExchange = async (token: string): Promise<AuthResult> => {
     return { redirect: '', accessToken: null, error: `refresh_no_token:${JSON.stringify(refreshData).slice(0, 200)}` };
   }
 
-  // Step 3: fetch user via /users/me with explicit fields (Customer role has auto-join on posts causing INVALID_QUERY)
+  // Step 3: fetch userId via /users/me (user token) then admin token for full fields
   let user: any;
   try {
-    const meRes = await fetch(`${DIRECTUS_URL}/users/me?fields=id,email,first_name,last_name`, {
+    const meRes = await fetch(`${DIRECTUS_URL}/users/me?fields=id`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -127,7 +127,18 @@ const processExchange = async (token: string): Promise<AuthResult> => {
       return { redirect: '', accessToken: null, error: `me_http_${meRes.status}:${errBody.slice(0, 200)}` };
     }
     const meData = await meRes.json().catch(() => null);
-    user = meData?.data;
+    const userId = meData?.data?.id;
+    if (!userId) {
+      return { redirect: '', accessToken: null, error: 'user_not_found' };
+    }
+
+    const adminUserRes = await adminFetch(`/users/${userId}?fields=id,email,first_name,last_name`);
+    if (!adminUserRes.ok) {
+      const errBody = await adminUserRes.text().catch(() => '');
+      return { redirect: '', accessToken: null, error: `admin_user_http_${adminUserRes.status}:${errBody.slice(0, 200)}` };
+    }
+    const adminUserData = await adminUserRes.json().catch(() => null);
+    user = adminUserData?.data;
   } catch (err: any) {
     return { redirect: '', accessToken: null, error: `me_network:${err.message}` };
   }
