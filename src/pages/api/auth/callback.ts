@@ -101,9 +101,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       )) as any;
     }
 
-    const destination = contact?.phone
-      ? '/tai-khoan'
-      : '/tai-khoan/cap-nhat-thong-tin';
+    const destination = '/tai-khoan';
 
     const cookieValue = `auth_token=${accessToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=604800`;
 
@@ -183,9 +181,7 @@ export const GET: APIRoute = async ({ request, redirect }) => {
       )) as any;
     }
 
-    const destination = contact?.phone
-      ? '/tai-khoan'
-      : '/tai-khoan/cap-nhat-thong-tin';
+    const destination = '/tai-khoan';
 
     const cookieValue = `auth_token=${accessToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=604800`;
 

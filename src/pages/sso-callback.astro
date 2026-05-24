@@ -176,9 +176,7 @@ const processExchange = async (token: string): Promise<AuthResult> => {
     return { redirect: '', accessToken: null, error: `contact:${err.message}` };
   }
 
-  const destination = contact?.phone
-    ? '/tai-khoan'
-    : '/tai-khoan/cap-nhat-thong-tin';
+  const destination = '/tai-khoan';
 
   return { redirect: destination, accessToken, error: null };
 };

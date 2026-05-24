@@ -66,14 +66,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
       return context.redirect('/tai-khoan');
     }
 
-    if (contact && !contact.phone && pathname === '/tai-khoan/cap-nhat-thong-tin') {
-      return next();
-    }
-
-    if (contact?.phone && pathname === '/tai-khoan/cap-nhat-thong-tin') {
-      return context.redirect('/tai-khoan');
-    }
-
     return next();
   } catch (err) {
     console.error('[middleware] auth check failed:', err);
