@@ -9,6 +9,8 @@ interface User {
 	first_name?: string;
 	last_name?: string;
 	avatar?: string | { id: string } | null;
+	provider?: string | null;
+	external_identifier?: string | null;
 }
 
 interface Contact {
@@ -203,6 +205,9 @@ export default function AccountDashboard({ user, contact: initialContact, blockC
 }
 
 function AccountInfo({ user, contact, fullName }: { user: User; contact: Contact | null; fullName: string }) {
+	const providerLabel = getProviderLabel(user.provider, user.external_identifier);
+	const isSocialLogin = user.provider === 'google' || user.provider === 'facebook';
+
 	return (
 		<div>
 			<h3 className="text-xl font-bold text-[#1f2a1d] mb-6">Thông tin tài khoản</h3>
@@ -210,9 +215,37 @@ function AccountInfo({ user, contact, fullName }: { user: User; contact: Contact
 				<InfoRow label="Họ tên" value={fullName} />
 				<InfoRow label="Email" value={user.email || 'Chưa cập nhật'} />
 				<InfoRow label="Điện thoại" value={contact?.phone || 'Chưa cập nhật'} />
+
+				<div className="p-4 bg-[#fcf5ee] rounded-xl">
+					<span className="text-sm text-[#9bab92]">Phương thức đăng nhập</span>
+					<p className="text-[#1f2a1d] font-medium mt-0.5 flex items-center gap-2">
+						{providerLabel.icon}
+						{providerLabel.text}
+					</p>
+				</div>
+
+				{isSocialLogin && user.provider === 'google' && (
+					<div className="p-3 bg-blue-50/50 border border-blue-100 rounded-xl text-xs text-[#6b7a65] leading-relaxed">
+						💡 Bạn có thể đăng nhập bằng Google ở lần sau bằng cùng một địa chỉ Email để hệ thống tự động liên kết nhanh.
+					</div>
+				)}
 			</div>
 		</div>
 	);
+}
+
+function getProviderLabel(provider?: string | null, externalIdentifier?: string | null): { text: string; icon: string } {
+	switch (provider) {
+		case 'google':
+			return { text: 'Đăng nhập bằng Google', icon: '🔵' };
+		case 'facebook':
+			return { text: 'Đăng nhập bằng Facebook', icon: '🔵' };
+		default:
+			if (!externalIdentifier) {
+				return { text: 'Đăng ký trực tiếp (Email/Mật khẩu)', icon: '📧' };
+			}
+			return { text: 'Đăng nhập bằng tài khoản ngoài', icon: '🔑' };
+	}
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
