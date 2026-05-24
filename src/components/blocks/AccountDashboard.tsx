@@ -107,6 +107,7 @@ export default function AccountDashboard({ user, contact: initialContact, blockC
 	const displayFirst = contactState?.first_name || user.first_name || '';
 	const displayLast = contactState?.last_name || user.last_name || '';
 	const fullName = [displayFirst, displayLast].filter(Boolean).join(' ') || 'Người dùng';
+	const avatarInitial = ((displayFirst || displayLast || 'N').charAt(0)).toUpperCase();
 
 	const tabs = useMemo(() => {
 		return blockConfig.enabled_tabs.map((key) => ({
@@ -136,42 +137,19 @@ export default function AccountDashboard({ user, contact: initialContact, blockC
 	return (
 		<div className="flex flex-col lg:flex-row min-h-[70vh] bg-white rounded-2xl shadow-lg border border-[#f5e1e0] overflow-hidden">
 			<div className="lg:w-72 xl:w-80 shrink-0 border-b lg:border-b-0 lg:border-r border-[#f5e1e0] bg-[#faf6f2] flex flex-col">
-				<div className="h-28 bg-gradient-to-r from-[#c0395b] via-[#e8676b] to-[#f1907c] relative">
-					{blockConfig.allow_cover_edit && (
-						<button
-							type="button"
-							className="absolute bottom-2 right-2 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-[#6b4f4f] hover:bg-white transition-colors"
-							aria-label="Đổi ảnh bìa"
-						>
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-								<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-							</svg>
-						</button>
-					)}
-				</div>
-
-				<div className="flex justify-center -mt-10 relative">
-					<div className="w-20 h-20 rounded-full border-4 border-white bg-[#e8d5d5] overflow-hidden shadow-md">
-						{avatarUrl ? (
-							<img src={avatarUrl} alt={fullName} className="w-full h-full object-cover" />
-						) : (
-							<div className="w-full h-full flex items-center justify-center text-2xl text-[#6b4f4f] font-bold">
-								{(displayFirst.charAt(0) || 'N').toUpperCase()}
-							</div>
-						)}
+					<div className="h-28 bg-gradient-to-r from-[#f1907c] to-[#e17055]" />
+	
+					<div className="flex justify-center -mt-10 relative">
+						<div className="w-20 h-20 rounded-full border-4 border-white overflow-hidden shadow-md">
+							{avatarUrl ? (
+								<img src={avatarUrl} alt={fullName} className="w-full h-full object-cover bg-[#fcf5ee]" />
+							) : (
+								<div className="w-full h-full flex items-center justify-center text-2xl font-bold bg-gradient-to-br from-[#fcf5ee] to-[#f5e1e0] text-[#6b4f4f]">
+									{avatarInitial}
+								</div>
+							)}
+						</div>
 					</div>
-					{blockConfig.allow_avatar_edit && (
-						<button
-							type="button"
-							className="absolute bottom-0 right-[calc(50%-50px)] w-7 h-7 bg-[#1f2a1d] text-white rounded-full flex items-center justify-center hover:bg-[#850e35] transition-colors"
-							aria-label="Đổi ảnh đại diện"
-						>
-							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-								<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-							</svg>
-						</button>
-					)}
-				</div>
 
 				<div className="text-center mt-3 px-4">
 					<h2 className="font-semibold text-[#1f2a1d] truncate">{fullName}</h2>
