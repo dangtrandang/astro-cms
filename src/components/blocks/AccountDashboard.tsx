@@ -255,6 +255,7 @@ function AccountEdit({ user, contact }: { user: User; contact: Contact | null })
 					Accept: 'application/json',
 				},
 				body: JSON.stringify({
+					contactId: contact?.id,
 					first_name: (formData.get('first_name') as string)?.trim() || undefined,
 					last_name: (formData.get('last_name') as string)?.trim() || undefined,
 					phone: (formData.get('phone') as string)?.trim() || '',
@@ -267,7 +268,10 @@ function AccountEdit({ user, contact }: { user: User; contact: Contact | null })
 			}
 
 			setSuccess(true);
-			setTimeout(() => window.location.reload(), 1000);
+			setTimeout(() => {
+				window.location.hash = '';
+				window.location.reload();
+			}, 1000);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Lỗi không xác định');
 		} finally {

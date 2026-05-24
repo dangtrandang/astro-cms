@@ -2,6 +2,8 @@ import type { APIRoute } from 'astro';
 import { createUserClient } from '@/lib/directus/directus';
 import { updateItem, readItems } from '@directus/sdk';
 
+const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
+
 export const POST: APIRoute = async ({ request, cookies }) => {
   const token = cookies.get('auth_token')?.value;
   if (!token) {
@@ -11,11 +13,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   let phone: string | undefined;
   let first_name: string | undefined;
   let last_name: string | undefined;
+  let contactId: string | undefined;
   let isJson = false;
 
   const contentType = request.headers.get('content-type') || '';
   if (contentType.includes('application/json')) {
     const body = await request.json();
+    contactId = body.contactId;
     phone = body.phone?.trim();
     first_name = body.first_name?.trim();
     last_name = body.last_name?.trim();
@@ -37,16 +41,28 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     const client = createUserClient(token);
 
-    const contacts = (await client.request(
-      readItems('contacts', { fields: ['id'], limit: 1 }),
-    )) as any[];
-
-    const contactId = contacts[0]?.id;
     if (!contactId) {
-      return new Response(JSON.stringify({ error: 'Không tìm thấy contact' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
+      const meRes = await fetch(`${DIRECTUS_URL}/users/me?fields=id`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+      const meData = await meRes.json();
+      const userId = meData?.data?.id;
+      if (!userId) {
+        return new Response(JSON.stringify({ error: 'Không xác định được người dùng' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      const contacts = (await client.request(
+        readItems('contacts', { fields: ['id'], filter: { user: { _eq: userId } }, limit: 1 }),
+      )) as any[];
+      contactId = contacts[0]?.id;
+      if (!contactId) {
+        return new Response(JSON.stringify({ error: 'Không tìm thấy contact' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     await client.request(
