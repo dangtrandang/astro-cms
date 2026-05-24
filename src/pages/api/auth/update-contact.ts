@@ -72,13 +72,24 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     if (first_name) body.first_name = first_name;
     if (last_name) body.last_name = last_name;
 
-    await adminFetch(`/items/contacts/${contactId}`, {
+    const patchRes = await adminFetch(`/items/contacts/${contactId}`, {
       method: 'PATCH',
       body: JSON.stringify(body),
     });
 
+    if (!patchRes.ok) {
+      const errBody = await patchRes.text().catch(() => '');
+      return new Response(JSON.stringify({ error: `Không thể cập nhật: ${errBody.slice(0, 200)}` }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const patchData = await patchRes.json().catch(() => null);
+    const updated = patchData?.data;
+
     if (isJson) {
-      return new Response(JSON.stringify({ success: true }), {
+      return new Response(JSON.stringify({ success: true, contact: updated || null }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });

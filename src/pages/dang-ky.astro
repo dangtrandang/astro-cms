@@ -200,11 +200,11 @@ const directusUrl = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 
       const data = await res.json().catch(() => null);
 
-      if (res.ok && data?.access_token) {
+      if (res.ok && data?.redirect) {
         okEl.textContent = 'Đăng ký thành công! Đang chuyển hướng...';
         okEl.classList.remove('hidden');
         setTimeout(() => {
-          window.location.href = '/tai-khoan';
+          window.location.href = data.redirect;
         }, 800);
       } else if (res.ok && data?.success) {
         okEl.textContent = 'Đăng ký thành công! Vui lòng đăng nhập.';

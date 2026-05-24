@@ -205,7 +205,11 @@ const reason = Astro.url.searchParams.get('reason');
 let result: AuthResult & { debugStep?: string } = { redirect: '', accessToken: null, error: null };
 
 if (errorParam === 'true') {
-  result.error = reason || 'sso_error';
+  const msgMap: Record<string, string> = {
+    INVALID_PROVIDER: 'Tài khoản này được bảo mật bằng mật khẩu. Vui lòng nhập mật khẩu của bạn.',
+  };
+  const friendly = msgMap[reason || ''] || (reason || 'sso_error');
+  return Astro.redirect(`/login?error=google_blocked&reason=${encodeURIComponent(friendly)}`);
 } else if (type === 'exchange' && token) {
   result = await processExchange(token);
 } else {

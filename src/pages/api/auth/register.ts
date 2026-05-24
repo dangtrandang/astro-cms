@@ -15,7 +15,7 @@ const adminFetch = (path: string, init?: RequestInit) =>
     },
   });
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   let email: string;
   let password: string;
   let firstName: string;
@@ -160,7 +160,6 @@ export const POST: APIRoute = async ({ request }) => {
   });
 
   if (!loginRes.ok) {
-    // User created but auto-login failed, redirect to login page
     return new Response(JSON.stringify({ success: true, auto_login: false }), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
@@ -177,7 +176,15 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  return new Response(JSON.stringify({ success: true, access_token: accessToken }), {
+  cookies.set('auth_token', accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 604800,
+  });
+
+  return new Response(JSON.stringify({ success: true, redirect: '/tai-khoan' }), {
     status: 201,
     headers: { 'Content-Type': 'application/json' },
   });

@@ -235,8 +235,11 @@ function AccountInfo({ user, contact, fullName }: { user: User; contact: Contact
 						<span>Tài khoản đã được liên kết bảo mật</span>
 					</div>
 				) : (
-					<div className="p-3 bg-blue-50/50 border border-blue-100 rounded-xl text-xs text-[#6b7a65] leading-relaxed">
-						💡 Bạn có thể đăng nhập bằng Google ở lần sau bằng cùng một địa chỉ Email để hệ thống tự động liên kết nhanh.
+					<div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50/60 border border-emerald-100 rounded-xl px-4 py-2.5">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
+							<polyline points="20 6 9 17 4 12" />
+						</svg>
+						<span>Tài khoản của bạn được bảo vệ bằng mật khẩu riêng.</span>
 					</div>
 				)}
 			</div>
