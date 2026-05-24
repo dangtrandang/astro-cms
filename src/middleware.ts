@@ -38,7 +38,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   try {
-    const meRes = await userFetch(token, '/users/me?fields=id');
+    const meRes = await userFetch(token, '/users/me?fields=id,email,first_name,last_name');
     if (!meRes.ok) {
       console.error('[middleware] /users/me failed:', meRes.status, await meRes.text().catch(() => ''));
       cookies.delete('auth_token', { path: '/' });
