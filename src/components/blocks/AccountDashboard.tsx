@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getDirectusAssetURL } from '@/lib/directus/directus-utils';
 
 interface User {
@@ -52,8 +52,9 @@ function getAvatarUrl(avatar: User['avatar']): string | null {
 	return null;
 }
 
-export default function AccountDashboard({ user, contact, blockConfig }: Props) {
+export default function AccountDashboard({ user, contact: initialContact, blockConfig }: Props) {
 	const [activeTab, setActiveTab] = useState(blockConfig.default_tab);
+	const [contactState, setContactState] = useState<Contact | null>(initialContact);
 
 	const resolveTab = useCallback(
 		(hash: string) => {
@@ -80,19 +81,31 @@ export default function AccountDashboard({ user, contact, blockConfig }: Props) 
 	}, [resolveTab, blockConfig.default_tab]);
 
 	useEffect(() => {
-		if (!contact?.phone && blockConfig.enabled_tabs.includes('account-edit')) {
+		if (!contactState?.phone && blockConfig.enabled_tabs.includes('account-edit')) {
 			setActiveTab('account-edit');
 			window.location.hash = 'account-edit';
 		}
 	}, []);
+
+	const handleContactUpdated = (updated: { first_name?: string; last_name?: string; phone: string }) => {
+		setContactState((prev) => {
+			if (!prev) return { id: '', ...updated };
+			return { ...prev, ...updated };
+		});
+		const infoTab = 'account-info';
+		if (blockConfig.enabled_tabs.includes(infoTab)) {
+			setActiveTab(infoTab);
+			window.location.hash = infoTab;
+		}
+	};
 
 	const handleTabClick = (tab: string) => {
 		window.location.hash = tab;
 	};
 
 	const avatarUrl = getAvatarUrl(user.avatar);
-	const displayFirst = contact?.first_name || user.first_name || '';
-	const displayLast = contact?.last_name || user.last_name || '';
+	const displayFirst = contactState?.first_name || user.first_name || '';
+	const displayLast = contactState?.last_name || user.last_name || '';
 	const fullName = [displayFirst, displayLast].filter(Boolean).join(' ') || 'Người dùng';
 
 	const tabs = useMemo(() => {
@@ -105,9 +118,9 @@ export default function AccountDashboard({ user, contact, blockConfig }: Props) 
 	const renderTabContent = () => {
 		switch (activeTab) {
 			case 'account-info':
-				return <AccountInfo user={user} contact={contact} fullName={fullName} />;
+				return <AccountInfo user={user} contact={contactState} fullName={fullName} />;
 			case 'account-edit':
-				return <AccountEdit user={user} contact={contact} />;
+				return <AccountEdit user={user} contact={contactState} onUpdated={handleContactUpdated} />;
 			case 'support':
 				return <SupportContent content={blockConfig.support_content} />;
 			default:
@@ -233,7 +246,15 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 	);
 }
 
-function AccountEdit({ user, contact }: { user: User; contact: Contact | null }) {
+function AccountEdit({
+	user,
+	contact,
+	onUpdated,
+}: {
+	user: User;
+	contact: Contact | null;
+	onUpdated: (values: { first_name?: string; last_name?: string; phone: string }) => void;
+}) {
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState(false);
@@ -247,6 +268,10 @@ function AccountEdit({ user, contact }: { user: User; contact: Contact | null })
 		const form = e.currentTarget;
 		const formData = new FormData(form);
 
+		const newFirstName = (formData.get('first_name') as string)?.trim() || undefined;
+		const newLastName = (formData.get('last_name') as string)?.trim() || undefined;
+		const newPhone = (formData.get('phone') as string)?.trim() || '';
+
 		try {
 			const res = await fetch('/api/auth/update-contact', {
 				method: 'POST',
@@ -256,9 +281,9 @@ function AccountEdit({ user, contact }: { user: User; contact: Contact | null })
 				},
 				body: JSON.stringify({
 					contactId: contact?.id,
-					first_name: (formData.get('first_name') as string)?.trim() || undefined,
-					last_name: (formData.get('last_name') as string)?.trim() || undefined,
-					phone: (formData.get('phone') as string)?.trim() || '',
+					first_name: newFirstName,
+					last_name: newLastName,
+					phone: newPhone,
 				}),
 			});
 
@@ -269,9 +294,12 @@ function AccountEdit({ user, contact }: { user: User; contact: Contact | null })
 
 			setSuccess(true);
 			setTimeout(() => {
-				window.location.hash = '';
-				window.location.reload();
-			}, 1000);
+				onUpdated({
+					first_name: newFirstName,
+					last_name: newLastName,
+					phone: newPhone,
+				});
+			}, 800);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Lỗi không xác định');
 		} finally {
@@ -279,12 +307,16 @@ function AccountEdit({ user, contact }: { user: User; contact: Contact | null })
 		}
 	};
 
+	const isFreshAccount = !contact?.phone;
+
 	return (
 		<div>
 			<h3 className="text-xl font-bold text-[#1f2a1d] mb-2">Cập nhật thông tin</h3>
-			<p className="text-sm text-[#6b7a65] mb-6">
-				Vui lòng cung cấp số điện thoại để hoàn tất thiết lập tài khoản
-			</p>
+			{isFreshAccount && (
+				<p className="text-sm text-[#6b7a65] mb-6">
+					Vui lòng cung cấp số điện thoại để hoàn tất thiết lập tài khoản
+				</p>
+			)}
 
 			{error && (
 				<div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
@@ -293,7 +325,7 @@ function AccountEdit({ user, contact }: { user: User; contact: Contact | null })
 			)}
 			{success && (
 				<div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm">
-					Cập nhật thành công! Đang tải lại...
+					Cập nhật thành công!
 				</div>
 			)}
 
