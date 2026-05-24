@@ -1,12 +1,12 @@
 import { defineMiddleware } from 'astro:middleware';
 
 interface AuthLocals {
-  user: { id: string; email?: string; first_name?: string; last_name?: string };
+  user: { id: string; email?: string; first_name?: string; last_name?: string; provider?: string | null; external_identifier?: string | null };
   contact: { id: string; phone?: string; first_name?: string; last_name?: string } | null;
   token: string;
 }
 
-const PROTECTED_ROUTES = ['/tai-khoan', '/login', '/sso-callback'];
+const PROTECTED_ROUTES = ['/tai-khoan', '/login', '/dang-ky', '/sso-callback'];
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
 
@@ -33,7 +33,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const token = cookies.get('auth_token')?.value;
 
   if (!token) {
-    if (pathname === '/login') return next();
+    if (pathname === '/login' || pathname === '/dang-ky') return next();
     return context.redirect('/login');
   }
 
@@ -82,7 +82,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     locals.contact = contact;
     locals.token = token;
 
-    if (pathname === '/login') {
+    if (pathname === '/login' || pathname === '/dang-ky') {
       return context.redirect('/tai-khoan');
     }
 

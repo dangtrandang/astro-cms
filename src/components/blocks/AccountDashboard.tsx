@@ -41,6 +41,7 @@ interface Props {
 const DEFAULT_TAB_LABELS: Record<string, string> = {
 	'account-info': 'Thông tin tài khoản',
 	'account-edit': 'Cập nhật thông tin',
+	baomat: 'Bảo mật',
 	billing: 'Hoá đơn',
 	topup: 'Nạp tiền',
 	'chat-history': 'Lịch sử chat',
@@ -124,6 +125,8 @@ export default function AccountDashboard({ user, contact: initialContact, blockC
 				return <AccountInfo user={user} contact={contactState} fullName={fullName} />;
 			case 'account-edit':
 				return <AccountEdit user={user} contact={contactState} onUpdated={handleContactUpdated} />;
+			case 'baomat':
+				return <SecurityTab user={user} />;
 			case 'support':
 				return <SupportContent content={blockConfig.support_content} />;
 			default:
@@ -431,6 +434,163 @@ function simpleMarkdownToHtml(md: string): string {
 	html = html.replace(/\n\n/g, '</p><p class="text-[#3d4d35]">');
 	html = '<p class="text-[#3d4d35]">' + html + '</p>';
 	return html;
+}
+
+function SecurityTab({ user }: { user: User }) {
+	const [submitting, setSubmitting] = useState(false);
+	const [error, setError] = useState('');
+	const [success, setSuccess] = useState(false);
+	const [done, setDone] = useState(false);
+
+	const isGoogle = user.provider === 'google';
+
+	const handleConvert = async (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		setError('');
+		setSuccess(false);
+		setSubmitting(true);
+
+		const form = e.currentTarget;
+		const formData = new FormData(form);
+		const password = (formData.get('password') as string) || '';
+		const confirm = (formData.get('confirm_password') as string) || '';
+
+		if (password.length < 8) {
+			setError('Mật khẩu phải có ít nhất 8 ký tự');
+			setSubmitting(false);
+			return;
+		}
+
+		if (password !== confirm) {
+			setError('Mật khẩu xác nhận không khớp');
+			setSubmitting(false);
+			return;
+		}
+
+		try {
+			const res = await fetch('/api/auth/convert-provider', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ password }),
+			});
+
+			const data = await res.json().catch(() => null);
+
+			if (res.ok) {
+				setSuccess(true);
+				setDone(true);
+			} else {
+				setError(data?.error || 'Không thể cập nhật tài khoản');
+			}
+		} catch {
+			setError('Lỗi kết nối, vui lòng thử lại');
+		} finally {
+			setSubmitting(false);
+		}
+	};
+
+	if (done) {
+		return (
+			<div>
+				<h3 className="text-xl font-bold text-[#1f2a1d] mb-6">Bảo mật</h3>
+				<div className="p-6 bg-green-50 border border-green-200 rounded-xl text-center">
+					<div className="text-3xl mb-3">🔐</div>
+					<p className="text-green-800 font-semibold text-lg mb-2">Tài khoản đã được bảo vệ tuyệt đối</p>
+					<p className="text-sm text-green-700 leading-relaxed">
+						Tài khoản của bạn giờ đây là "lô cốt bất khả xâm phạm". Bạn sẽ không thể đăng nhập nhanh bằng Google được nữa. Mọi dữ liệu (lịch sử chat, thanh toán) được bảo toàn 100%.
+					</p>
+				</div>
+			</div>
+		);
+	}
+
+	if (!isGoogle) {
+		return (
+			<div>
+				<h3 className="text-xl font-bold text-[#1f2a1d] mb-6">Bảo mật</h3>
+				<div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50/60 border border-emerald-100 rounded-xl px-4 py-3 mb-4">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
+						<polyline points="20 6 9 17 4 12" />
+					</svg>
+					<span>Tài khoản của bạn đã được bảo vệ bằng mật khẩu riêng.</span>
+				</div>
+				<p className="text-sm text-[#6b7a65] leading-relaxed">
+					Bạn đăng nhập bằng Email và Mật khẩu. Không ai có thể truy cập tài khoản của bạn qua Google.
+				</p>
+			</div>
+		);
+	}
+
+	return (
+		<div>
+			<h3 className="text-xl font-bold text-[#1f2a1d] mb-6">Bảo mật</h3>
+
+			<div className="p-4 bg-red-50/50 border border-red-200 rounded-xl mb-6">
+				<div className="flex items-start gap-3">
+					<span className="text-lg shrink-0 mt-0.5">⚠️</span>
+					<div>
+						<p className="font-semibold text-red-800 mb-1">Ngắt kết nối Google & Sử dụng Mật khẩu riêng</p>
+						<p className="text-sm text-red-700 leading-relaxed">
+							Để bảo vệ tối đa sự riêng tư của bạn, hãy thiết lập mật khẩu. Sau khi thiết lập, bạn sẽ không thể đăng nhập nhanh bằng Google được nữa.
+						</p>
+					</div>
+				</div>
+			</div>
+
+			{error && (
+				<div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+					{error}
+				</div>
+			)}
+			{success && (
+				<div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm">
+					{success}
+				</div>
+			)}
+
+			<form onSubmit={handleConvert} className="space-y-5">
+				<div>
+					<label htmlFor="sec_password" className="block text-sm font-medium text-[#1f2a1d] mb-1">
+						Mật khẩu mới
+					</label>
+					<input
+						type="password"
+						id="sec_password"
+						name="password"
+						required
+						minLength={8}
+						autoComplete="new-password"
+						placeholder="Ít nhất 8 ký tự"
+						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
+					/>
+				</div>
+
+				<div>
+					<label htmlFor="sec_confirm" className="block text-sm font-medium text-[#1f2a1d] mb-1">
+						Xác nhận mật khẩu
+					</label>
+					<input
+						type="password"
+						id="sec_confirm"
+						name="confirm_password"
+						required
+						minLength={8}
+						autoComplete="new-password"
+						placeholder="Nhập lại mật khẩu"
+						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
+					/>
+				</div>
+
+				<button
+					type="submit"
+					disabled={submitting}
+					className="w-full bg-[#c0392b] hover:bg-[#a93226] disabled:bg-[#9bab92] text-white font-medium py-3 px-6 rounded-full transition-colors"
+				>
+					{submitting ? 'Đang xử lý...' : 'Ngắt kết nối Google & Lưu mật khẩu'}
+				</button>
+			</form>
+		</div>
+	);
 }
 
 function PlaceholderTab({ tab, label }: { tab: string; label: string }) {

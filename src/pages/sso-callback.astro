@@ -132,7 +132,7 @@ const processExchange = async (token: string): Promise<AuthResult> => {
       return { redirect: '', accessToken: null, error: 'user_not_found' };
     }
 
-    const adminUserRes = await adminFetch(`/users/${userId}?fields=id,email,first_name,last_name`);
+    const adminUserRes = await adminFetch(`/users/${userId}?fields=id,email,first_name,last_name,provider`);
     if (!adminUserRes.ok) {
       const errBody = await adminUserRes.text().catch(() => '');
       return { redirect: '', accessToken: null, error: `admin_user_http_${adminUserRes.status}:${errBody.slice(0, 200)}` };
@@ -144,6 +144,11 @@ const processExchange = async (token: string): Promise<AuthResult> => {
   }
   if (!user) {
     return { redirect: '', accessToken: null, error: 'user_not_found' };
+  }
+
+  // Step 3b: Provider mismatch check — if user was registered via email/password, reject Google SSO
+  if (user.provider && user.provider !== 'google') {
+    return { redirect: `/login?error=google_blocked&reason=${encodeURIComponent('Tài khoản này được bảo mật bằng mật khẩu. Vui lòng nhập mật khẩu của bạn.')}`, accessToken: null, error: null };
   }
 
   // Step 4: ensureUserConfig
@@ -215,6 +220,10 @@ if (result.redirect && result.accessToken) {
     path: '/',
     maxAge: 604800,
   });
+  return Astro.redirect(result.redirect);
+}
+
+if (result.redirect && !result.accessToken) {
   return Astro.redirect(result.redirect);
 }
 ---
