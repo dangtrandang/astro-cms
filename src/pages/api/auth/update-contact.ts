@@ -1,13 +1,25 @@
 import type { APIRoute } from 'astro';
-import { createUserClient } from '@/lib/directus/directus';
-import { updateItem, readItems } from '@directus/sdk';
 
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
+const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
+
+const adminFetch = (path: string, init?: RequestInit) =>
+  fetch(`${DIRECTUS_URL}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${ADMIN_TOKEN}`,
+      'Content-Type': 'application/json',
+      ...(init?.headers as Record<string, string> | undefined),
+    },
+  });
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   const token = cookies.get('auth_token')?.value;
   if (!token) {
-    return new Response(null, { status: 401 });
+    return new Response(JSON.stringify({ error: 'Chưa đăng nhập' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   let phone: string | undefined;
@@ -31,21 +43,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     last_name = (formData.get('last_name') as string)?.trim();
   }
 
-  if (!phone) {
-    return new Response(JSON.stringify({ error: 'Số điện thoại là bắt buộc' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
   try {
-    const client = createUserClient(token);
-
     if (!contactId) {
-      const meRes = await fetch(`${DIRECTUS_URL}/users/me?fields=id`, {
+      const meRes = await fetch(`${DIRECTUS_URL}/users/me?fields=id,email`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const meData = await meRes.json();
+      const meData = await meRes.json().catch(() => null);
       const userId = meData?.data?.id;
       if (!userId) {
         return new Response(JSON.stringify({ error: 'Không xác định được người dùng' }), {
@@ -53,10 +56,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           headers: { 'Content-Type': 'application/json' },
         });
       }
-      const contacts = (await client.request(
-        readItems('contacts', { fields: ['id'], filter: { user: { _eq: userId } }, limit: 1 }),
-      )) as any[];
-      contactId = contacts[0]?.id;
+      const contactFilter = encodeURIComponent(JSON.stringify({ user: { _eq: userId } }));
+      const cRes = await adminFetch(`/items/contacts?fields=id&filter=${contactFilter}&limit=1`);
+      const cData = await cRes.json().catch(() => null);
+      contactId = cData?.data?.[0]?.id;
       if (!contactId) {
         return new Response(JSON.stringify({ error: 'Không tìm thấy contact' }), {
           status: 400,
@@ -65,13 +68,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       }
     }
 
-    await client.request(
-      updateItem('contacts', contactId, {
-        phone,
-        first_name: first_name || undefined,
-        last_name: last_name || undefined,
-      }),
-    );
+    const body: Record<string, string | undefined> = { phone };
+    if (first_name) body.first_name = first_name;
+    if (last_name) body.last_name = last_name;
+
+    await adminFetch(`/items/contacts/${contactId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    });
 
     if (isJson) {
       return new Response(JSON.stringify({ success: true }), {
