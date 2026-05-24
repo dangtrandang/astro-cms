@@ -48,10 +48,13 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  // Check if email already exists
-  const emailFilter = encodeURIComponent(JSON.stringify({ email: { _eq: email } }));
+  // Check if email already exists (exclude archived/deleted users)
+  const emailFilter = encodeURIComponent(JSON.stringify({
+    email: { _eq: email },
+    status: { _neq: 'archived' },
+  }));
   const existingRes = await adminFetch(
-    `/users?fields=id,email,provider&filter=${emailFilter}&limit=1`,
+    `/users?fields=id,email,provider,status&filter=${emailFilter}&limit=1`,
   );
 
   if (!existingRes.ok) {

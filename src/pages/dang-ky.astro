@@ -53,14 +53,46 @@ const directusUrl = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 
         <div>
           <label for="reg_password" class="block text-sm font-medium text-[#1f2a1d] mb-1">Mật khẩu <span class="text-red-400">*</span></label>
+          <div class="relative">
+            <input
+              type="password"
+              id="reg_password"
+              name="password"
+              required
+              minlength="8"
+              autocomplete="new-password"
+              placeholder="Ít nhất 8 ký tự"
+              class="w-full px-4 py-2.5 pr-10 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
+            />
+            <button
+              type="button"
+              id="reg-toggle-pw"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-[#9bab92] hover:text-[#4a5a40] focus:outline-none"
+              tabindex="-1"
+              aria-label="Hiển thị mật khẩu"
+            >
+              <svg id="reg-eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+              <svg id="reg-eye-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hidden">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label for="reg_confirm_password" class="block text-sm font-medium text-[#1f2a1d] mb-1">Xác nhận mật khẩu <span class="text-red-400">*</span></label>
           <input
             type="password"
-            id="reg_password"
-            name="password"
+            id="reg_confirm_password"
+            name="confirm_password"
             required
             minlength="8"
             autocomplete="new-password"
-            placeholder="Ít nhất 8 ký tự"
+            placeholder="Nhập lại mật khẩu"
             class="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
           />
         </div>
@@ -105,6 +137,19 @@ const directusUrl = import.meta.env.PUBLIC_DIRECTUS_URL as string;
   const okEl = document.getElementById('register-ok')!;
   const submitBtn = document.getElementById('register-submit') as HTMLButtonElement;
 
+  // Password toggle
+  const toggleBtn = document.getElementById('reg-toggle-pw') as HTMLButtonElement;
+  const pwInput = document.getElementById('reg_password') as HTMLInputElement;
+  const eyeOff = document.getElementById('reg-eye-off')!;
+  const eyeOn = document.getElementById('reg-eye-on')!;
+
+  toggleBtn.addEventListener('click', () => {
+    const isPassword = pwInput.type === 'password';
+    pwInput.type = isPassword ? 'text' : 'password';
+    eyeOff.classList.toggle('hidden', isPassword);
+    eyeOn.classList.toggle('hidden', !isPassword);
+  });
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errEl.classList.add('hidden');
@@ -113,14 +158,16 @@ const directusUrl = import.meta.env.PUBLIC_DIRECTUS_URL as string;
     submitBtn.textContent = 'Đang xử lý...';
 
     const formData = new FormData(form);
+    const password = formData.get('password')?.toString() || '';
+    const confirm = formData.get('confirm_password')?.toString() || '';
     const body = {
       first_name: formData.get('first_name')?.toString().trim() || '',
       last_name: formData.get('last_name')?.toString().trim() || '',
       email: formData.get('email')?.toString().trim() || '',
-      password: formData.get('password')?.toString() || '',
+      password,
     };
 
-    if (!body.email || !body.password) {
+    if (!body.email || !password) {
       errEl.textContent = 'Vui lòng nhập đầy đủ Email và Mật khẩu';
       errEl.classList.remove('hidden');
       submitBtn.disabled = false;
@@ -128,8 +175,16 @@ const directusUrl = import.meta.env.PUBLIC_DIRECTUS_URL as string;
       return;
     }
 
-    if (body.password.length < 8) {
+    if (password.length < 8) {
       errEl.textContent = 'Mật khẩu phải có ít nhất 8 ký tự';
+      errEl.classList.remove('hidden');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Đăng ký';
+      return;
+    }
+
+    if (password !== confirm) {
+      errEl.textContent = 'Mật khẩu xác nhận không khớp';
       errEl.classList.remove('hidden');
       submitBtn.disabled = false;
       submitBtn.textContent = 'Đăng ký';

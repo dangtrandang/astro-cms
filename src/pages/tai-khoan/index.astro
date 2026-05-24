@@ -27,8 +27,14 @@ try {
     blockConfig = {
       id: raw.id || '',
       default_tab: raw.default_tab || 'account-info',
-      enabled_tabs: Array.isArray(raw.enabled_tabs) ? raw.enabled_tabs : ['account-info', 'account-edit'],
-      tab_labels: raw.tab_labels && typeof raw.tab_labels === 'object' ? raw.tab_labels : {},
+      enabled_tabs: (() => {
+        const tabs = Array.isArray(raw.enabled_tabs) ? raw.enabled_tabs : ['account-info', 'account-edit'];
+        if (!tabs.includes('baomat')) tabs.push('baomat');
+        return tabs;
+      })(),
+      tab_labels: raw.tab_labels && typeof raw.tab_labels === 'object'
+        ? { ...raw.tab_labels, baomat: raw.tab_labels.baomat || 'Bảo mật' }
+        : {},
       allow_avatar_edit: raw.allow_avatar_edit ?? false,
       allow_cover_edit: raw.allow_cover_edit ?? false,
       show_logout_button: raw.show_logout_button ?? true,
