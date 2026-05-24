@@ -72,7 +72,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     if (first_name) body.first_name = first_name;
     if (last_name) body.last_name = last_name;
 
-    const patchRes = await adminFetch(`/items/contacts/${contactId}`, {
+    const patchRes = await adminFetch(`/items/contacts/${contactId}?fields=id,phone,first_name,last_name`, {
       method: 'PATCH',
       body: JSON.stringify(body),
     });
