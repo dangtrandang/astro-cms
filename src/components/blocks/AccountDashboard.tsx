@@ -316,13 +316,24 @@ function AccountEdit({
 				throw new Error(errData?.error || 'Cập nhật thất bại');
 			}
 
+			const savedData = await res.json().catch(() => null);
+			const savedContact = savedData?.contact;
+
 			setSuccess(true);
 			setTimeout(() => {
-				onUpdated({
-					first_name: newFirstName,
-					last_name: newLastName,
-					phone: newPhone,
-				});
+				if (savedContact) {
+					onUpdated({
+						first_name: savedContact.first_name,
+						last_name: savedContact.last_name,
+						phone: savedContact.phone || '',
+					});
+				} else {
+					onUpdated({
+						first_name: newFirstName,
+						last_name: newLastName,
+						phone: newPhone,
+					});
+				}
 			}, 800);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Lỗi không xác định');

@@ -76,7 +76,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     method: 'PATCH',
     body: JSON.stringify({
       password: newPassword,
-      provider: null,
+      provider: 'default',
       external_identifier: null,
     }),
   });
