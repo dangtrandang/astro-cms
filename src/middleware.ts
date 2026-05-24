@@ -69,7 +69,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     let contact: any = null;
     try {
       const contactFilter = encodeURIComponent(JSON.stringify({ user: { _eq: user.id } }));
-      const cRes = await userFetch(token, `/items/contacts?fields=id,phone,first_name,last_name&filter=${contactFilter}&limit=1`);
+      const cRes = await adminFetch(`/items/contacts?fields=id,phone,first_name,last_name&filter=${contactFilter}&limit=1`);
       if (cRes.ok) {
         const cData = await cRes.json().catch(() => null);
         contact = cData?.data?.[0] ?? null;

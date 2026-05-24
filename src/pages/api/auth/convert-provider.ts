@@ -39,8 +39,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  // Verify current user
-  const meRes = await fetch(`${DIRECTUS_URL}/users/me?fields=id,email,provider`, {
+  // Step 1: user token to verify session + get userId
+  const meRes = await fetch(`${DIRECTUS_URL}/users/me?fields=id,email`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -54,7 +54,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   const meData = await meRes.json().catch(() => null);
   const userId = meData?.data?.id;
-  const currentProvider = meData?.data?.provider;
 
   if (!userId) {
     return new Response(JSON.stringify({ error: 'Không xác định được người dùng' }), {
@@ -62,6 +61,18 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       headers: { 'Content-Type': 'application/json' },
     });
   }
+
+  // Step 2: admin token to get provider (bypass Customer role field-level permissions)
+  const adminUserRes = await adminFetch(`/users/${userId}?fields=id,email,provider`);
+  if (!adminUserRes.ok) {
+    return new Response(JSON.stringify({ error: 'Không thể kiểm tra tài khoản' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const adminUserData = await adminUserRes.json().catch(() => null);
+  const currentProvider = adminUserData?.data?.provider;
 
   // Only allow conversion from google to default
   if (currentProvider !== 'google') {
@@ -71,7 +82,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     );
   }
 
-  // Cut Google link: set password, change provider to null (becomes "default"), clear external_identifier
+  // Cut Google link: set password, change provider to default, clear external_identifier
   const patchRes = await adminFetch(`/users/${userId}`, {
     method: 'PATCH',
     body: JSON.stringify({

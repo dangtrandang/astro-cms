@@ -494,8 +494,8 @@ function SecurityTab({ user }: { user: User }) {
 				setSuccess(true);
 				setDone(true);
 				setTimeout(() => {
-					window.location.reload();
-				}, 1500);
+					window.location.href = '/api/auth/logout';
+				}, 2000);
 			} else {
 				setError(data?.error || 'Không thể cập nhật tài khoản');
 			}
