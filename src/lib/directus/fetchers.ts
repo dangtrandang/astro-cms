@@ -101,6 +101,17 @@ const pageFields = [
               gallery_items: ['id', 'sort', 'size', { directus_files_id: ['id', 'title', 'description', 'width', 'height'] }],
             },
           ] as any,
+          block_account: [
+            'id',
+            'title',
+            'default_tab',
+            'enabled_tabs',
+            'tab_labels',
+            'allow_avatar_edit',
+            'allow_cover_edit',
+            'show_logout_button',
+            'support_content',
+          ] as any,
           block_richtext: ['id', 'title', 'headline', 'content', 'alignment'] as any,
           block_quote: ['id', 'title', 'subtitle', 'content'] as any,
           block_who_i_am: [

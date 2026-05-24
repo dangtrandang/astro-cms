@@ -32,7 +32,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   try {
-    const meRes = await userFetch(token, '/users/me?fields=id,email,first_name,last_name');
+    const meRes = await userFetch(token, '/users/me?fields=id,email,first_name,last_name,avatar');
     if (!meRes.ok) {
       console.error('[middleware] /users/me failed:', meRes.status, await meRes.text().catch(() => ''));
       cookies.delete('auth_token', { path: '/' });
@@ -66,8 +66,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
       return context.redirect('/tai-khoan');
     }
 
-    if (contact && !contact.phone && pathname !== '/tai-khoan/cap-nhat-thong-tin') {
-      return context.redirect('/tai-khoan/cap-nhat-thong-tin');
+    if (contact && !contact.phone && pathname === '/tai-khoan/cap-nhat-thong-tin') {
+      return next();
     }
 
     if (contact?.phone && pathname === '/tai-khoan/cap-nhat-thong-tin') {

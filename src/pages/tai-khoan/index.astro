@@ -1,47 +1,52 @@
 ---
 import Layout from '@/layouts/BaseLayout.astro';
+import { fetchPageData } from '@/lib/directus/fetchers';
+import AccountDashboard from '@/components/blocks/AccountDashboard';
 
 const { user, contact } = Astro.locals;
+
+const DEFAULT_BLOCK_CONFIG = {
+  id: '',
+  default_tab: 'account-info',
+  enabled_tabs: ['account-info', 'account-edit'],
+  tab_labels: { 'account-info': 'Thông tin tài khoản', 'account-edit': 'Cập nhật thông tin' },
+  allow_avatar_edit: false,
+  allow_cover_edit: false,
+  show_logout_button: true,
+  support_content: '',
+};
+
+let blockConfig = DEFAULT_BLOCK_CONFIG;
+try {
+  const page = await fetchPageData('/tai-khoan', 1);
+  const blockAccountRow = page?.blocks?.find(
+    (b: any) => b?.collection === 'block_account' && b?.item && typeof b.item === 'object',
+  );
+  if (blockAccountRow?.item) {
+    const raw = blockAccountRow.item;
+    blockConfig = {
+      id: raw.id || '',
+      default_tab: raw.default_tab || 'account-info',
+      enabled_tabs: Array.isArray(raw.enabled_tabs) ? raw.enabled_tabs : ['account-info', 'account-edit'],
+      tab_labels: raw.tab_labels && typeof raw.tab_labels === 'object' ? raw.tab_labels : {},
+      allow_avatar_edit: raw.allow_avatar_edit ?? false,
+      allow_cover_edit: raw.allow_cover_edit ?? false,
+      show_logout_button: raw.show_logout_button ?? true,
+      support_content: raw.support_content || '',
+    };
+  }
+} catch (err) {
+  console.error('[tai-khoan] Failed to fetch block_account:', err);
+}
 ---
 
 <Layout metadata={{ title: 'Tài khoản của tôi', description: 'Trang quản lý tài khoản Hồng Ngọc Huyền Học' }}>
-  <div class="min-h-[70vh] px-4 py-16 max-w-3xl mx-auto">
-    <div class="bg-white rounded-2xl shadow-lg p-8 border border-[#f5e1e0]">
-      <h1 class="text-2xl font-bold text-[#1f2a1d] mb-6">Tài khoản của tôi</h1>
-
-      <div class="space-y-4">
-        <div class="p-4 bg-[#fcf5ee] rounded-xl">
-          <span class="text-sm text-[#9bab92]">Họ tên</span>
-          <p class="text-[#1f2a1d] font-medium">
-            {contact?.first_name || user?.first_name || 'Chưa cập nhật'} {contact?.last_name || user?.last_name || ''}
-          </p>
-        </div>
-
-        <div class="p-4 bg-[#fcf5ee] rounded-xl">
-          <span class="text-sm text-[#9bab92]">Email</span>
-          <p class="text-[#1f2a1d] font-medium">{user?.email || 'Chưa cập nhật'}</p>
-        </div>
-
-        <div class="p-4 bg-[#fcf5ee] rounded-xl">
-          <span class="text-sm text-[#9bab92]">Điện thoại</span>
-          <p class="text-[#1f2a1d] font-medium">{contact?.phone || 'Chưa cập nhật'}</p>
-        </div>
-
-        <div class="pt-4 flex gap-4">
-          <a
-            href="/tai-khoan/cap-nhat-thong-tin"
-            class="inline-flex items-center px-5 py-2.5 bg-[#1f2a1d] text-white text-sm font-medium rounded-full hover:bg-[#850e35] transition-colors"
-          >
-            Cập nhật thông tin
-          </a>
-          <a
-            href="/api/auth/logout"
-            class="inline-flex items-center px-5 py-2.5 border border-[#e8d5d5] text-[#6b4f4f] text-sm font-medium rounded-full hover:bg-[#f5e1e0] transition-colors"
-          >
-            Đăng xuất
-          </a>
-        </div>
-      </div>
-    </div>
+  <div class="min-h-[70vh] px-4 py-8 lg:py-12 max-w-5xl mx-auto">
+    <AccountDashboard
+      client:load
+      user={user}
+      contact={contact}
+      blockConfig={blockConfig}
+    />
   </div>
 </Layout>

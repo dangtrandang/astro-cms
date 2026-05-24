@@ -8,13 +8,30 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return new Response(null, { status: 401 });
   }
 
-  const formData = await request.formData();
-  const phone = (formData.get('phone') as string)?.trim();
-  const first_name = (formData.get('first_name') as string)?.trim();
-  const last_name = (formData.get('last_name') as string)?.trim();
+  let phone: string | undefined;
+  let first_name: string | undefined;
+  let last_name: string | undefined;
+  let isJson = false;
+
+  const contentType = request.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    const body = await request.json();
+    phone = body.phone?.trim();
+    first_name = body.first_name?.trim();
+    last_name = body.last_name?.trim();
+    isJson = true;
+  } else {
+    const formData = await request.formData();
+    phone = (formData.get('phone') as string)?.trim();
+    first_name = (formData.get('first_name') as string)?.trim();
+    last_name = (formData.get('last_name') as string)?.trim();
+  }
 
   if (!phone) {
-    return new Response(null, { status: 400 });
+    return new Response(JSON.stringify({ error: 'Số điện thoại là bắt buộc' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
@@ -26,7 +43,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     const contactId = contacts[0]?.id;
     if (!contactId) {
-      return new Response(null, { status: 400 });
+      return new Response(JSON.stringify({ error: 'Không tìm thấy contact' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     await client.request(
@@ -37,12 +57,22 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       }),
     );
 
+    if (isJson) {
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response(null, {
       status: 302,
       headers: { Location: '/tai-khoan' },
     });
   } catch (err) {
     console.error('Update contact error:', err);
-    return new Response(null, { status: 500 });
+    return new Response(JSON.stringify({ error: 'Lỗi máy chủ' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 };
