@@ -13,11 +13,13 @@ const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
 const userFetch = (token: string, path: string) =>
   fetch(`${DIRECTUS_URL}${path}`, {
     headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
   });
 
 const adminFetch = (path: string) =>
   fetch(`${DIRECTUS_URL}${path}`, {
     headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
+    cache: 'no-store',
   });
 
 export const onRequest = defineMiddleware(async (context, next) => {
