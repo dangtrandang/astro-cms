@@ -3,7 +3,11 @@ import Layout from '@/layouts/BaseLayout.astro';
 import { fetchPageData } from '@/lib/directus/fetchers';
 import AccountDashboard from '@/components/blocks/AccountDashboard';
 
+export const prerender = false;
+
 const { user, contact } = Astro.locals;
+
+Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
 
 const DEFAULT_BLOCK_CONFIG = {
   id: '',
