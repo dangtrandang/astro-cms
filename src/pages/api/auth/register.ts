@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { AUTH_COOKIE_NAME, AUTH_COOKIE_OPTIONS } from '@/lib/auth-cookie';
 
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
@@ -176,13 +177,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  cookies.set('auth_token', accessToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 604800,
-  });
+  cookies.set(AUTH_COOKIE_NAME, accessToken, AUTH_COOKIE_OPTIONS);
 
   return new Response(JSON.stringify({ success: true, redirect: '/tai-khoan' }), {
     status: 201,

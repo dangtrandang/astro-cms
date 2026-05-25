@@ -1,4 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
+import { AUTH_COOKIE_NAME } from '@/lib/auth-cookie';
 
 interface AuthLocals {
   user: { id: string; email?: string; first_name?: string; last_name?: string; provider?: string | null; external_identifier?: string | null };
@@ -7,6 +8,7 @@ interface AuthLocals {
 }
 
 const PROTECTED_ROUTES = ['/tai-khoan', '/login', '/dang-ky', '/sso-callback'];
+const PUBLIC_AUTH_ROUTES = ['/login', '/dang-ky'];
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
 
@@ -32,10 +34,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   if (pathname === '/sso-callback') return next();
 
-  const token = cookies.get('auth_token')?.value;
+  const token = cookies.get(AUTH_COOKIE_NAME)?.value;
+  const isPublicAuthRoute = PUBLIC_AUTH_ROUTES.includes(pathname);
 
   if (!token) {
-    if (pathname === '/login' || pathname === '/dang-ky') return next();
+    if (isPublicAuthRoute) return next();
     return context.redirect('/login');
   }
 
@@ -43,28 +46,28 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const meRes = await userFetch(token, '/users/me?fields=id,email,first_name,last_name');
     if (!meRes.ok) {
       console.error('[middleware] /users/me failed:', meRes.status, await meRes.text().catch(() => ''));
-      cookies.delete('auth_token', { path: '/' });
+      cookies.delete(AUTH_COOKIE_NAME, { path: '/' });
       return context.redirect('/login');
     }
     const meData = await meRes.json();
     const userId = meData?.data?.id;
     if (!userId) {
       console.error('[middleware] /users/me returned no data');
-      cookies.delete('auth_token', { path: '/' });
+      cookies.delete(AUTH_COOKIE_NAME, { path: '/' });
       return context.redirect('/login');
     }
 
     const adminUserRes = await adminFetch(`/users/${userId}?fields=id,email,first_name,last_name,provider,external_identifier`);
     if (!adminUserRes.ok) {
       console.error('[middleware] admin /users/:id failed:', adminUserRes.status, await adminUserRes.text().catch(() => ''));
-      cookies.delete('auth_token', { path: '/' });
+      cookies.delete(AUTH_COOKIE_NAME, { path: '/' });
       return context.redirect('/login');
     }
     const adminUserData = await adminUserRes.json();
     const user = adminUserData?.data;
     if (!user) {
       console.error('[middleware] admin /users/:id returned no data');
-      cookies.delete('auth_token', { path: '/' });
+      cookies.delete(AUTH_COOKIE_NAME, { path: '/' });
       return context.redirect('/login');
     }
 
@@ -84,7 +87,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     locals.contact = contact;
     locals.token = token;
 
-    if (pathname === '/login' || pathname === '/dang-ky') {
+    if (isPublicAuthRoute) {
       return context.redirect('/tai-khoan');
     }
 
@@ -93,7 +96,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return response;
   } catch (err) {
     console.error('[middleware] auth check failed:', err);
-    cookies.delete('auth_token', { path: '/' });
+    cookies.delete(AUTH_COOKIE_NAME, { path: '/' });
     return context.redirect('/login');
   }
 });

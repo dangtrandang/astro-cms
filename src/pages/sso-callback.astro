@@ -1,5 +1,6 @@
 ---
-
+import { AUTH_COOKIE_NAME, AUTH_COOKIE_OPTIONS } from '@/lib/auth-cookie';
+ 
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
 const GOOGLE_ROLE_ID = '0ef5375a-2de5-4e25-bcd4-3eecfcca53b8';
@@ -217,13 +218,7 @@ if (errorParam === 'true') {
 }
 
 if (result.redirect && result.accessToken) {
-  Astro.cookies.set('auth_token', result.accessToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 604800,
-  });
+  Astro.cookies.set(AUTH_COOKIE_NAME, result.accessToken, AUTH_COOKIE_OPTIONS);
   return Astro.redirect(result.redirect);
 }
 
@@ -249,12 +244,6 @@ if (result.redirect && !result.accessToken) {
           ? 'Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại.'
           : 'Đang xử lý đăng nhập, vui lòng đợi...'}
       </p>
-      {result.error && (
-        <details class="mb-6">
-          <summary class="text-xs text-red-500 cursor-pointer">Chi tiết lỗi</summary>
-          <p class="text-xs text-red-400 mt-1 bg-red-50 p-2 rounded break-all">{result.error}</p>
-        </details>
-      )}
       {result.error && (
         <a
           href="/login"
