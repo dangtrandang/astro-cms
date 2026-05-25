@@ -86,8 +86,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
       return context.redirect('/tai-khoan');
     }
 
-    context.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-    return next();
+    const response = await next();
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    return response;
   } catch (err) {
     console.error('[middleware] auth check failed:', err);
     cookies.delete('auth_token', { path: '/' });
