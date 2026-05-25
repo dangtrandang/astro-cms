@@ -53,7 +53,7 @@ export default defineConfig({
 
   experimental: {
     queuedRendering: {
-      enabled: true,
+      enabled: false,
     },
   },
 });
