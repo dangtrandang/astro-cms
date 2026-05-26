@@ -522,18 +522,113 @@ function SecurityTab({ user }: { user: User }) {
 	}
 
 	if (!isGoogle) {
+		const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+			e.preventDefault();
+			setError('');
+			setSubmitting(true);
+
+			const form = e.currentTarget;
+			const formData = new FormData(form);
+			const newPassword = (formData.get('new_password') as string) || '';
+			const confirm = (formData.get('confirm_new_password') as string) || '';
+
+			if (newPassword.length < 8) {
+				setError('Mật khẩu phải có ít nhất 8 ký tự');
+				setSubmitting(false);
+				return;
+			}
+
+			if (newPassword !== confirm) {
+				setError('Mật khẩu xác nhận không khớp');
+				setSubmitting(false);
+				return;
+			}
+
+			try {
+				const res = await fetch('/api/auth/change-password', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ password: newPassword }),
+				});
+
+				const data = await res.json().catch(() => null);
+
+				if (res.ok) {
+					setSuccess(data?.message || 'Mật khẩu đã được cập nhật thành công');
+					form.reset();
+				} else {
+					setError(data?.error || 'Không thể cập nhật mật khẩu');
+				}
+			} catch {
+				setError('Lỗi kết nối, vui lòng thử lại');
+			} finally {
+				setSubmitting(false);
+			}
+		};
+
 		return (
 			<div>
 				<h3 className="text-xl font-bold text-[#1f2a1d] mb-6">Bảo mật</h3>
+
 				<div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50/60 border border-emerald-100 rounded-xl px-4 py-3 mb-4">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
 						<polyline points="20 6 9 17 4 12" />
 					</svg>
 					<span>Tài khoản của bạn đã được bảo vệ bằng mật khẩu riêng.</span>
 				</div>
-				<p className="text-sm text-[#6b7a65] leading-relaxed">
-					Bạn đăng nhập bằng Email và Mật khẩu. Không ai có thể truy cập tài khoản của bạn qua Google.
-				</p>
+
+				{error && (
+					<div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+						{error}
+					</div>
+				)}
+				{success && (
+					<div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm">
+						{success}
+					</div>
+				)}
+
+				<form onSubmit={handleChangePassword} className="space-y-5">
+					<div>
+						<label htmlFor="sec_new_password" className="block text-sm font-medium text-[#1f2a1d] mb-1">
+							Mật khẩu mới
+						</label>
+						<input
+							type="password"
+							id="sec_new_password"
+							name="new_password"
+							required
+							minLength={8}
+							autoComplete="new-password"
+							placeholder="Ít nhất 8 ký tự"
+							className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
+						/>
+					</div>
+
+					<div>
+						<label htmlFor="sec_confirm_new" className="block text-sm font-medium text-[#1f2a1d] mb-1">
+							Xác nhận mật khẩu mới
+						</label>
+						<input
+							type="password"
+							id="sec_confirm_new"
+							name="confirm_new_password"
+							required
+							minLength={8}
+							autoComplete="new-password"
+							placeholder="Nhập lại mật khẩu mới"
+							className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
+						/>
+					</div>
+
+					<button
+						type="submit"
+						disabled={submitting}
+						className="w-full bg-[#c0392b] hover:bg-[#a93226] disabled:bg-[#9bab92] text-white font-medium py-3 px-6 rounded-full transition-colors"
+					>
+						{submitting ? 'Đang cập nhật...' : 'Đổi mật khẩu'}
+					</button>
+				</form>
 			</div>
 		);
 	}
