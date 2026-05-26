@@ -2,6 +2,26 @@ import type { APIRoute } from 'astro';
 
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
+const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY;
+const RECAPTCHA_THRESHOLD = Number(process.env.RECAPTCHA_SCORE_THRESHOLD) || 0.5;
+
+async function verifyRecaptcha(token: string): Promise<{ success: boolean; score: number }> {
+  const params = new URLSearchParams();
+  params.set('secret', RECAPTCHA_SECRET!);
+  params.set('response', token);
+
+  const googleRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+
+  const result = await googleRes.json();
+  return {
+    success: result.success && (result.score ?? 0) >= RECAPTCHA_THRESHOLD,
+    score: result.score ?? 0,
+  };
+}
 
 const adminFetch = (path: string, init?: RequestInit) =>
   fetch(`${DIRECTUS_URL}${path}`, {
@@ -15,10 +35,12 @@ const adminFetch = (path: string, init?: RequestInit) =>
 
 export const POST: APIRoute = async ({ request }) => {
   let email: string;
+  let recaptchaToken: string | undefined;
 
   try {
     const body = await request.json();
     email = (body.email as string)?.trim().toLowerCase();
+    recaptchaToken = body.recaptchaToken as string | undefined;
   } catch {
     return new Response(JSON.stringify({ error: 'Dữ liệu không hợp lệ' }), {
       status: 400,
@@ -31,6 +53,30 @@ export const POST: APIRoute = async ({ request }) => {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
+  }
+
+  if (RECAPTCHA_SECRET) {
+    if (!recaptchaToken) {
+      return new Response(JSON.stringify({ error: 'Xác minh bảo mật thất bại, vui lòng thử lại' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    try {
+      const { success } = await verifyRecaptcha(recaptchaToken);
+      if (!success) {
+        return new Response(JSON.stringify({ error: 'Xác minh bảo mật thất bại, vui lòng thử lại' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    } catch {
+      return new Response(JSON.stringify({ error: 'Lỗi xác minh bảo mật, vui lòng thử lại' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
   }
 
   try {
