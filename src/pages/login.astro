@@ -120,11 +120,45 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY as string;
   </div>
 </Layout>
 
-<script type="module">
-  import { loadRecaptchaScript, getRecaptchaToken } from '/src/lib/recaptcha.ts';
+<script>
+  // Inline reCAPTCHA v3 helpers (không dùng module import vì không resolve được ở production)
+  let _recaptchaScriptLoaded = false;
+  let _recaptchaScriptPromise = null;
 
-  const loginPage = document.getElementById('login-page')!;
-  const siteKey = loginPage.dataset.recaptchaSiteKey || '';
+  function loadRecaptchaScript(siteKey) {
+    if (_recaptchaScriptLoaded) return Promise.resolve();
+    if (_recaptchaScriptPromise) return _recaptchaScriptPromise;
+    _recaptchaScriptPromise = new Promise(function (resolve, reject) {
+      var existing = document.querySelector('script[src="https://www.google.com/recaptcha/api.js?render=' + encodeURIComponent(siteKey) + '"]');
+      if (existing) { _recaptchaScriptLoaded = true; resolve(); return; }
+      var script = document.createElement('script');
+      script.src = 'https://www.google.com/recaptcha/api.js?render=' + encodeURIComponent(siteKey);
+      script.async = true;
+      script.defer = true;
+      script.onload = function () {
+        _recaptchaScriptLoaded = true;
+        (function wait() {
+          if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
+            window.grecaptcha.ready(resolve);
+          } else { setTimeout(wait, 50); }
+        })();
+      };
+      script.onerror = function () { _recaptchaScriptPromise = null; reject(new Error('Failed to load reCAPTCHA')); };
+      document.head.appendChild(script);
+    });
+    return _recaptchaScriptPromise;
+  }
+
+  function getRecaptchaToken(siteKey, action) {
+    return new Promise(function (resolve, reject) {
+      window.grecaptcha.ready(function () {
+        window.grecaptcha.execute(siteKey, { action: action }).then(resolve).catch(reject);
+      });
+    });
+  }
+
+  var loginPage = document.getElementById('login-page');
+  var siteKey = loginPage ? (loginPage.dataset.recaptchaSiteKey || '') : '';
 
   const form = document.getElementById('login-form') as HTMLFormElement;
   const errEl = document.getElementById('login-err')!;
