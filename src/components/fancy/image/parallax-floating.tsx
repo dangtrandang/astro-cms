@@ -178,6 +178,7 @@ export function FloatingElement({
             }
             style={{
                 position: "absolute",
+                width: 'max-content',
                 x: isTouchDevice ? undefined : x,
                 y: isTouchDevice ? undefined : y,
                 ...style,

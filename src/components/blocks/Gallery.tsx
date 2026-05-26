@@ -523,7 +523,7 @@ function FloatingGallery({ data, items }: FloatingGalleryProps) {
                   initial={{ opacity: 0 }}
                   src={`${import.meta.env.PUBLIC_DIRECTUS_URL}/assets/${item.fileId}`}
                   alt={headline || title || `Ảnh ${index + 1}`}
-                  className={`${sizeClass} -translate-x-1/2 -translate-y-1/2 rounded-xl object-cover shadow-[0_10px_30px_rgba(133,14,53,0.08)] hover:scale-105 duration-200 cursor-pointer transition-transform`}
+                  className={`${sizeClass} -translate-x-1/2 -translate-y-1/2 rounded-xl object-cover shadow-[0_10px_30px_rgba(133,14,53,0.08)] hover:scale-105 duration-200 cursor-pointer transition-transform max-w-none`}
                 />
               </FloatingElement>
             );
