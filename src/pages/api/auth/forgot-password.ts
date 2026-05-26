@@ -73,10 +73,12 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
+    const siteUrl = import.meta.env.PUBLIC_SITE_URL || DIRECTUS_URL;
+    const resetUrl = `${siteUrl}/reset-password`;
     const pwRes = await fetch(`${DIRECTUS_URL}/auth/password/request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, reset_url: resetUrl }),
     });
 
     if (!pwRes.ok) {
