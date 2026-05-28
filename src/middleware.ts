@@ -2,7 +2,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { AUTH_COOKIE_NAME } from '@/lib/auth-cookie';
 
 interface AuthLocals {
-  user: { id: string; email?: string; first_name?: string; last_name?: string; provider?: string | null; external_identifier?: string | null };
+  user: { id: string; email?: string; first_name?: string; last_name?: string; avatar?: string | { id: string } | null; provider?: string | null; external_identifier?: string | null };
   contact: { id: string; phone?: string; first_name?: string; last_name?: string } | null;
   token: string;
 }
@@ -43,7 +43,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   try {
-    const meRes = await userFetch(token, '/users/me?fields=id,email,first_name,last_name');
+    const meRes = await userFetch(token, '/users/me?fields=id,email,first_name,last_name,avatar');
     if (!meRes.ok) {
       console.error('[middleware] /users/me failed:', meRes.status, await meRes.text().catch(() => ''));
       cookies.delete(AUTH_COOKIE_NAME, { path: '/' });
@@ -57,7 +57,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       return context.redirect('/login');
     }
 
-    const adminUserRes = await adminFetch(`/users/${userId}?fields=id,email,first_name,last_name,provider,external_identifier`);
+    const adminUserRes = await adminFetch(`/users/${userId}?fields=id,email,first_name,last_name,avatar,provider,external_identifier`);
     if (!adminUserRes.ok) {
       console.error('[middleware] admin /users/:id failed:', adminUserRes.status, await adminUserRes.text().catch(() => ''));
       cookies.delete(AUTH_COOKIE_NAME, { path: '/' });

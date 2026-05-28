@@ -20,7 +20,21 @@ const getHref = (item?: { page?: { permalink?: string | null }; url?: string }) 
 
 const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation, globals, variant = 'default' }, ref) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<{ firstName: string; lastName: string; avatarUrl: string | null } | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const directusURL = import.meta.env.PUBLIC_DIRECTUS_URL;
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => res.json())
+      .then((data: { authenticated: boolean; firstName?: string; lastName?: string; avatarUrl?: string | null }) => {
+        if (data.authenticated) {
+          setUser({ firstName: data.firstName || '', lastName: data.lastName || '', avatarUrl: data.avatarUrl || null });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setAuthLoading(false));
+  }, []);
 
   const logoUrl = globals?.logo_on_dark_bg
     ? `${directusURL}/assets/${globals.logo_on_dark_bg}`
@@ -93,13 +107,29 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
 
           {/* Right side: auth links + hamburger */}
           <div className="flex items-center gap-3 sm:gap-6 text-[#2d3a2a]">
-            <a
-              href="/login"
-              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
-            >
-              <LogIn className="w-4 h-4" />
-              Đăng nhập
-            </a>
+            {!authLoading && user ? (
+              <a
+                href="/tai-khoan"
+                className="hidden sm:flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
+              >
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt={user.firstName} className="w-8 h-8 rounded-full object-cover border border-white/60" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#c0395b] to-[#f1907c] flex items-center justify-center text-white text-sm font-bold border border-white/60">
+                    {(user.firstName || user.lastName || 'N').charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span>Xin chào! {user.firstName || user.lastName || 'Bạn'}</span>
+              </a>
+            ) : (
+              <a
+                href="/login"
+                className="hidden sm:flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
+              >
+                <LogIn className="w-4 h-4" />
+                Đăng nhập
+              </a>
+            )}
             <button
               onClick={() => setMenuOpen((v) => !v)}
               className="lg:hidden relative flex items-center justify-center w-10 h-10 rounded-full bg-white/70 backdrop-blur-md border border-white/60 text-[#1f2a1d] transition-all duration-300 hover:bg-white/90"
@@ -154,13 +184,30 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
               }`}
             style={{ transitionDelay: menuOpen ? '400ms' : '0ms' }}
           >
-            <a
-              href="/login"
-              className="flex items-center gap-2 text-sm font-medium text-[#2d3a2a] sm:hidden"
-            >
-              <LogIn className="w-4 h-4" />
-              Đăng nhập
-            </a>
+            {!authLoading && user ? (
+              <a
+                href="/tai-khoan"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 text-sm font-medium text-[#2d3a2a] sm:hidden"
+              >
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt={user.firstName} className="w-10 h-10 rounded-full object-cover border border-[#1f2a1d]/10" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#c0395b] to-[#f1907c] flex items-center justify-center text-white text-base font-bold">
+                    {(user.firstName || user.lastName || 'N').charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="text-base">Xin chào! {user.firstName || user.lastName || 'Bạn'}</span>
+              </a>
+            ) : (
+              <a
+                href="/login"
+                className="flex items-center gap-2 text-sm font-medium text-[#2d3a2a] sm:hidden"
+              >
+                <LogIn className="w-4 h-4" />
+                Đăng nhập
+              </a>
+            )}
             <button className="mt-2 bg-[#1f2a1d] hover:bg-[#2a3827] text-white text-sm font-semibold px-5 py-3 rounded-full transition-colors">
               Try it Live
             </button>
