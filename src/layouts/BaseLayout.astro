@@ -95,8 +95,11 @@ const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTit
           if (!bar) return;
           bar.classList.add('active');
           bar.style.width = '0';
-          bar.offsetHeight; // force reflow
-          trickle();
+          requestAnimationFrame(function () {
+            var b = getBar();
+            if (b) { void b.offsetHeight; }
+            trickle();
+          });
         }
 
         function done() {

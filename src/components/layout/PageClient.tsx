@@ -1,24 +1,16 @@
 'use client';
 
 import useSWR from 'swr';
-import { useEffect, useMemo, useState } from 'react';
-import { useVisualEditing } from '@/hooks/useVisualEditing';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import PageBuilder from '@/components/layout/PageBuilder';
 import type { PageBlock } from '@/types/directus-schema';
-import { Button } from '@/components/ui/button';
-import { Pencil } from 'lucide-react';
-import { setVisualEditingAttr } from '@/lib/visualEditing';
+
+const VisualEditingOverlay = lazy(() => import('@/components/layout/VisualEditingOverlay'));
 
 interface PageClientProps {
   initialSections: PageBlock[];
   permalink: string;
   pageId: string;
-}
-
-interface VisualEditingOptions {
-  customClass?: string;
-  onSaved?: () => void;
-  elements?: HTMLElement;
 }
 
 const fetchBlocks = async (permalink: string, params: URLSearchParams): Promise<PageBlock[]> => {
@@ -32,8 +24,6 @@ const fetchBlocks = async (permalink: string, params: URLSearchParams): Promise<
 };
 
 export default function PageClient({ initialSections, permalink, pageId }: PageClientProps) {
-  const { isVisualEditingEnabled, apply } = useVisualEditing();
-
   const [isPreviewEnabled, setIsPreviewEnabled] = useState(false);
   const [hasVersioningParams, setHasVersioningParams] = useState(false);
 
@@ -67,75 +57,16 @@ export default function PageClient({ initialSections, permalink, pageId }: PageC
     },
   );
 
-  useEffect(() => {
-    if (isVisualEditingEnabled) {
-      console.log('[PageClient] enabling visual editing overlays', {
-        permalink,
-        pageId,
-      });
-
-      apply({
-        onSaved: () => {
-          mutate();
-        },
-      } as VisualEditingOptions);
-
-      const editButton = document.querySelector('#visual-editing-button') as HTMLElement | null;
-
-      if (editButton) {
-        apply({
-          elements: editButton,
-          customClass: 'visual-editing-button-class',
-          onSaved: () => {
-            mutate();
-          },
-        } as VisualEditingOptions);
-      }
-    }
-  }, [isVisualEditingEnabled, apply, mutate, permalink, pageId]);
+  const isPreviewContext = isPreviewEnabled || hasVersioningParams;
 
   return (
     <div className="relative">
       <PageBuilder sections={sections} />
-      {isVisualEditingEnabled && (
-        <div className="fixed z-[60] w-full bottom-4 inset-x-0 p-4 flex justify-center items-center gap-2">
-          <Button
-            id="visual-editing-button"
-            variant="secondary"
-            className="visual-editing-button-class"
-            data-directus={setVisualEditingAttr({
-              collection: 'pages',
-              item: pageId,
-              fields: ['blocks', 'meta_m2a_button'],
-              mode: 'modal',
-            })}
-          >
-            <Pencil className="size-4 mr-2" />
-            Edit All Blocks
-          </Button>
-        </div>
+      {isPreviewContext && (
+        <Suspense fallback={null}>
+          <VisualEditingOverlay pageId={pageId} onMutate={() => mutate()} />
+        </Suspense>
       )}
-      <style>
-        {`/* Safe to remove this if you're not using the visual editor. */
-          .directus-visual-editing-overlay.visual-editing-button-class .directus-visual-editing-edit-button {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            transform: none;
-            background: transparent;
-          }
-          /* Hide the rectangle but keep the overlay above the button so it can receive clicks */
-          .directus-visual-editing-overlay.visual-editing-button-class {
-            opacity: 0 !important;
-            z-index: 70 !important;
-          }
-          /* Ensure Visual Editor rectangles appear below header and buttons */
-          .directus-visual-editing-overlay {
-            z-index: 40 !important;
-          }
-        `}
-      </style>
     </div>
   );
 }
