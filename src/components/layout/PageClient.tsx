@@ -1,11 +1,9 @@
 'use client';
 
 import useSWR from 'swr';
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import PageBuilder from '@/components/layout/PageBuilder';
 import type { PageBlock } from '@/types/directus-schema';
-
-const VisualEditingOverlay = lazy(() => import('@/components/layout/VisualEditingOverlay'));
 
 interface PageClientProps {
   initialSections: PageBlock[];
@@ -32,14 +30,6 @@ export default function PageClient({ initialSections, permalink, pageId }: PageC
     const preview = params.get('preview') === 'true';
     const hasVersioning = !!params.get('version') || !!params.get('id');
 
-    console.log('[PageClient] preview context', {
-      permalink,
-      pageId,
-      query: window.location.search,
-      preview,
-      hasVersioning,
-    });
-
     setIsPreviewEnabled(preview);
     setHasVersioningParams(hasVersioning);
   }, [permalink, pageId]);
@@ -57,16 +47,9 @@ export default function PageClient({ initialSections, permalink, pageId }: PageC
     },
   );
 
-  const isPreviewContext = isPreviewEnabled || hasVersioningParams;
-
   return (
     <div className="relative">
       <PageBuilder sections={sections} />
-      {isPreviewContext && (
-        <Suspense fallback={null}>
-          <VisualEditingOverlay pageId={pageId} onMutate={() => mutate()} />
-        </Suspense>
-      )}
     </div>
   );
 }

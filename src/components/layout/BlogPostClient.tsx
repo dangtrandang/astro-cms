@@ -9,8 +9,6 @@ import ShareDialog from '@/components/ui/ShareDialog';
 import Headline from '@/components/ui/Headline';
 import { cn } from '@/lib/utils';
 import type { Post, Team } from '@/types/directus-schema';
-import { setVisualEditingAttr as setAttr } from '@/lib/visualEditing';
-import { useVisualEditing } from '@/hooks/useVisualEditing';
 
 interface TocItem {
   id: string;
@@ -53,8 +51,6 @@ export default function BlogPostClient({
   datePublished,
   tags,
 }: BlogPostClientProps) {
-  const { isVisualEditingEnabled, apply } = useVisualEditing();
-
   const [isPreviewEnabled, setIsPreviewEnabled] = useState(false);
   const [hasVersioningParams, setHasVersioningParams] = useState(false);
 
@@ -64,10 +60,10 @@ export default function BlogPostClient({
     setHasVersioningParams(!!params.get('version') || !!params.get('id'));
   }, []);
 
-  const shouldFetchLive = (isVisualEditingEnabled || isPreviewEnabled || hasVersioningParams) && slug;
+  const shouldFetchLive = (isPreviewEnabled || hasVersioningParams) && slug;
 
   const swrKey = shouldFetchLive
-    ? `/api/blog-post/${encodeURIComponent(slug!)}?${new URLSearchParams(window.location.search).toString()}&visual-editing=${isVisualEditingEnabled}`
+    ? `/api/blog-post/${encodeURIComponent(slug!)}?${new URLSearchParams(window.location.search).toString()}`
     : null;
 
   const { data: swrData, mutate } = useSWR(
@@ -88,17 +84,7 @@ export default function BlogPostClient({
     },
   );
 
-  const post = isVisualEditingEnabled ? (swrData?.post ?? initialPost) : initialPost;
-
-  useEffect(() => {
-    if (isVisualEditingEnabled) {
-      apply({
-        onSaved: () => {
-          mutate();
-        },
-      });
-    }
-  }, [isVisualEditingEnabled, apply, mutate]);
+  const post = shouldFetchLive ? (swrData?.post ?? initialPost) : initialPost;
 
   // --- Table of Contents: Scroll Spy ---
   const [activeId, setActiveId] = useState<string>('');
@@ -189,12 +175,6 @@ export default function BlogPostClient({
         <div className="mb-8 overflow-hidden rounded-2xl">
           <div
             className="group relative h-[320px] w-full overflow-hidden rounded-2xl sm:h-[380px] md:h-[480px]"
-            data-directus={setAttr({
-              collection: 'posts',
-              item: post.id,
-              fields: ['title', 'slug', 'summary', 'image', 'meta_header_image', 'author', 'date_published', 'tags', 'category'],
-              mode: 'modal',
-            })}
           >
             <div className="absolute inset-0 bg-[#F2D1D1]">
               {post.image && (
@@ -225,12 +205,6 @@ export default function BlogPostClient({
                   as="h1"
                   headline={post.title}
                   className="max-w-[80rem] !font-serif text-[1.7rem] font-semibold leading-tight !text-[#f5dcda] sm:text-4xl md:text-5xl"
-                  data-directus={setAttr({
-                    collection: 'posts',
-                    item: post.id,
-                    fields: ['title', 'slug'],
-                    mode: 'popover',
-                  })}
                 />
               </div>
 
@@ -325,12 +299,6 @@ export default function BlogPostClient({
 
             <BaseText
               content={displayContent}
-              data-directus={setAttr({
-                collection: 'posts',
-                item: post.id,
-                fields: ['content', 'meta_header_content'],
-                mode: 'drawer',
-              })}
             />
 
             {(previousPost || nextPost) && (
@@ -371,12 +339,6 @@ export default function BlogPostClient({
             {author && (
               <div
                 className="mb-[4.2rem] rounded-xl border border-[#F2D1D1] bg-[#f8e7e3] p-5"
-                data-directus={setAttr({
-                  collection: 'posts',
-                  item: post.id,
-                  fields: ['author'],
-                  mode: 'popover',
-                })}
               >
                 <div className="flex items-center gap-4">
                   {author.image ? (
