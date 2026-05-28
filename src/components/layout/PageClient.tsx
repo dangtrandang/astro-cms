@@ -63,7 +63,7 @@ export default function PageClient({ initialSections, permalink, pageId }: PageC
     {
       fallbackData: initialSections,
       revalidateOnFocus: false,
-      revalidateOnMount: true,
+      revalidateOnMount: isPreviewEnabled || hasVersioningParams,
     },
   );
 

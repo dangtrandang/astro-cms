@@ -1,6 +1,6 @@
 ---
-import { ClientRouter } from 'astro:transitions';
-import VisualEditingLayout from '@/components/layout/VisualEditingLayout';
+import NavigationBar from '@/components/layout/NavigationBar';
+import Footer from '@/components/layout/Footer';
 import { getDirectusAssetURL } from '@/lib/directus/directus-utils';
 import { fetchSiteData } from '@/lib/directus/fetchers';
 import '@/styles/global.css';
@@ -34,7 +34,6 @@ const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTit
       </>
     )}
 
-    <ClientRouter />
 
     <style is:inline>
       /* ── Top Progress Bar (Gradient Pill) ── */
@@ -152,17 +151,20 @@ const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTit
     <!-- Top Progress Bar: ngay sau mở body, trước mọi nội dung -->
     <div id="top-progress-bar"></div>
 
-    <VisualEditingLayout
-      headerNavigation={headerNavigation}
-      footerNavigation={footerNavigation}
+    <NavigationBar
+      variant={headerVariant}
+      navigation={headerNavigation}
       globals={globals}
-      headerVariant={headerVariant}
       client:load
-    >
-      <main class="flex-grow">
-        <slot />
-      </main>
-    </VisualEditingLayout>
+    />
+    <main class="flex-grow">
+      <slot />
+    </main>
+    <Footer
+      navigation={footerNavigation}
+      globals={globals}
+      client:load
+    />
 
   </body>
 </html>
