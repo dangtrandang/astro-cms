@@ -1,24 +1,27 @@
-import React from 'react';
-import ContactForm from './ContactForm';
-import Gallery from './Gallery';
-import Posts from './Posts';
-import Hero from './Hero';
-import RichText from './RichText';
-import Pricing from './Pricing';
-import Cta from './Cta';
-import Columns from './Columns';
-import Faqs from './Faqs';
-import Html from './Html';
-import LogoCloud from './LogoCloud';
-import Quote from './Quote';
-import Steps from './Steps';
-import Team from './Team';
-import Testimonials from './Testimonials';
-import Video from './Video';
-import Divider from './Divider';
-import BlogArchive from './BlogArchive';
-import WhoIAm from './WhoIAm';
+import { lazy, Suspense } from 'react';
 import type { PageBlock } from '@/types/directus-schema';
+
+const components: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
+  block_hero: lazy(() => import('./Hero')),
+  block_gallery: lazy(() => import('./Gallery')),
+  block_posts: lazy(() => import('./Posts')),
+  block_blog_archive: lazy(() => import('./BlogArchive')),
+  block_form: lazy(() => import('./ContactForm')),
+  block_richtext: lazy(() => import('./RichText')),
+  block_pricing: lazy(() => import('./Pricing')),
+  block_cta: lazy(() => import('./Cta')),
+  block_columns: lazy(() => import('./Columns')),
+  block_faqs: lazy(() => import('./Faqs')),
+  block_html: lazy(() => import('./Html')),
+  block_logocloud: lazy(() => import('./LogoCloud')),
+  block_quote: lazy(() => import('./Quote')),
+  block_steps: lazy(() => import('./Steps')),
+  block_team: lazy(() => import('./Team')),
+  block_testimonials: lazy(() => import('./Testimonials')),
+  block_video: lazy(() => import('./Video')),
+  block_divider: lazy(() => import('./Divider')),
+  block_who_i_am: lazy(() => import('./WhoIAm')),
+};
 
 interface BaseBlockProps {
   block: PageBlock;
@@ -27,32 +30,16 @@ interface BaseBlockProps {
 export default function BaseBlock({ block }: BaseBlockProps) {
   if (!block.collection || !block.item) return null;
 
-  const components: Record<string, React.ElementType> = {
-    block_hero: Hero,
-    block_gallery: Gallery,
-    block_posts: Posts,
-    block_blog_archive: BlogArchive,
-    block_form: ContactForm,
-    block_richtext: RichText,
-    block_pricing: Pricing,
-    block_cta: Cta,
-    block_columns: Columns,
-    block_faqs: Faqs,
-    block_html: Html,
-    block_logocloud: LogoCloud,
-    block_quote: Quote,
-    block_steps: Steps,
-    block_team: Team,
-    block_testimonials: Testimonials,
-    block_video: Video,
-    block_divider: Divider,
-    block_who_i_am: WhoIAm,
-  };
-
   const Component = components[block.collection];
 
   const itemId =
     typeof block.item === 'object' && block.item !== null && 'id' in block.item ? (block.item.id as string) : undefined;
 
-  return Component ? <Component data={block.item} blockId={block.id} itemId={itemId} /> : null;
+  if (!Component) return null;
+
+  return (
+    <Suspense fallback={null}>
+      <Component data={block.item} blockId={block.id} itemId={itemId} />
+    </Suspense>
+  );
 }
