@@ -374,7 +374,7 @@ function AccountEdit({
 						id="edit_first_name"
 						name="first_name"
 						defaultValue={contact?.first_name || user.first_name || ''}
-						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
+						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
 					/>
 				</div>
 
@@ -387,7 +387,7 @@ function AccountEdit({
 						id="edit_last_name"
 						name="last_name"
 						defaultValue={contact?.last_name || user.last_name || ''}
-						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
+						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
 					/>
 				</div>
 
@@ -401,7 +401,7 @@ function AccountEdit({
 						name="phone"
 						placeholder="VD: 0912345678"
 						defaultValue={contact?.phone || ''}
-						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
+						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
 					/>
 				</div>
 
@@ -601,7 +601,7 @@ function SecurityTab({ user }: { user: User }) {
 							minLength={8}
 							autoComplete="new-password"
 							placeholder="Ít nhất 8 ký tự"
-							className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
+							className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
 						/>
 					</div>
 
@@ -617,7 +617,7 @@ function SecurityTab({ user }: { user: User }) {
 							minLength={8}
 							autoComplete="new-password"
 							placeholder="Nhập lại mật khẩu mới"
-							className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
+							className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
 						/>
 					</div>
 
@@ -673,7 +673,7 @@ function SecurityTab({ user }: { user: User }) {
 						minLength={8}
 						autoComplete="new-password"
 						placeholder="Ít nhất 8 ký tự"
-						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
+						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
 					/>
 				</div>
 
@@ -689,7 +689,7 @@ function SecurityTab({ user }: { user: User }) {
 						minLength={8}
 						autoComplete="new-password"
 						placeholder="Nhập lại mật khẩu"
-						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#c0395b]/30 focus:border-[#c0395b] outline-none transition"
+						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
 					/>
 				</div>
 

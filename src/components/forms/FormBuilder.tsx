@@ -81,7 +81,7 @@ const FormBuilder = ({ form, className, submitVariant, submitClassName }: FormBu
   }
 
   return (
-    <div className={cn('space-y-6 bg-white p-8 rounded-xl shadow-[0_10px_30px_rgba(133,14,53,0.08)] [&_input]:bg-[#f6f6f6] [&_textarea]:bg-[#f6f6f6] [&_input]:border-[#f5dcda] [&_textarea]:border-[#f5dcda] [&_input]:focus-visible:ring-white [&_textarea]:focus-visible:ring-white [&_input]:rounded-[1.75rem] [&_textarea]:rounded-[1.75rem] [&_textarea]:min-h-[200px]', className)}>
+    <div className={cn('space-y-6 bg-white p-8 rounded-xl shadow-[0_10px_30px_rgba(133,14,53,0.08)] [&_input]:bg-[#f6f6f6] [&_textarea]:bg-[#f6f6f6] [&_input]:border-[#f5dcda] [&_textarea]:border-[#f5dcda] [&_input]:focus-visible:ring-[#C6DCE4]/30 [&_textarea]:focus-visible:ring-[#C6DCE4]/30 [&_input]:rounded-[1.75rem] [&_textarea]:rounded-[1.75rem] [&_textarea]:min-h-[200px]', className)}>
       {form.title && <h3 className="text-xl font-['Playfair_Display'] text-[#850E35] mb-4">{form.title}</h3>}
 
       {recaptcha.isLoading && (

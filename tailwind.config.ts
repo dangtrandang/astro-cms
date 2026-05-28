@@ -221,6 +221,8 @@ const config: Config = {
     'text-[#FCF5EE]/70',
     'text-[#FCF5EE]/50',
     'focus:ring-[#C6DCE4]',
+    'focus:ring-[#C6DCE4]/30',
+    'focus:border-[#C6DCE4]',
     'hover:text-[#C6DCE4]',
     'lg:grid-cols-[35%_20%_20%_25%]',
   ],
