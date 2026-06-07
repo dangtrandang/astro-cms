@@ -53,14 +53,14 @@ function LinkflowHero({
   imageSrc?: string | null;
 }) {
   return (
-    <section className="relative flex min-h-screen w-full items-center overflow-hidden sm:h-screen">
+    <section className="relative flex min-h-screen w-full items-end sm:items-center overflow-hidden sm:h-screen">
       {videoSrc ? (
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover object-[75%] sm:object-center"
         >
           <source src={videoSrc} type="video/mp4" />
         </video>
@@ -70,7 +70,7 @@ function LinkflowHero({
 
       <div className="absolute inset-0 bg-white/10" />
 
-      <div className="relative z-10 w-full px-6 pb-18 pt-30 sm:px-11 sm:pb-22 sm:pt-34 lg:px-18 xl:px-22 2xl:px-24">
+      <div className="relative z-10 w-full px-6 pb-20 pt-20 sm:px-11 sm:pb-22 sm:pt-34 lg:px-18 xl:px-22 2xl:px-24">
         <div className="max-w-[52rem] text-left">
           <p className="text-[1.02rem] uppercase tracking-[0.21em] text-[#c98383] sm:text-[1.18rem] lg:text-[1.3rem]">
             HỒNG NGỌC HUYỀN HỌC
@@ -97,7 +97,7 @@ function LinkflowHero({
           >
             {linkflowContent}
           </p>
-          <button className="mt-11 inline-flex items-center gap-4 rounded-[1.25rem] bg-dusty-blue px-8 py-4.5 text-base font-semibold text-cream shadow-sm transition-colors hover:bg-charcoal sm:px-10 sm:py-5 sm:text-[1.08rem] lg:text-[1.18rem]">
+          <button className="mt-7 sm:mt-11 inline-flex items-center gap-3 sm:gap-4 rounded-[1.25rem] bg-dusty-blue px-6 sm:px-10 py-3.5 sm:py-5 text-sm sm:text-[1.08rem] lg:text-[1.18rem] font-semibold text-cream shadow-sm transition-colors hover:bg-charcoal">
             <svg
               aria-hidden="true"
               viewBox="0 0 24 24"
