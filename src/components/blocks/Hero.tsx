@@ -73,7 +73,7 @@ function LinkflowHero({
       <div className="relative z-10 w-full px-6 pb-16 pt-28 sm:px-10 sm:pb-20 sm:pt-32 lg:px-16 xl:px-20">
         <div className="max-w-[32rem] text-left">
           <p className="text-sm uppercase tracking-[0.24em] text-[#c98383] sm:text-base">
-            HONG NGOC HUYEN HOC
+            HỒNG NGỌC HUYỀN HỌC
           </p>
           <h1
             className="mt-6 font-heading text-[3.2rem] italic font-semibold leading-[0.88] text-[#2f2626] sm:text-[4.4rem] lg:text-[5.25rem]"
@@ -98,7 +98,7 @@ function LinkflowHero({
             {linkflowContent}
           </p>
           <button className="mt-10 inline-flex rounded-2xl bg-dusty-blue px-7 py-4 text-sm font-semibold text-cream shadow-sm transition-colors hover:bg-charcoal sm:px-8 sm:text-base">
-            Tro chuyen cung Ngoc
+            Trò chuyện cùng Ngọc
           </button>
         </div>
       </div>
@@ -107,18 +107,18 @@ function LinkflowHero({
 }
 
 export default function Hero({ data }: HeroProps) {
-  const headline = data.headline || 'Nhin ro hon<br />mot chut.';
+  const headline = data.headline || 'Nhìn rõ hơn<br />một chút.';
   const content =
     data.content ||
-    'Mot khong gian de ban duoc lang nghe, nhin lai va go roi nhung dieu dang be tac. Bang huyen hoc, Bang goc nhin. Va bang su thau hieu.';
+    'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng huyền học, Bằng góc nhìn. Và bằng sự thấu hiểu.';
   const linkflowVideoSrc = resolveDirectusFileUrl(data.video) || LINKFLOW_VIDEO_URL;
   const linkflowImageSrc = resolveDirectusFileUrl(data.image);
 
   if (isHeroLinkflowVariant(data.variant)) {
-    const linkflowHeadline = headline || 'Nhin ro hon<br />mot chut.';
+    const linkflowHeadline = headline || 'Nhìn rõ hơn<br />một chút.';
     const linkflowContent =
       content ||
-      'Mot khong gian de ban duoc lang nghe, nhin lai va go roi nhung dieu dang be tac. Bang huyen hoc, Bang goc nhin. Va bang su thau hieu.';
+      'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng huyền học, Bằng góc nhìn. Và bằng sự thấu hiểu.';
 
     return (
       <LinkflowHero
