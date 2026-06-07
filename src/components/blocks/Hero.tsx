@@ -70,14 +70,14 @@ function LinkflowHero({
 
       <div className="absolute inset-0 bg-white/10" />
 
-      <div className="relative z-10 w-full px-6 pb-16 pt-28 sm:px-10 sm:pb-20 sm:pt-32 lg:px-16 xl:px-20">
-        <div className="max-w-[32rem] text-left">
-          <p className="text-sm uppercase tracking-[0.24em] text-[#c98383] sm:text-base">
+      <div className="relative z-10 w-full px-6 pb-18 pt-30 sm:px-11 sm:pb-22 sm:pt-34 lg:px-18 xl:px-22 2xl:px-24">
+        <div className="max-w-[52rem] text-left">
+          <p className="text-[1.02rem] uppercase tracking-[0.21em] text-[#c98383] sm:text-[1.18rem] lg:text-[1.3rem]">
             HỒNG NGỌC HUYỀN HỌC
           </p>
           <h1
-            className="mt-6 font-heading text-[3.2rem] italic font-semibold leading-[0.88] text-[#2f2626] sm:text-[4.4rem] lg:text-[5.25rem]"
-            style={{ letterSpacing: '-0.04em' }}
+            className="mt-6 font-heading text-[5rem] italic font-semibold leading-[0.82] text-[#2f2626] sm:text-[6.7rem] lg:text-[8rem] xl:text-[8.75rem]"
+            style={{ letterSpacing: '-0.048em' }}
             data-directus={setAttr({
               collection: 'block_hero',
               item: heroId,
@@ -87,7 +87,7 @@ function LinkflowHero({
             dangerouslySetInnerHTML={{ __html: linkflowHeadline }}
           />
           <p
-            className="mt-8 max-w-[26rem] text-base leading-[2] text-[#7a6661] sm:text-[1.125rem]"
+            className="mt-9 max-w-[40rem] text-[1.18rem] leading-[1.9] text-[#7a6661] sm:text-[1.32rem] lg:text-[1.5rem]"
             data-directus={setAttr({
               collection: 'block_hero',
               item: heroId,
@@ -97,8 +97,20 @@ function LinkflowHero({
           >
             {linkflowContent}
           </p>
-          <button className="mt-10 inline-flex rounded-2xl bg-dusty-blue px-7 py-4 text-sm font-semibold text-cream shadow-sm transition-colors hover:bg-charcoal sm:px-8 sm:text-base">
-            Trò chuyện cùng Ngọc
+          <button className="mt-11 inline-flex items-center gap-4 rounded-[1.25rem] bg-dusty-blue px-8 py-4.5 text-base font-semibold text-cream shadow-sm transition-colors hover:bg-charcoal sm:px-10 sm:py-5 sm:text-[1.08rem] lg:text-[1.18rem]">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-6 w-6 shrink-0"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <span>Trò chuyện cùng Ngọc</span>
           </button>
         </div>
       </div>
@@ -107,7 +119,7 @@ function LinkflowHero({
 }
 
 export default function Hero({ data }: HeroProps) {
-  const headline = data.headline || 'Nhìn rõ hơn<br />một chút.';
+  const headline = data.headline || 'Nhìn <span class="text-[#D28080]">rõ hơn</span><br />một chút.';
   const content =
     data.content ||
     'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng huyền học, Bằng góc nhìn. Và bằng sự thấu hiểu.';
@@ -115,7 +127,7 @@ export default function Hero({ data }: HeroProps) {
   const linkflowImageSrc = resolveDirectusFileUrl(data.image);
 
   if (isHeroLinkflowVariant(data.variant)) {
-    const linkflowHeadline = headline || 'Nhìn rõ hơn<br />một chút.';
+    const linkflowHeadline = headline || 'Nhìn <span class="text-[#D28080]">rõ hơn</span><br />một chút.';
     const linkflowContent =
       content ||
       'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng huyền học, Bằng góc nhìn. Và bằng sự thấu hiểu.';

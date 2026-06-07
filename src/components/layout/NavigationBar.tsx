@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, useEffect, useState } from 'react';
-import { LogIn, Menu, X } from 'lucide-react';
+import { LogIn, Menu, MessageSquare, X } from 'lucide-react';
 
 interface NavigationBarProps {
   navigation?: {
@@ -18,10 +18,18 @@ interface NavigationBarProps {
 const getHref = (item?: { page?: { permalink?: string | null }; url?: string }) =>
   item?.page?.permalink || item?.url || '#';
 
+const normalizePath = (value?: string) => {
+  if (!value) return '/';
+  const stripped = value.split('?')[0]?.split('#')[0] || '/';
+  if (stripped === '/') return '/';
+  return stripped.endsWith('/') ? stripped.slice(0, -1) : stripped;
+};
+
 const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation, globals, variant = 'default' }, ref) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<{ firstName: string; lastName: string; avatarUrl: string | null } | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [currentPath, setCurrentPath] = useState('/');
   const directusURL = import.meta.env.PUBLIC_DIRECTUS_URL;
 
   useEffect(() => {
@@ -54,12 +62,18 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
   }, [menuOpen]);
 
   useEffect(() => {
+    const syncPath = () => setCurrentPath(normalizePath(window.location.pathname));
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
         setMenuOpen(false);
       }
     };
-    const handlePopstate = () => setMenuOpen(false);
+    const handlePopstate = () => {
+      setMenuOpen(false);
+      syncPath();
+    };
+
+    syncPath();
     window.addEventListener('resize', handleResize);
     window.addEventListener('popstate', handlePopstate);
     return () => {
@@ -69,6 +83,13 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
   }, []);
 
   const isOverlay = variant === 'overlay';
+  const navLinkTone = isOverlay ? 'text-[#4b3d39]/88 hover:text-[#d28080]' : 'text-[#5b4b45]/82 hover:text-[#d28080]';
+  const loginButtonTone = isOverlay
+    ? 'border border-[#2D2A28] bg-transparent text-[#2D2A28] hover:bg-white/16'
+    : 'border border-[#d9c8bf] bg-white/58 text-[#4f403a] hover:bg-white/82';
+  const primaryButtonTone = isOverlay
+    ? 'bg-dusty-blue text-cream hover:bg-charcoal'
+    : 'bg-dusty-blue text-cream hover:bg-charcoal';
 
   return (
     <>
@@ -80,68 +101,78 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
             : 'sticky top-0 z-[60] border-b border-white/20 bg-[#f2d1d1]/70 backdrop-blur-md text-[#2d3a2a]'
         }
       >
-        <nav className="flex items-center justify-between px-4 sm:px-6 md:px-10 py-4 sm:py-6">
-          {/* Logo */}
+        <nav className="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-4 sm:px-6 sm:py-6 md:px-10 xl:px-14">
           <a href="/" className="flex shrink-0 items-center">
-            <img src={logoUrl} alt="Logo" className="block h-8 sm:h-9 w-auto max-w-none" />
+            <img src={logoUrl} alt="Logo" className="block h-8 w-auto max-w-none sm:h-9" />
           </a>
 
-          {/* Desktop pill nav */}
-          <div className="hidden lg:flex items-center gap-1 bg-white/70 backdrop-blur-md rounded-xl pl-6 pr-1 py-1 shadow-sm border border-white/60">
-            {(navigation?.items || []).map((link: any, i: number) => (
-              <a
-                key={link.id || i}
-                href={getHref(link)}
-                className={`text-sm px-3 py-2 rounded-lg transition-colors hover:bg-soft-nurture ${i === 0
-                  ? 'font-semibold text-charcoal'
-                  : 'font-medium text-charcoal/70 hover:text-charcoal'
-                  }`}
-              >
-                {link.title}
-              </a>
-            ))}
-            <button className="ml-2 bg-dusty-blue hover:bg-charcoal active:bg-charcoal text-cream text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
-              Try it Live
-            </button>
+          <div className="hidden lg:flex items-center justify-center gap-7 xl:gap-9">
+            {(navigation?.items || []).map((link: any, i: number) => {
+              const href = getHref(link);
+              const isActive = href.startsWith('/') && normalizePath(href) === currentPath;
+
+              return (
+                <a
+                  key={link.id || i}
+                  href={href}
+                  className={`relative text-[18px] font-medium transition-colors ${isActive ? 'text-[#d28080]' : navLinkTone}`}
+                >
+                  {link.title}
+                  {isActive ? <span className="absolute left-0 top-full mt-2 h-[2px] w-full rounded-full bg-[#d28080]" /> : null}
+                </a>
+              );
+            })}
           </div>
 
-          {/* Right side: auth links + hamburger */}
-          <div className="flex items-center gap-3 sm:gap-6 text-[#2d3a2a]">
-            {!authLoading && user ? (
+          <div className="flex items-center justify-end gap-3 sm:gap-4">
+            <div className="hidden lg:flex items-center gap-3">
+              {!authLoading && user ? (
+                <a
+                  href="/tai-khoan"
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium backdrop-blur-sm transition-colors ${loginButtonTone}`}
+                >
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.firstName} className="h-7 w-7 rounded-full object-cover border border-white/60" />
+                  ) : (
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/60 bg-gradient-to-br from-[#c0395b] to-[#f1907c] text-xs font-bold text-white">
+                      {(user.firstName || user.lastName || 'N').charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <span>Tài khoản</span>
+                </a>
+              ) : (
+                <a
+                  href="/login"
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium backdrop-blur-sm transition-colors ${loginButtonTone}`}
+                >
+                  <LogIn className="h-4 w-4" />
+                  <span>Đăng nhập</span>
+                </a>
+              )}
               <a
-                href="/tai-khoan"
-                className="hidden sm:flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
+                href="/lien-he"
+                className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium shadow-sm transition-colors ${primaryButtonTone}`}
               >
-                {user.avatarUrl ? (
-                  <img src={user.avatarUrl} alt={user.firstName} className="w-8 h-8 rounded-full object-cover border border-white/60" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#c0395b] to-[#f1907c] flex items-center justify-center text-white text-sm font-bold border border-white/60">
-                    {(user.firstName || user.lastName || 'N').charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <span>Xin chào! {user.firstName || user.lastName || 'Bạn'}</span>
+                <MessageSquare className="h-4 w-4" />
+                <span>Trò chuyện cùng Ngọc</span>
               </a>
-            ) : (
-              <a
-                href="/login"
-                className="hidden sm:flex items-center gap-2 text-sm font-medium hover:opacity-80 transition-opacity"
-              >
-                <LogIn className="w-4 h-4" />
-                Đăng nhập
-              </a>
-            )}
+            </div>
+
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="lg:hidden relative flex items-center justify-center w-10 h-10 rounded-lg bg-white/70 backdrop-blur-md border border-white/60 text-charcoal transition-all duration-300 hover:bg-white/90"
+              className={`relative flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 lg:hidden ${isOverlay
+                ? 'bg-white/18 text-[#3e312d] hover:bg-white/28'
+                : 'bg-white/75 text-[#4f403a] hover:bg-white'
+                }`}
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
             >
               <Menu
-                className={`w-5 h-5 absolute transition-all duration-300 ${menuOpen ? 'opacity-0 rotate-90 scale-50' : 'opacity-100 rotate-0 scale-100'
+                className={`absolute h-5 w-5 transition-all duration-300 ${menuOpen ? 'rotate-90 scale-50 opacity-0' : 'rotate-0 scale-100 opacity-100'
                   }`}
               />
               <X
-                className={`w-5 h-5 absolute transition-all duration-300 ${menuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'
+                className={`absolute h-5 w-5 transition-all duration-300 ${menuOpen ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-50 opacity-0'
                   }`}
               />
             </button>
@@ -160,23 +191,28 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
 
       {/* Mobile menu drawer — outside <header> stacking context */}
       <div
-        className={`lg:hidden fixed top-0 right-0 bottom-0 z-[70] w-[85%] max-w-sm bg-white/95 backdrop-blur-xl shadow-2xl transition-transform duration-500 ease-[transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${menuOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
+        className={`fixed top-0 right-0 bottom-0 z-[70] w-[85%] max-w-sm transition-transform duration-500 ease-[transition-timing-function:cubic-bezier(0.22,1,0.36,1)] lg:hidden ${menuOpen ? 'translate-x-0' : 'translate-x-full'
+          } ${isOverlay ? 'bg-[rgba(255,248,244,0.94)]' : 'bg-[rgba(255,250,247,0.97)]'} backdrop-blur-xl shadow-2xl`}
       >
-        <div className="flex flex-col h-full pt-24 px-8 pb-8">
+        <div className="flex h-full flex-col px-8 pb-8 pt-24">
           <div className="flex flex-col gap-1">
-            {(navigation?.items || []).map((link: any, i: number) => (
-              <a
-                key={link.id || i}
-                href={getHref(link)}
-                onClick={() => setMenuOpen(false)}
-                className={`text-2xl font-semibold text-charcoal py-4 border-b border-charcoal/10 transition-all duration-500 ${menuOpen ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
-                  }`}
-                style={{ transitionDelay: menuOpen ? `${150 + i * 70}ms` : '0ms' }}
-              >
-                {link.title}
-              </a>
-            ))}
+            {(navigation?.items || []).map((link: any, i: number) => {
+              const href = getHref(link);
+              const isActive = href.startsWith('/') && normalizePath(href) === currentPath;
+
+              return (
+                <a
+                  key={link.id || i}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  className={`py-4 text-2xl font-semibold transition-all duration-500 ${isActive ? 'text-[#d28080]' : 'text-[#3c312f]'} ${menuOpen ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
+                    }`}
+                  style={{ transitionDelay: menuOpen ? `${150 + i * 70}ms` : '0ms' }}
+                >
+                  {link.title}
+                </a>
+              );
+            })}
           </div>
 
           <div
@@ -188,29 +224,35 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
               <a
                 href="/tai-khoan"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 text-sm font-medium text-[#2d3a2a] sm:hidden"
+                className="inline-flex items-center gap-3 px-1 py-2 text-sm font-medium text-[#4f403a]"
               >
                 {user.avatarUrl ? (
-                  <img src={user.avatarUrl} alt={user.firstName} className="w-10 h-10 rounded-full object-cover border border-[#1f2a1d]/10" />
+                  <img src={user.avatarUrl} alt={user.firstName} className="h-10 w-10 rounded-full object-cover border border-[#1f2a1d]/10" />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#c0395b] to-[#f1907c] flex items-center justify-center text-white text-base font-bold">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#c0395b] to-[#f1907c] text-base font-bold text-white">
                     {(user.firstName || user.lastName || 'N').charAt(0).toUpperCase()}
                   </div>
                 )}
-                <span className="text-base">Xin chào! {user.firstName || user.lastName || 'Bạn'}</span>
+                <span className="text-base">Tài khoản</span>
               </a>
             ) : (
               <a
                 href="/login"
-                className="flex items-center gap-2 text-sm font-medium text-[#2d3a2a] sm:hidden"
+                onClick={() => setMenuOpen(false)}
+                className="inline-flex items-center gap-2 px-1 py-2 text-sm font-medium text-[#4f403a]"
               >
-                <LogIn className="w-4 h-4" />
-                Đăng nhập
+                <LogIn className="h-4 w-4" />
+                <span>Đăng nhập</span>
               </a>
             )}
-            <button className="mt-2 bg-dusty-blue hover:bg-charcoal text-cream text-sm font-semibold px-5 py-3 rounded-xl transition-colors">
-              Try it Live
-            </button>
+            <a
+              href="/lien-he"
+              onClick={() => setMenuOpen(false)}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-dusty-blue px-5 py-3.5 text-sm font-semibold text-cream shadow-sm transition-colors hover:bg-charcoal"
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span>Trò chuyện cùng Ngọc</span>
+            </a>
           </div>
         </div>
       </div>
