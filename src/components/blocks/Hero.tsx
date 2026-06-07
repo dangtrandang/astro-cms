@@ -53,7 +53,7 @@ function LinkflowHero({
   imageSrc?: string | null;
 }) {
   return (
-    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden sm:h-screen">
+    <section className="relative flex min-h-screen w-full items-center overflow-hidden sm:h-screen">
       {videoSrc ? (
         <video
           autoPlay
@@ -70,53 +70,55 @@ function LinkflowHero({
 
       <div className="absolute inset-0 bg-white/10" />
 
-      {/* Hero copy */}
-      <div className="relative z-10 flex flex-col items-center text-center px-4 sm:px-6">
-        <h1
-          className="font-normal leading-[0.95] text-[#850E35] text-[2rem] sm:text-4xl md:text-5xl lg:text-[4.75rem] xl:text-[5.25rem] max-w-5xl"
-          style={{ letterSpacing: '-0.035em' }}
-          data-directus={setAttr({
-            collection: 'block_hero',
-            item: heroId,
-            fields: ['headline'],
-            mode: 'popover',
-          })}
-          dangerouslySetInnerHTML={{ __html: linkflowHeadline }}
-        />
-        <p
-          className="mt-6 sm:mt-8 text-[#3e2a2a] text-sm sm:text-base md:text-lg leading-relaxed max-w-md px-2"
-          data-directus={setAttr({
-            collection: 'block_hero',
-            item: heroId,
-            fields: ['content'],
-            mode: 'popover',
-          })}
-        >
-          {linkflowContent}
-        </p>
-        <button className="mt-8 sm:mt-10 bg-[#850E35] hover:bg-[#6b0b2b] text-white text-sm sm:text-base font-semibold px-8 sm:px-10 py-3 sm:py-3.5 rounded-full transition-colors shadow-sm">
-          Cùng kết nối
-        </button>
+      <div className="relative z-10 w-full px-6 pb-16 pt-28 sm:px-10 sm:pb-20 sm:pt-32 lg:px-16 xl:px-20">
+        <div className="max-w-[32rem] text-left">
+          <p className="text-sm uppercase tracking-[0.24em] text-[#c98383] sm:text-base">
+            HONG NGOC HUYEN HOC
+          </p>
+          <h1
+            className="mt-6 font-heading text-[3.2rem] italic font-semibold leading-[0.88] text-[#2f2626] sm:text-[4.4rem] lg:text-[5.25rem]"
+            style={{ letterSpacing: '-0.04em' }}
+            data-directus={setAttr({
+              collection: 'block_hero',
+              item: heroId,
+              fields: ['headline'],
+              mode: 'popover',
+            })}
+            dangerouslySetInnerHTML={{ __html: linkflowHeadline }}
+          />
+          <p
+            className="mt-8 max-w-[26rem] text-base leading-[2] text-[#7a6661] sm:text-[1.125rem]"
+            data-directus={setAttr({
+              collection: 'block_hero',
+              item: heroId,
+              fields: ['content'],
+              mode: 'popover',
+            })}
+          >
+            {linkflowContent}
+          </p>
+          <button className="mt-10 inline-flex rounded-2xl bg-dusty-blue px-7 py-4 text-sm font-semibold text-cream shadow-sm transition-colors hover:bg-charcoal sm:px-8 sm:text-base">
+            Tro chuyen cung Ngoc
+          </button>
+        </div>
       </div>
     </section>
   );
 }
 
 export default function Hero({ data }: HeroProps) {
-  const headline = data.headline || 'Focus in a Distracted World';
+  const headline = data.headline || 'Nhin ro hon<br />mot chut.';
   const content =
     data.content ||
-    "We're designing tools for deep thinkers, bold creators, and quiet rebels. Amid the chaos, we build digital spaces for sharp focus and inspired work.";
+    'Mot khong gian de ban duoc lang nghe, nhin lai va go roi nhung dieu dang be tac. Bang huyen hoc, Bang goc nhin. Va bang su thau hieu.';
   const linkflowVideoSrc = resolveDirectusFileUrl(data.video) || LINKFLOW_VIDEO_URL;
   const linkflowImageSrc = resolveDirectusFileUrl(data.image);
 
   if (isHeroLinkflowVariant(data.variant)) {
-    const linkflowHeadline =
-      headline ||
-      'Close the rift <span class="text-[#85AB8B]">linking<br class="hidden sm:block" /> signals and action</span>';
+    const linkflowHeadline = headline || 'Nhin ro hon<br />mot chut.';
     const linkflowContent =
       content ||
-      'Shape scattered signals into meaningful outcomes via AI-driven workflows.';
+      'Mot khong gian de ban duoc lang nghe, nhin lai va go roi nhung dieu dang be tac. Bang huyen hoc, Bang goc nhin. Va bang su thau hieu.';
 
     return (
       <LinkflowHero

@@ -90,10 +90,10 @@ function PostCard({ post }: { post: Post }) {
   return (
     <a
       href={slug ? `/blog/${slug}` : '#'}
-      className="group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-[#F2D1D1] transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-md"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl bg-cream shadow-sm transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-md"
     >
       {/* Thumbnail */}
-      <div className="relative h-52 w-full overflow-hidden rounded-t-xl bg-[#F2D1D1]">
+      <div className="relative h-52 w-full overflow-hidden rounded-t-2xl bg-soft-nurture">
         {imageId ? (
           <DirectusImage
             uuid={imageId}
@@ -106,7 +106,7 @@ function PostCard({ post }: { post: Post }) {
           <div className="absolute inset-0 flex items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-12 w-12 text-[#C6DCE4]"
+              className="h-12 w-12 text-rose-clay"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -122,7 +122,7 @@ function PostCard({ post }: { post: Post }) {
         )}
         {/* Category badge */}
         {categoryTitle && (
-          <span className="absolute left-3 top-3 rounded-full bg-[#C6DCE4]/90 px-3 py-1 text-xs font-semibold text-[#850E35] backdrop-blur-sm">
+          <span className="absolute left-3 top-3 rounded-lg bg-soft-nurture/90 px-3 py-1 text-xs font-semibold text-charcoal backdrop-blur-sm">
             {categoryTitle}
           </span>
         )}
@@ -132,7 +132,7 @@ function PostCard({ post }: { post: Post }) {
       <div className="flex min-h-[260px] flex-1 flex-col gap-3 p-5">
         {date && <p className="text-xs text-gray-400">{date}</p>}
 
-        <h3 className="min-h-[1.75rem] truncate font-serif text-base font-semibold leading-7 text-gray-800 transition-colors duration-300 group-hover:text-[#850E35]">
+        <h3 className="min-h-[1.75rem] truncate font-heading text-base font-semibold leading-7 text-charcoal transition-colors duration-300 group-hover:text-rose-clay">
           {post.title}
         </h3>
 
@@ -144,7 +144,7 @@ function PostCard({ post }: { post: Post }) {
             {post.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag.tags_id?.slug || tag.tags_id?.name}
-                className="rounded-full bg-[#FCF5EE] px-2.5 py-0.5 text-xs text-gray-500 ring-1 ring-[#F2D1D1]"
+                className="rounded-lg bg-cream px-2.5 py-0.5 text-xs text-charcoal/50"
               >
                 {tag.tags_id?.name || ''}
               </span>
@@ -154,8 +154,8 @@ function PostCard({ post }: { post: Post }) {
 
         {/* Author row */}
         {authorName && (
-          <div className="mt-auto flex items-center gap-2 border-t border-[#F2D1D1] pt-3">
-            <div className="relative h-7 w-7 overflow-hidden rounded-full bg-[#F2D1D1]">
+          <div className="mt-auto flex items-center gap-2 border-t border-soft-nurture pt-3">
+            <div className="relative h-7 w-7 overflow-hidden rounded-full bg-soft-nurture">
               {authorImageId ? (
                 <DirectusImage
                   uuid={typeof authorImageId === 'string' ? authorImageId : (authorImageId as any)?.id}
@@ -164,7 +164,7 @@ function PostCard({ post }: { post: Post }) {
                   className="object-cover"
                 />
               ) : (
-                <span className="flex h-full w-full items-center justify-center text-xs font-bold text-[#850E35]">
+                <span className="flex h-full w-full items-center justify-center text-xs font-bold text-charcoal/70">
                   {authorName.charAt(0)}
                 </span>
               )}
@@ -195,7 +195,7 @@ function FeaturedPost({ post }: { post: Post }) {
       style={{ outline: 'none' }}
     >
       {/* Background image */}
-      <div className="absolute inset-0 bg-[#F2D1D1]">
+      <div className="absolute inset-0 bg-soft-nurture">
         {imageId && (
           <DirectusImage
             uuid={imageId}
@@ -213,13 +213,13 @@ function FeaturedPost({ post }: { post: Post }) {
       {/* Content */}
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 sm:gap-4 p-4 sm:p-6 md:p-8">
         {categoryTitle && (
-          <span className="w-fit rounded-full bg-[#C6DCE4]/90 px-3 py-1 text-xs font-semibold text-[#850E35] backdrop-blur-sm">
+          <span className="w-fit rounded-lg bg-soft-nurture/90 px-3 py-1 text-xs font-semibold text-charcoal backdrop-blur-sm">
             {categoryTitle}
           </span>
         )}
 
         <div className="flex items-start justify-between gap-4">
-          <h2 className="max-w-2xl font-serif text-lg sm:text-xl font-semibold leading-tight text-white md:text-3xl">
+          <h2 className="max-w-2xl font-heading italic text-lg sm:text-xl font-semibold leading-tight text-white md:text-3xl">
             {post.title}
           </h2>
           {/* Arrow icon */}
@@ -242,7 +242,7 @@ function FeaturedPost({ post }: { post: Post }) {
             <div className="flex flex-col gap-1">
               <p className="text-xs font-semibold text-white/60">Tác giả</p>
               <div className="flex items-center gap-2">
-                <div className="relative h-8 w-8 overflow-hidden rounded-full ring-2 ring-white/40">
+                <div className="relative h-8 w-8 overflow-hidden rounded-full">
                   {authorImageId ? (
                     <DirectusImage
                       uuid={typeof authorImageId === 'string' ? authorImageId : (authorImageId as any)?.id}
@@ -251,7 +251,7 @@ function FeaturedPost({ post }: { post: Post }) {
                       className="object-cover"
                     />
                   ) : (
-                    <span className="flex h-full w-full items-center justify-center bg-[#850E35] text-xs font-bold text-white">
+                    <span className="flex h-full w-full items-center justify-center bg-rose-clay text-xs font-bold text-charcoal">
                       {authorName.charAt(0)}
                     </span>
                   )}
@@ -277,7 +277,7 @@ function FeaturedPost({ post }: { post: Post }) {
                 {post.tags.slice(0, 3).map((tag) => (
                   <li
                     key={tag.tags_id?.slug || tag.tags_id?.name}
-                    className="rounded-full px-2.5 py-0.5 text-xs font-medium text-white ring-1 ring-white/40"
+                    className="rounded-lg px-2.5 py-0.5 text-xs font-medium text-white"
                   >
                     {tag.tags_id?.name || ''}
                   </li>
@@ -322,7 +322,7 @@ function Pagination({
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-[#F2D1D1] hover:text-[#850E35] disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-charcoal/50 transition hover:bg-soft-nurture hover:text-charcoal disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Trang trước"
       >
         ←
@@ -337,9 +337,9 @@ function Pagination({
           <button
             key={page}
             onClick={() => onPageChange(page)}
-            className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition ${currentPage === page
-              ? 'bg-[#850E35] text-white'
-              : 'text-gray-600 hover:bg-[#F2D1D1] hover:text-[#850E35]'
+            className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition ${currentPage === page
+              ? 'bg-soft-nurture text-charcoal'
+              : 'text-charcoal/70 hover:bg-rose-clay/70 hover:text-charcoal'
               }`}
             aria-current={currentPage === page ? 'page' : undefined}
           >
@@ -351,7 +351,7 @@ function Pagination({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-[#F2D1D1] hover:text-[#850E35] disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-charcoal/50 transition hover:bg-soft-nurture hover:text-charcoal disabled:cursor-not-allowed disabled:opacity-40"
         aria-label="Trang sau"
       >
         →
@@ -525,7 +525,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
   const gridPosts = posts.slice(1);
 
   return (
-    <section className="bg-[#FCF5EE] py-16 md:py-24">
+    <section className="bg-cream py-16 md:py-24">
       {/* Header */}
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <div
@@ -537,11 +537,11 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
             mode: 'popover',
           })}
         >
-          <span className="font-script text-lg text-[#850E35]">Nhật ky & Kien thuc</span>
-          <h2 className="font-serif text-3xl font-semibold text-gray-800 md:text-4xl">
+          <span className="font-body text-lg text-rose-clay">Nhật ky & Kien thuc</span>
+          <h2 className="font-heading italic text-3xl font-semibold text-charcoal md:text-4xl">
             {headline ?? 'Bai viet & Chia se'}
           </h2>
-          <p className="mt-1 text-base text-gray-500">
+          <p className="mt-1 text-base text-charcoal/70">
             Kham pha tri thuc huyen hoc, chiem tinh va hanh trinh noi tam.
           </p>
         </div>
@@ -556,9 +556,9 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
               type="button"
               onClick={() => handleCategoryChange('all')}
               disabled={loading || isTransitioning}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeCategoryId === 'all'
-                ? 'bg-[#850E35] text-white ring-1 ring-[#850E35]'
-                : 'bg-white text-[#850E35] ring-1 ring-[#F2D1D1] hover:bg-[#F2D1D1]'
+              className={`rounded-lg px-4 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeCategoryId === 'all'
+                ? 'bg-soft-nurture text-charcoal'
+                : 'bg-white text-charcoal/75 hover:bg-soft-nurture hover:text-charcoal'
                 }`}
             >
               Tất cả
@@ -569,9 +569,9 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
                 type="button"
                 onClick={() => handleCategoryChange(category.id)}
                 disabled={loading || isTransitioning}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeCategoryId === category.id
-                  ? 'bg-[#850E35] text-white ring-1 ring-[#850E35]'
-                  : 'bg-white text-[#850E35] ring-1 ring-[#F2D1D1] hover:bg-[#F2D1D1]'
+                className={`rounded-lg px-4 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeCategoryId === category.id
+                  ? 'bg-soft-nurture text-charcoal'
+                  : 'bg-white text-charcoal/75 hover:bg-soft-nurture hover:text-charcoal'
                   }`}
               >
                 {category.title}
@@ -583,12 +583,12 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
         {/* Sort + Date filter controls */}
         <div className="mt-6 flex flex-wrap items-center gap-3">
           {/* Sort mode */}
-          <div className="flex items-center gap-1 rounded-full bg-white px-1 py-1 ring-1 ring-[#F2D1D1]">
+          <div className="flex items-center gap-1 rounded-xl bg-white px-1 py-1">
             <button
               type="button"
               onClick={() => handleSortChange('newest')}
               disabled={loading || isTransitioning}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${sortMode === 'newest' ? 'bg-[#850E35] text-white' : 'text-[#850E35] hover:bg-[#F2D1D1]'}`}
+              className={`rounded-lg px-3 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${sortMode === 'newest' ? 'bg-soft-nurture text-charcoal' : 'text-charcoal/70 hover:bg-rose-clay/70 hover:text-charcoal'}`}
             >
               Mới nhất
             </button>
@@ -596,7 +596,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
               type="button"
               onClick={() => handleSortChange('oldest')}
               disabled={loading || isTransitioning}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${sortMode === 'oldest' ? 'bg-[#850E35] text-white' : 'text-[#850E35] hover:bg-[#F2D1D1]'}`}
+              className={`rounded-lg px-3 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${sortMode === 'oldest' ? 'bg-soft-nurture text-charcoal' : 'text-charcoal/70 hover:bg-rose-clay/70 hover:text-charcoal'}`}
             >
               Cũ nhất
             </button>
@@ -609,7 +609,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
                 type="button"
                 onClick={() => handleMonthChange('all')}
                 disabled={loading || isTransitioning}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeMonth === 'all' ? 'bg-[#C6DCE4] text-gray-800 ring-1 ring-[#C6DCE4]' : 'bg-white text-gray-600 ring-1 ring-[#F2D1D1] hover:bg-[#F2D1D1]'}`}
+                className={`rounded-lg px-3 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeMonth === 'all' ? 'bg-soft-nurture text-charcoal' : 'bg-cream text-charcoal/70 hover:bg-rose-clay/70 hover:text-charcoal'}`}
               >
                 Tất cả thời gian
               </button>
@@ -619,7 +619,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
                   type="button"
                   onClick={() => handleMonthChange(month)}
                   disabled={loading || isTransitioning}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeMonth === month ? 'bg-[#C6DCE4] text-gray-800 ring-1 ring-[#C6DCE4]' : 'bg-white text-gray-600 ring-1 ring-[#F2D1D1] hover:bg-[#F2D1D1]'}`}
+                  className={`rounded-lg px-3 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeMonth === month ? 'bg-soft-nurture text-charcoal' : 'bg-cream text-charcoal/70 hover:bg-rose-clay/70 hover:text-charcoal'}`}
                 >
                   {formatMonthLabel(month)}
                 </button>
@@ -637,9 +637,9 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
               <ul className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <li key={i} className="animate-pulse space-y-3">
-                    <div className="h-52 rounded-xl bg-[#F2D1D1]" />
-                    <div className="h-4 w-3/4 rounded bg-[#F2D1D1]" />
-                    <div className="h-3 w-full rounded bg-[#FCF5EE]" />
+                    <div className="h-52 rounded-2xl bg-soft-nurture" />
+                    <div className="h-4 w-3/4 rounded bg-soft-nurture" />
+                    <div className="h-3 w-full rounded bg-cream" />
                     <div className="h-3 w-5/6 rounded bg-[#FCF5EE]" />
                   </li>
                 ))}
@@ -656,7 +656,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
               <div className="flex flex-col items-center justify-center py-20 text-center text-gray-400">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="mb-4 h-12 w-12 text-[#C6DCE4]"
+                  className="mb-4 h-12 w-12 text-rose-clay"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"

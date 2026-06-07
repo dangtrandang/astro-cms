@@ -104,26 +104,26 @@ export default function WhoIAm({ data }: WhoIAmProps) {
         <section
             className={cn(
                 'relative overflow-hidden px-6 py-20 sm:px-8 lg:px-10 lg:py-28',
-                isBlueMystic ? 'bg-[#2E568D] text-white' : 'bg-[#FCF5EE] text-[#3E2A2A]'
+                isBlueMystic ? 'bg-[#2E568D] text-white' : 'bg-cream text-charcoal'
             )}
         >
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
                 <div
                     className={cn(
                         'absolute left-1/2 top-1/2 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full border',
-                        isBlueMystic ? 'border-white/10' : 'border-[#850E35]/10'
+                        isBlueMystic ? 'border-white/10' : 'border-rose-clay/30'
                     )}
                 />
                 <div
                     className={cn(
                         'absolute left-1/2 top-1/2 h-[42rem] w-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed',
-                        isBlueMystic ? 'border-white/20' : 'border-[#850E35]/15'
+                        isBlueMystic ? 'border-white/20' : 'border-rose-clay/35'
                     )}
                 />
                 <div
                     className={cn(
                         'absolute left-1/2 top-1/2 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl',
-                        isBlueMystic ? 'bg-white/5' : 'bg-[#C6DCE4]/25'
+                        isBlueMystic ? 'bg-white/5' : 'bg-soft-nurture/45'
                     )}
                 />
             </div>
@@ -133,7 +133,7 @@ export default function WhoIAm({ data }: WhoIAmProps) {
                     <p
                         className={cn(
                             'text-sm font-semibold uppercase tracking-[0.32em]',
-                            isBlueMystic ? 'text-[#D6A64B]' : 'text-[#850E35]/70'
+                            isBlueMystic ? 'text-[#D6A64B]' : 'text-rose-clay'
                         )}
                         data-directus={setAttr({ collection: 'block_who_i_am', item: data.id, fields: ['eyebrow'], mode: 'popover' })}
                     >
@@ -142,8 +142,8 @@ export default function WhoIAm({ data }: WhoIAmProps) {
 
                     <div
                         className={cn(
-                            'mt-5 font-serif-display text-4xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-5xl lg:text-[3.6rem]',
-                            isBlueMystic ? 'text-white' : 'text-[#850E35]'
+                            'mt-5 font-heading text-4xl font-semibold italic leading-[1.05] tracking-[-0.03em] sm:text-5xl lg:text-[3.6rem]',
+                            isBlueMystic ? 'text-white' : 'text-charcoal'
                         )}
                         data-directus={setAttr({ collection: 'block_who_i_am', item: data.id, fields: ['headline'], mode: 'drawer' })}
                         dangerouslySetInnerHTML={{
@@ -154,7 +154,7 @@ export default function WhoIAm({ data }: WhoIAmProps) {
                     <div
                         className={cn(
                             'mt-8 max-w-lg text-base leading-8 sm:text-lg',
-                            isBlueMystic ? 'text-white/92' : 'text-[#3E2A2A]/85'
+                            isBlueMystic ? 'text-white/92' : 'text-charcoal/80'
                         )}
                         data-directus={setAttr({ collection: 'block_who_i_am', item: data.id, fields: ['content'], mode: 'drawer' })}
                         dangerouslySetInnerHTML={{
@@ -179,7 +179,7 @@ export default function WhoIAm({ data }: WhoIAmProps) {
                                         'flex h-14 w-14 items-center justify-center rounded-full transition-transform duration-300 hover:-translate-y-1',
                                         isBlueMystic
                                             ? 'bg-[#C69A46] text-[#23497A] hover:bg-[#d5ab5c]'
-                                            : 'bg-[#850E35] text-[#FCF5EE] hover:bg-[#9d1744]'
+                                            : 'bg-soft-nurture text-charcoal hover:bg-rose-clay'
                                     )}
                                     aria-label={social.platform}
                                 >
@@ -194,21 +194,21 @@ export default function WhoIAm({ data }: WhoIAmProps) {
                     <div
                         className={cn(
                             'pointer-events-none absolute h-[26rem] w-[26rem] rounded-full border border-dashed md:h-[34rem] md:w-[34rem]',
-                            isBlueMystic ? 'border-white/35' : 'border-[#850E35]/20'
+                            isBlueMystic ? 'border-white/35' : 'border-rose-clay/45'
                         )}
                     />
                     <div
                         className={cn(
                             'pointer-events-none absolute h-[22rem] w-[22rem] rounded-full border md:h-[30rem] md:w-[30rem]',
-                            isBlueMystic ? 'border-white/20' : 'border-[#850E35]/12'
+                            isBlueMystic ? 'border-white/20' : 'border-rose-clay/40'
                         )}
                     />
 
                     {data.center_badge ? (
                         <div
                             className={cn(
-                                'absolute left-1/2 top-8 -translate-x-1/2 rounded-full border px-4 py-1 text-xs uppercase tracking-[0.24em]',
-                                isBlueMystic ? 'border-white/30 bg-white/10 text-white/80' : 'border-[#850E35]/15 bg-white/70 text-[#850E35]/80'
+                                'absolute left-1/2 top-8 -translate-x-1/2 rounded-lg border px-4 py-1 text-xs uppercase tracking-[0.24em]',
+                                isBlueMystic ? 'border-white/30 bg-white/10 text-white/80' : 'border-rose-clay/50 bg-white/70 text-charcoal/70'
                             )}
                             data-directus={setAttr({ collection: 'block_who_i_am', item: data.id, fields: ['center_badge'], mode: 'popover' })}
                         >
@@ -223,7 +223,7 @@ export default function WhoIAm({ data }: WhoIAmProps) {
                             <div
                                 className={cn(
                                     'aspect-[4/5] w-full rounded-[2rem] border backdrop-blur-sm',
-                                    isBlueMystic ? 'border-white/20 bg-white/10' : 'border-[#850E35]/10 bg-white/70'
+                                    isBlueMystic ? 'border-white/20 bg-white/10' : 'border-rose-clay/35 bg-white/70'
                                 )}
                             />
                         )}
@@ -244,18 +244,18 @@ export default function WhoIAm({ data }: WhoIAmProps) {
                                         'flex h-16 w-16 shrink-0 items-center justify-center rounded-full border',
                                         isBlueMystic
                                             ? 'border-white/20 bg-white text-[#2E568D]'
-                                            : 'border-[#850E35]/10 bg-white text-[#850E35]'
+                                            : 'border-rose-clay/35 bg-white text-rose-clay'
                                     )}
                                 >
                                     <Icon className="h-7 w-7" />
                                 </div>
 
                                 <div>
-                                    <h3 className={cn('text-2xl font-medium leading-tight', isBlueMystic ? 'text-white' : 'text-[#850E35]')}>
+                                    <h3 className={cn('font-heading text-2xl font-medium italic leading-tight', isBlueMystic ? 'text-white' : 'text-charcoal')}>
                                         {item.title}
                                     </h3>
                                     {item.content ? (
-                                        <p className={cn('mt-3 text-lg leading-8', isBlueMystic ? 'text-white/90' : 'text-[#3E2A2A]/80')}>
+                                        <p className={cn('mt-3 text-lg leading-8', isBlueMystic ? 'text-white/90' : 'text-charcoal/75')}>
                                             {item.content}
                                         </p>
                                     ) : null}

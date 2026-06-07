@@ -10,7 +10,7 @@ export interface TextProps {
 const Text = ({ content, className, 'data-directus': dataDirectus }: TextProps) => {
   return (
     <div
-      className={cn('prose text-justify prose-headings:font-serif prose-headings:text-[#850E35] prose-a:text-[#850E35] hover:prose-a:text-[#C6DCE4] prose-p:text-gray-800 prose-strong:text-gray-900 prose-li:text-gray-800 max-w-none', className)}
+      className={cn('prose max-w-none text-justify prose-headings:font-heading prose-headings:italic prose-headings:text-charcoal prose-a:text-charcoal underline-offset-4 hover:prose-a:text-rose-clay prose-p:text-charcoal/80 prose-strong:text-charcoal prose-li:text-charcoal/80', className)}
       dangerouslySetInnerHTML={{ __html: content }}
       data-directus={dataDirectus}
     />

@@ -20,11 +20,11 @@ export default function BackToTop() {
       className={`
         fixed bottom-6 right-6 z-50
         size-11 rounded-[10px]
-        bg-[#C6DCE4] text-[#850E35]
+        bg-soft-nurture text-charcoal
         flex items-center justify-center
         shadow-md
         transition-all duration-300
-        hover:shadow-[0_0_20px_rgba(133,14,53,0.3)]
+        hover:shadow-[0_0_20px_rgba(221,184,178,0.35)]
         hover:scale-105
         focus:outline-none focus:ring-0
         active:ring-0

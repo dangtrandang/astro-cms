@@ -1,32 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Great+Vibes&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400..700;1,400..700&family=Libertinus+Serif:ital,wght@0,400;0,700;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg: 0 0% 4%;
-  --surface: 0 0% 8%;
-  --text: 0 0% 96%;
-  --muted: 0 0% 53%;
-  --stroke: 0 0% 12%;
-  --accent: 0 0% 96%;
-  --background-color: hsl(var(--bg));
-  --foreground-color: hsl(var(--text));
-  --background-color-muted: hsl(var(--surface));
-  --accent-color: #89aacc;
-  --background-variant-color: hsl(var(--surface));
-  --accent-color-dark: #4e85bf;
-  --accent-color-soft: rgba(137, 170, 204, 0.16);
-  --accent-color-light: #d9e6f2;
-  --input-color: hsl(var(--stroke));
+  --color-cream: #FCF5EE;
+  --color-soft-nurture: #F2D1D1;
+  --color-rose-clay: #DDB8B2;
+  --color-dusty-blue: #6F8695;
+  --color-charcoal: #2D2A28;
 }
 
 .dark {
-  --background-color: hsl(var(--bg));
-  --background-color-muted: hsl(var(--surface));
-  --background-variant-color: hsl(var(--surface));
-  --foreground-color: hsl(var(--text));
+  --color-cream: #2D2A28;
+  --color-charcoal: #FCF5EE;
 }
 
 @keyframes scroll-down {
@@ -79,26 +67,26 @@
 
 @layer base {
   html {
-    @apply bg-bg text-text-primary;
+    @apply bg-cream text-charcoal;
   }
 
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Libertinus Serif', serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    @apply bg-bg text-text-primary;
+    @apply bg-cream text-charcoal;
   }
 }
 
 @layer components {
 
   [data-background='dark'] {
-    @apply bg-surface;
+    @apply bg-charcoal text-cream;
   }
 
   :root:not(.dark) [data-background='dark'] {
     .inline-flex[class*='bg-gray'] {
-      @apply bg-surface text-text-primary;
+      @apply bg-charcoal text-cream;
     }
   }
 
@@ -132,9 +120,9 @@
   }
 
   .hero-button-group :is(a, button) {
-    font-family: 'Inter', sans-serif;
-    color: white;
-    border-radius: 9999px;
+    font-family: 'Libertinus Serif', serif;
+    color: #FCF5EE;
+    border-radius: 12px;
     padding: 1.25rem 3.5rem;
     font-size: 1rem;
     line-height: 1.5rem;
@@ -174,11 +162,11 @@
   }
 
   .font-serif-display {
-    font-family: 'Instrument Serif', serif;
+    font-family: 'Fraunces', serif;
   }
 
   .accent-gradient {
-    background-image: linear-gradient(90deg, #89aacc 0%, #4e85bf 100%);
+    background-image: linear-gradient(90deg, #F2D1D1 0%, #DDB8B2 100%);
     background-size: 200% 200%;
   }
 

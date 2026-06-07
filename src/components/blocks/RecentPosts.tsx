@@ -26,14 +26,14 @@ const RecentPosts = () => {
 
     if (loading) {
         return (
-            <section className="py-20 px-6">
+            <section className="bg-cream px-6 py-20">
                 <div className="mx-auto max-w-7xl">
                     <div className="grid gap-8 sm:grid-cols-3">
                         {[1, 2, 3].map((i) => (
                             <div key={i} className="animate-pulse space-y-4">
-                                <div className="h-56 rounded-xl bg-gray-200" />
-                                <div className="h-4 w-3/4 rounded bg-gray-200" />
-                                <div className="h-3 w-full rounded bg-gray-100" />
+                                <div className="h-56 rounded-2xl bg-soft-nurture" />
+                                <div className="h-4 w-3/4 rounded bg-soft-nurture" />
+                                <div className="h-3 w-full rounded bg-cream" />
                             </div>
                         ))}
                     </div>
@@ -45,11 +45,11 @@ const RecentPosts = () => {
     if (!posts.length) return null;
 
     return (
-        <section className="py-20 px-6">
+        <section className="bg-cream px-6 py-20">
             <div className="mx-auto max-w-7xl space-y-12">
                 <div className="flex items-end justify-between">
-                    <h2 className="font-serif text-3xl text-[#850E35] tracking-tight sm:text-4xl">Bài viết mới nhất</h2>
-                    <a href="/blog" className="text-sm font-medium text-gray-800 hover:text-[#850E35] transition-colors">
+                    <h2 className="font-heading text-3xl font-semibold italic tracking-tight text-charcoal sm:text-4xl">Bài viết mới nhất</h2>
+                    <a href="/blog" className="text-sm font-medium text-charcoal transition-colors hover:text-rose-clay">
                         Xem tất cả →
                     </a>
                 </div>
@@ -62,7 +62,7 @@ const RecentPosts = () => {
                             : null;
                         const card = (
                             <div key={post.id} className="group block space-y-4">
-                                <div className="relative h-56 overflow-hidden rounded-xl bg-gray-100">
+                                <div className="relative h-56 overflow-hidden rounded-2xl bg-soft-nurture">
                                     {imageId && (
                                         <DirectusImage
                                             uuid={imageId}
@@ -73,8 +73,8 @@ const RecentPosts = () => {
                                     )}
                                 </div>
                                 <div className="space-y-1">
-                                    {date && <p className="text-xs text-gray-500">{date}</p>}
-                                    <h3 className="font-serif text-lg font-bold text-gray-800 line-clamp-2 group-hover:text-[#850E35] transition-colors">
+                                    {date && <p className="text-xs text-charcoal/55">{date}</p>}
+                                    <h3 className="line-clamp-2 font-heading text-lg font-semibold italic text-charcoal transition-colors group-hover:text-rose-clay">
                                         {post.title}
                                     </h3>
                                 </div>

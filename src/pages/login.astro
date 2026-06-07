@@ -7,17 +7,17 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY as string;
 
 <Layout metadata={{ title: 'Đăng nhập', description: 'Đăng nhập vào tài khoản Hồng Ngọc Huyền Học' }}>
   <div id="login-page" data-directus-url={directusUrl} data-recaptcha-site-key={recaptchaSiteKey} class="min-h-[70vh] flex items-center justify-center px-4 py-16">
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-[#f5e1e0]">
+    <div class="w-full max-w-md bg-cream rounded-2xl shadow-lg p-8 border border-soft-nurture">
       <div class="text-center mb-8">
-        <h1 id="login-title" class="text-2xl font-bold text-[#1f2a1d] mb-2">Đăng nhập</h1>
-        <p id="login-msg" class="text-sm text-[#6b7a65]">Chào mừng bạn quay lại Hồng Ngọc Huyền Học</p>
+        <h1 id="login-title" class="text-2xl font-bold text-charcoal mb-2">Đăng nhập</h1>
+        <p id="login-msg" class="text-sm text-charcoal/70">Chào mừng bạn quay lại Hồng Ngọc Huyền Học</p>
         <div id="login-err" class="text-sm text-red-500 mt-2 hidden"></div>
       </div>
 
       <!-- Email/Password Form -->
       <form id="login-form" class="space-y-4">
         <div>
-          <label for="login_email" class="block text-sm font-medium text-[#1f2a1d] mb-1">Email</label>
+          <label for="login_email" class="block text-sm font-medium text-charcoal mb-1">Email</label>
           <input
             type="email"
             id="login_email"
@@ -25,12 +25,12 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY as string;
             required
             autocomplete="email"
             placeholder="VD: ban@example.com"
-            class="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
+            class="w-full rounded-xl border border-rose-clay/45 bg-cream px-4 py-2.5 outline-none transition focus:border-rose-clay/50"
           />
         </div>
 
         <div>
-          <label for="login_password" class="block text-sm font-medium text-[#1f2a1d] mb-1">Mật khẩu</label>
+          <label for="login_password" class="block text-sm font-medium text-charcoal mb-1">Mật khẩu</label>
           <div class="relative">
             <input
               type="password"
@@ -39,12 +39,12 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY as string;
               required
               autocomplete="current-password"
               placeholder="Nhập mật khẩu"
-              class="w-full px-4 py-2.5 pr-10 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
+              class="w-full rounded-xl border border-rose-clay/45 bg-cream px-4 py-2.5 pr-10 outline-none transition focus:border-rose-clay/50"
             />
             <button
               type="button"
               id="login-toggle-pw"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-[#9bab92] hover:text-[#4a5a40] focus:outline-none"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/50 hover:text-charcoal focus:outline-none"
               tabindex="-1"
               aria-label="Hiển thị mật khẩu"
             >
@@ -63,20 +63,20 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY as string;
         <button
           type="submit"
           id="login-submit"
-          class="w-full bg-[#1f2a1d] hover:bg-[#2f3a2d] disabled:bg-[#9bab92] text-white font-medium py-3 px-6 rounded-full transition-colors"
+          class="w-full bg-dusty-blue hover:bg-charcoal disabled:bg-rose-clay text-cream font-medium py-3 px-6 rounded-xl transition-colors"
         >
           Đăng nhập
         </button>
 
         <p class="text-right mt-1">
-          <button type="button" id="forgot-pw-link" class="text-xs text-[#c0395b] hover:underline">Quên mật khẩu?</button>
+          <button type="button" id="forgot-pw-link" class="text-xs text-rose-clay hover:underline">Quên mật khẩu?</button>
         </p>
       </form>
 
-      <form id="forgot-pw-form" class="hidden space-y-4 mt-6 pt-6 border-t border-[#f5e1e0]">
-        <p class="text-sm text-[#6b7a65]">Nhập email của bạn, chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.</p>
+      <form id="forgot-pw-form" class="hidden space-y-4 mt-6 pt-6 border-t border-soft-nurture">
+        <p class="text-sm text-charcoal/70">Nhập email của bạn, chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.</p>
         <div>
-          <label for="forgot_email" class="block text-sm font-medium text-[#1f2a1d] mb-1">Email</label>
+          <label for="forgot_email" class="block text-sm font-medium text-charcoal mb-1">Email</label>
           <input
             type="email"
             id="forgot_email"
@@ -84,19 +84,19 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY as string;
             required
             autocomplete="email"
             placeholder="VD: ban@example.com"
-            class="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
+            class="w-full rounded-xl border border-rose-clay/45 bg-cream px-4 py-2.5 outline-none transition focus:border-rose-clay/50"
           />
         </div>
         <div id="forgot-msg" class="text-xs hidden"></div>
         <div class="flex gap-2">
-          <button type="button" id="forgot-back" class="flex-1 border border-[#e8d5d5] text-[#6b7a65] font-medium py-2.5 px-4 rounded-full hover:bg-gray-50 transition-colors text-sm">Quay lại</button>
-          <button type="submit" id="forgot-submit" class="flex-1 bg-[#1f2a1d] hover:bg-[#2f3a2d] disabled:bg-[#9bab92] text-white font-medium py-2.5 px-4 rounded-full transition-colors text-sm">Gửi yêu cầu</button>
+          <button type="button" id="forgot-back" class="flex-1 border border-rose-clay text-charcoal/70 font-medium py-2.5 px-4 rounded-xl hover:bg-soft-nurture transition-colors text-sm">Quay lại</button>
+          <button type="submit" id="forgot-submit" class="flex-1 bg-dusty-blue hover:bg-charcoal disabled:bg-rose-clay text-cream font-medium py-2.5 px-4 rounded-xl transition-colors text-sm">Gửi yêu cầu</button>
         </div>
       </form>
 
       <div class="relative my-6">
-        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-[#f5e1e0]"></div></div>
-        <div class="relative flex justify-center text-xs"><span class="bg-white px-3 text-[#9bab92]">hoặc</span></div>
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-soft-nurture"></div></div>
+        <div class="relative flex justify-center text-xs"><span class="bg-cream px-3 text-charcoal/50">hoặc</span></div>
       </div>
 
       <a
@@ -113,8 +113,8 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY as string;
         Đăng nhập với Google
       </a>
 
-      <p class="text-center text-sm text-[#9bab92] mt-6">
-        Chưa có tài khoản? <a href="/dang-ky" class="text-[#c0395b] hover:underline font-medium">Đăng ký</a>
+      <p class="text-center text-sm text-charcoal/50 mt-6">
+        Chưa có tài khoản? <a href="/dang-ky" class="text-rose-clay hover:underline font-medium">Đăng ký</a>
       </p>
     </div>
   </div>
@@ -123,12 +123,12 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY as string;
 <script>
   // Inline reCAPTCHA v3 helpers (không dùng module import vì không resolve được ở production)
   let _recaptchaScriptLoaded = false;
-  let _recaptchaScriptPromise = null;
+  let _recaptchaScriptPromise: Promise<void> | null = null;
 
-  function loadRecaptchaScript(siteKey) {
+  function loadRecaptchaScript(siteKey: string): Promise<void> {
     if (_recaptchaScriptLoaded) return Promise.resolve();
     if (_recaptchaScriptPromise) return _recaptchaScriptPromise;
-    _recaptchaScriptPromise = new Promise(function (resolve, reject) {
+    _recaptchaScriptPromise = new Promise<void>(function (resolve, reject) {
       var existing = document.querySelector('script[src="https://www.google.com/recaptcha/api.js?render=' + encodeURIComponent(siteKey) + '"]');
       if (existing) { _recaptchaScriptLoaded = true; resolve(); return; }
       var script = document.createElement('script');
@@ -139,7 +139,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY as string;
         _recaptchaScriptLoaded = true;
         (function wait() {
           if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
-            window.grecaptcha.ready(resolve);
+            window.grecaptcha.ready(function () { resolve(); });
           } else { setTimeout(wait, 50); }
         })();
       };
@@ -149,178 +149,188 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY as string;
     return _recaptchaScriptPromise;
   }
 
-  function getRecaptchaToken(siteKey, action) {
-    return new Promise(function (resolve, reject) {
+  function getRecaptchaToken(siteKey: string, action: string): Promise<string> {
+    return new Promise<string>(function (resolve, reject) {
       window.grecaptcha.ready(function () {
-        window.grecaptcha.execute(siteKey, { action: action }).then(resolve).catch(reject);
+        window.grecaptcha.execute(siteKey, { action: action }).then(function (token: string) { resolve(token); }).catch(reject);
       });
     });
   }
 
-  var loginPage = document.getElementById('login-page');
-  var siteKey = loginPage ? (loginPage.dataset.recaptchaSiteKey || '') : '';
+  const loginPage = document.getElementById('login-page') as HTMLElement | null;
+  const siteKey: string = loginPage ? ((loginPage as HTMLElement).dataset.recaptchaSiteKey || '') : '';
 
-  var form = document.getElementById('login-form');
-  var errEl = document.getElementById('login-err');
-  var submitBtn = document.getElementById('login-submit');
+  const form = document.getElementById('login-form') as HTMLFormElement | null;
+  const errEl = document.getElementById('login-err') as HTMLElement | null;
+  const submitBtn = document.getElementById('login-submit') as HTMLButtonElement | null;
 
   // Password toggle
-  var toggleBtn = document.getElementById('login-toggle-pw');
-  var pwInput = document.getElementById('login_password');
-  var eyeOff = document.getElementById('login-eye-off');
-  var eyeOn = document.getElementById('login-eye-on');
+  const toggleBtn = document.getElementById('login-toggle-pw') as HTMLButtonElement | null;
+  const pwInput = document.getElementById('login_password') as HTMLInputElement | null;
+  const eyeOff = document.getElementById('login-eye-off') as HTMLElement | null;
+  const eyeOn = document.getElementById('login-eye-on') as HTMLElement | null;
 
-  toggleBtn.addEventListener('click', () => {
-    const isPassword = pwInput.type === 'password';
-    pwInput.type = isPassword ? 'text' : 'password';
-    eyeOff.classList.toggle('hidden', isPassword);
-    eyeOn.classList.toggle('hidden', !isPassword);
-  });
+  if (toggleBtn && pwInput && eyeOff && eyeOn) {
+    toggleBtn.addEventListener('click', () => {
+      const isPassword = pwInput.type === 'password';
+      pwInput.type = isPassword ? 'text' : 'password';
+      eyeOff.classList.toggle('hidden', isPassword);
+      eyeOn.classList.toggle('hidden', !isPassword);
+    });
+  }
 
   // Check for error params from SSO callback redirect
   const urlParams = new URLSearchParams(window.location.search);
   const errorParam = urlParams.get('error');
   const reasonParam = urlParams.get('reason');
 
-  if (errorParam === 'google_blocked' && reasonParam) {
+  if (errorParam === 'google_blocked' && reasonParam && errEl) {
     errEl.textContent = decodeURIComponent(reasonParam);
     errEl.classList.remove('hidden');
   }
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    errEl.classList.add('hidden');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Đang xác minh...';
+  if (form && errEl && submitBtn) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errEl.classList.add('hidden');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Đang xác minh...';
 
-    var formData = new FormData(form);
-    var body = {
-      email: (formData.get('email') || '').toString().trim(),
-      password: (formData.get('password') || '').toString(),
-    };
+      var formData = new FormData(form);
+      var body: Record<string, string> = {
+        email: (formData.get('email') || '').toString().trim(),
+        password: (formData.get('password') || '').toString(),
+      };
 
-    if (!body.email || !body.password) {
-      errEl.textContent = 'Vui lòng nhập Email và Mật khẩu';
-      errEl.classList.remove('hidden');
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Đăng nhập';
-      return;
-    }
-
-    try {
-      if (siteKey) {
-        await loadRecaptchaScript(siteKey);
-        body.recaptchaToken = await getRecaptchaToken(siteKey, 'login');
-      }
-    } catch {
-      // reCAPTCHA optional — proceed without token
-    }
-
-    submitBtn.textContent = 'Đang đăng nhập...';
-
-    try {
-      const res = await fetch('/api/auth/login-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json().catch(() => null);
-
-      if (res.ok && data?.redirect) {
-        window.location.href = data.redirect;
-      } else {
-        errEl.textContent = data?.error || 'Đăng nhập thất bại, vui lòng thử lại';
+      if (!body.email || !body.password) {
+        errEl.textContent = 'Vui lòng nhập Email và Mật khẩu';
         errEl.classList.remove('hidden');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Đăng nhập';
+        return;
       }
-    } catch {
-      errEl.textContent = 'Lỗi kết nối, vui lòng thử lại';
-      errEl.classList.remove('hidden');
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Đăng nhập';
-    }
-  });
+
+      try {
+        if (siteKey) {
+          await loadRecaptchaScript(siteKey);
+          body['recaptchaToken'] = await getRecaptchaToken(siteKey, 'login');
+        }
+      } catch {
+        // reCAPTCHA optional — proceed without token
+      }
+
+      submitBtn.textContent = 'Đang đăng nhập...';
+
+      try {
+        const res = await fetch('/api/auth/login-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (res.ok && data?.redirect) {
+          window.location.href = data.redirect;
+        } else {
+          errEl.textContent = data?.error || 'Đăng nhập thất bại, vui lòng thử lại';
+          errEl.classList.remove('hidden');
+        }
+      } catch {
+        errEl.textContent = 'Lỗi kết nối, vui lòng thử lại';
+        errEl.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Đăng nhập';
+      }
+    });
+  }
 
   // Forgot password toggle + submit
-  var forgotLink = document.getElementById('forgot-pw-link');
-  var forgotForm = document.getElementById('forgot-pw-form');
-  var forgotMsg = document.getElementById('forgot-msg');
-  var forgotSubmit = document.getElementById('forgot-submit');
-  var forgotBack = document.getElementById('forgot-back');
+  const forgotLink = document.getElementById('forgot-pw-link') as HTMLElement | null;
+  const forgotForm = document.getElementById('forgot-pw-form') as HTMLFormElement | null;
+  const forgotMsg = document.getElementById('forgot-msg') as HTMLElement | null;
+  const forgotSubmit = document.getElementById('forgot-submit') as HTMLButtonElement | null;
+  const forgotBack = document.getElementById('forgot-back') as HTMLElement | null;
 
-  forgotLink.addEventListener('click', () => {
-    form.classList.add('hidden');
-    forgotForm.classList.remove('hidden');
-    forgotMsg.classList.add('hidden');
-  });
+  if (forgotLink && forgotForm && forgotMsg && form) {
+    forgotLink.addEventListener('click', () => {
+      form.classList.add('hidden');
+      forgotForm.classList.remove('hidden');
+      forgotMsg.classList.add('hidden');
+    });
+  }
 
-  forgotBack.addEventListener('click', () => {
-    forgotForm.classList.add('hidden');
-    form.classList.remove('hidden');
-    forgotMsg.classList.add('hidden');
-  });
+  if (forgotBack && forgotForm && forgotMsg && form) {
+    forgotBack.addEventListener('click', () => {
+      forgotForm.classList.add('hidden');
+      form.classList.remove('hidden');
+      forgotMsg.classList.add('hidden');
+    });
+  }
 
-  forgotForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    forgotMsg.classList.add('hidden');
-    forgotSubmit.disabled = true;
-    forgotSubmit.textContent = 'Đang xác minh...';
+  if (forgotForm && forgotMsg && forgotSubmit) {
+    forgotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      forgotMsg.classList.add('hidden');
+      forgotSubmit.disabled = true;
+      forgotSubmit.textContent = 'Đang xác minh...';
 
-    var formData = new FormData(forgotForm);
-    var email = (formData.get('email') || '').toString().trim();
+      var formData = new FormData(forgotForm);
+      var email = (formData.get('email') || '').toString().trim();
 
-    if (!email) {
-      forgotMsg.className = 'text-xs text-red-500';
-      forgotMsg.textContent = 'Vui lòng nhập email';
-      forgotMsg.classList.remove('hidden');
-      forgotSubmit.disabled = false;
-      forgotSubmit.textContent = 'Gửi yêu cầu';
-      return;
-    }
-
-    var body = { email: email };
-
-    try {
-      if (siteKey) {
-        await loadRecaptchaScript(siteKey);
-        body.recaptchaToken = await getRecaptchaToken(siteKey, 'forgot_password');
-      }
-    } catch {
-      // reCAPTCHA optional — proceed without token
-    }
-
-    forgotSubmit.textContent = 'Đang gửi...';
-
-    try {
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json().catch(() => null);
-
-      if (data?.success) {
-        forgotMsg.className = 'text-xs text-green-600';
-        forgotMsg.textContent = 'Nếu email hợp lệ, hướng dẫn đặt lại mật khẩu đã được gửi.';
-        forgotMsg.classList.remove('hidden');
-      } else if (data?.code === 'GOOGLE_ACCOUNT') {
-        forgotMsg.className = 'text-xs text-amber-600';
-        forgotMsg.textContent = data.error || 'Email này đang sử dụng đăng nhập Google.';
-        forgotMsg.classList.remove('hidden');
-      } else {
+      if (!email) {
         forgotMsg.className = 'text-xs text-red-500';
-        forgotMsg.textContent = data?.error || 'Có lỗi xảy ra, vui lòng thử lại';
+        forgotMsg.textContent = 'Vui lòng nhập email';
         forgotMsg.classList.remove('hidden');
+        forgotSubmit.disabled = false;
+        forgotSubmit.textContent = 'Gửi yêu cầu';
+        return;
       }
-    } catch {
-      forgotMsg.className = 'text-xs text-red-500';
-      forgotMsg.textContent = 'Lỗi kết nối, vui lòng thử lại';
-      forgotMsg.classList.remove('hidden');
-    } finally {
-      forgotSubmit.disabled = false;
-      forgotSubmit.textContent = 'Gửi yêu cầu';
-    }
-  });
+
+      var body: Record<string, string> = { email: email };
+
+      try {
+        if (siteKey) {
+          await loadRecaptchaScript(siteKey);
+          body['recaptchaToken'] = await getRecaptchaToken(siteKey, 'forgot_password');
+        }
+      } catch {
+        // reCAPTCHA optional — proceed without token
+      }
+
+      forgotSubmit.textContent = 'Đang gửi...';
+
+      try {
+        const res = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (data?.success) {
+          forgotMsg.className = 'text-xs text-green-600';
+          forgotMsg.textContent = 'Nếu email hợp lệ, hướng dẫn đặt lại mật khẩu đã được gửi.';
+          forgotMsg.classList.remove('hidden');
+        } else if (data?.code === 'GOOGLE_ACCOUNT') {
+          forgotMsg.className = 'text-xs text-amber-600';
+          forgotMsg.textContent = data.error || 'Email này đang sử dụng đăng nhập Google.';
+          forgotMsg.classList.remove('hidden');
+        } else {
+          forgotMsg.className = 'text-xs text-red-500';
+          forgotMsg.textContent = data?.error || 'Có lỗi xảy ra, vui lòng thử lại';
+          forgotMsg.classList.remove('hidden');
+        }
+      } catch {
+        forgotMsg.className = 'text-xs text-red-500';
+        forgotMsg.textContent = 'Lỗi kết nối, vui lòng thử lại';
+        forgotMsg.classList.remove('hidden');
+      } finally {
+        forgotSubmit.disabled = false;
+        forgotSubmit.textContent = 'Gửi yêu cầu';
+      }
+    });
+  }
 </script>

@@ -354,6 +354,26 @@ export interface FormSubmission {
 	form?: Form | string | null;
 }
 
+export interface FormField {
+	id?: string;
+	sort?: number | null;
+	name?: string | null;
+	type: 'text' | 'textarea' | 'checkbox' | 'checkbox_group' | 'radio' | 'file' | 'select' | 'hidden';
+	label?: string | null;
+	placeholder?: string | null;
+	help?: string | null;
+	validation?: string | null;
+	width?: '100' | '67' | '50' | '33' | null;
+	required?: boolean;
+	choices?: Array<{ label: string; value: string }> | null;
+	conditions?: Array<{
+		field: string;
+		action: 'show' | 'hide';
+		condition: 'is_empty' | 'is_filled' | 'contains' | 'not_contains' | 'equals' | 'not_equal';
+		value: string;
+	}> | null;
+}
+
 export interface Form {
 	date_created?: string | null;
 	date_updated?: string | null;
@@ -363,7 +383,7 @@ export interface Form {
 	on_success?: 'redirect' | 'message' | null;
 	redirect_url?: string | null;
 	/** @description The fields for the form. */
-	schema?: Array<{ name: string; type: 'text' | 'textarea' | 'checkbox' | 'radio' | 'file' | 'select' | 'hidden'; label: string; placeholder: string; help: string; validation: string; width: '100' | '67' | '50' | '33'; conditions: Array<{ field: string; action: 'show' | 'hide'; condition: 'is_empty' | 'is_filled' | 'contains' | 'not_contains' | 'equals' | 'not_equal'; value: string }> }> | null;
+	schema?: FormField[] | null;
 	sort?: number | null;
 	status?: 'published' | 'draft' | 'archived';
 	/** @description The text for the submit button label. */

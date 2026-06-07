@@ -48,8 +48,8 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
   );
 
   return (
-    <footer ref={ref} className="bg-[#850E35] py-16 text-[#FCF5EE]">
-      <Container className="text-[#FCF5EE]">
+    <footer ref={ref} className="bg-charcoal py-16 text-cream">
+      <Container className="text-cream">
         {/* 4 cột: Logo | Nhóm link 1 | Nhóm link 2 | Newsletter */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[35%_20%_20%_25%] gap-10 mb-12">
           {/* Cột 1: Logo + Description + Social */}
@@ -65,7 +65,7 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
               )}
             </a>
             {globals?.description && (
-              <p className="text-sm text-[#FCF5EE]/80 leading-relaxed mb-4">{globals.description}</p>
+              <p className="text-sm text-cream/80 leading-relaxed mb-4">{globals.description}</p>
             )}
             {globals?.social_links && globals.social_links.length > 0 && (
               <div className="flex flex-wrap gap-3">
@@ -75,10 +75,10 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="size-9 rounded-full bg-[#FCF5EE]/10 inline-flex items-center justify-center transition-colors hover:bg-[#C6DCE4]/20"
+                    className="inline-flex size-9 items-center justify-center rounded-lg bg-cream/10 transition-colors hover:bg-soft-nurture/20"
                     aria-label={social.service}
                   >
-                    <SocialIcon service={social.service} size={20} className="size-5 text-[#FCF5EE] hover:text-[#C6DCE4] transition-colors" />
+                    <SocialIcon service={social.service} size={20} className="size-5 text-cream transition-colors hover:text-soft-nurture" />
                   </a>
                 ))}
               </div>
@@ -88,7 +88,7 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
           {/* Cột 2 & 3: Nhóm link từ item cha có children */}
           {linkGroups.length >= 1 && (
             <div className="flex flex-col min-w-0">
-              <h4 className="text-[#FCF5EE] font-heading text-lg font-semibold mb-4">
+              <h4 className="text-cream font-heading text-lg font-semibold mb-4">
                 {linkGroups[0].title}
               </h4>
               <ul className="space-y-3">
@@ -96,7 +96,7 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
                   <li key={child.id}>
                     <a
                       href={resolveHref(child)}
-                      className="text-[#FCF5EE]/80 hover:text-[#C6DCE4] transition-colors text-sm"
+                      className="text-sm text-cream/80 transition-colors hover:text-soft-nurture"
                     >
                       {child.title}
                     </a>
@@ -108,7 +108,7 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
 
           {linkGroups.length >= 2 && (
             <div className="flex flex-col min-w-0">
-              <h4 className="text-[#FCF5EE] font-heading text-lg font-semibold mb-4">
+              <h4 className="text-cream font-heading text-lg font-semibold mb-4">
                 {linkGroups[1].title}
               </h4>
               <ul className="space-y-3">
@@ -116,7 +116,7 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
                   <li key={child.id}>
                     <a
                       href={resolveHref(child)}
-                      className="text-[#FCF5EE]/80 hover:text-[#C6DCE4] transition-colors text-sm"
+                      className="text-sm text-cream/80 transition-colors hover:text-soft-nurture"
                     >
                       {child.title}
                     </a>
@@ -129,7 +129,7 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
           {/* Nếu thiếu 1 nhóm link, dùng leftover items lấp vào cột thứ 3 */}
           {linkGroups.length < 2 && leftoverItems.length > 0 && (
             <div className="flex flex-col">
-              <h4 className="text-[#FCF5EE] font-heading text-lg font-semibold mb-4">
+              <h4 className="text-cream font-heading text-lg font-semibold mb-4">
                 Links
               </h4>
               <ul className="space-y-3">
@@ -137,7 +137,7 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
                   <li key={item.id}>
                     <a
                       href={resolveHref(item)}
-                      className="text-[#FCF5EE]/80 hover:text-[#C6DCE4] transition-colors text-sm"
+                      className="text-sm text-cream/80 transition-colors hover:text-soft-nurture"
                     >
                       {item.title}
                     </a>
@@ -149,28 +149,28 @@ const Footer = forwardRef<HTMLElement, FooterProps>(({ navigation, globals }, re
 
           {/* Cột 4: Newsletter (luôn ở vị trí cuối) */}
           <div className={`flex flex-col min-w-0 ${linkGroups.length < 2 && leftoverItems.length === 0 ? '' : ''}`}>
-            <h4 className="text-[#FCF5EE] font-heading text-lg font-semibold mb-4">
+            <h4 className="text-cream font-heading text-lg font-semibold mb-4">
               Đăng ký nhận tin
             </h4>
-            <p className="text-sm text-[#FCF5EE]/70 mb-4">
+            <p className="text-sm text-cream/70 mb-4">
               Nhận những bài viết mới nhất về huyền học, chiêm tinh và phong thủy.
             </p>
             <form className="flex flex-col gap-2" onSubmit={(e) => e.preventDefault()}>
               <input
                 type="email"
                 placeholder="email@example.com"
-                className="w-full px-4 py-2.5 rounded-lg bg-[#FCF5EE] text-gray-800 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C6DCE4]"
+                className="w-full rounded-lg bg-cream px-4 py-2.5 text-sm text-charcoal placeholder:text-charcoal/40 focus:outline-none focus:border-rose-clay/50"
               />
               <button
                 type="submit"
-                className="w-full px-5 py-2.5 rounded-lg bg-[#C6DCE4] text-[#850E35] font-semibold text-sm hover:bg-[#b8d0d9] transition-colors"
+                className="w-full px-5 py-2.5 rounded-lg bg-dusty-blue text-cream font-semibold text-sm hover:bg-charcoal transition-colors"
               >
                 Đăng ký
               </button>
             </form>
-            <p className="text-xs text-[#FCF5EE]/50 mt-3">
+            <p className="text-xs text-cream/50 mt-3">
               Bằng cách đăng ký, bạn đồng ý với{' '}
-              <a href="/chinh-sach-bao-mat" className="underline hover:text-[#C6DCE4] transition-colors">
+              <a href="/chinh-sach-bao-mat" className="underline transition-colors hover:text-soft-nurture">
                 Chính sách bảo mật
               </a>
               .

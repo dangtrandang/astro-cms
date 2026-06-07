@@ -42,7 +42,7 @@ const FormBuilder = ({ form, className, submitVariant, submitClassName }: FormBu
       const recaptchaToken = await recaptcha.execute();
 
       const fieldsWithNames = form.fields.map((field) => ({
-        id: field.id,
+        id: field.id || '',
         name: field.name || '',
         type: field.type || '',
       }));
@@ -81,8 +81,8 @@ const FormBuilder = ({ form, className, submitVariant, submitClassName }: FormBu
   }
 
   return (
-    <div className={cn('space-y-6 bg-white p-8 rounded-xl shadow-[0_10px_30px_rgba(133,14,53,0.08)] [&_input]:bg-[#f6f6f6] [&_textarea]:bg-[#f6f6f6] [&_input]:border-[#f5dcda] [&_textarea]:border-[#f5dcda] [&_input]:focus-visible:ring-[#C6DCE4]/30 [&_textarea]:focus-visible:ring-[#C6DCE4]/30 [&_input]:rounded-[1.75rem] [&_textarea]:rounded-[1.75rem] [&_textarea]:min-h-[200px]', className)}>
-      {form.title && <h3 className="text-xl font-['Playfair_Display'] text-[#850E35] mb-4">{form.title}</h3>}
+    <div className={cn('space-y-6 rounded-2xl bg-white p-8 shadow-[0_10px_30px_rgba(111,134,149,0.12)] [&_input]:rounded-2xl [&_input]:border-rose-clay/45 [&_input]:bg-cream [&_input]:focus-visible:border-rose-clay/50 [&_textarea]:min-h-[200px] [&_textarea]:rounded-2xl [&_textarea]:border-rose-clay/45 [&_textarea]:bg-cream [&_textarea]:focus-visible:border-rose-clay/50', className)}>
+      {form.title && <h3 className="mb-4 font-heading text-xl font-semibold italic text-charcoal">{form.title}</h3>}
 
       {recaptcha.isLoading && (
         <div className="flex items-center justify-center gap-2 py-2 text-sm text-gray-400">
@@ -95,7 +95,7 @@ const FormBuilder = ({ form, className, submitVariant, submitClassName }: FormBu
       )}
 
       {error && (
-        <div className="p-4 text-red-500 bg-red-100 rounded-md">
+        <div className="rounded-xl bg-red-100 p-4 text-red-500">
           <strong>Lỗi:</strong> {error}
         </div>
       )}

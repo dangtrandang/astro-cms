@@ -97,20 +97,20 @@ export default function Steps({ data }: StepsProps) {
     const total = steps.length
 
     return (
-        <section className="w-full py-16 md:py-24 bg-[#FCF5EE] text-stone-800">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="w-full bg-cream py-16 text-charcoal md:py-24">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
 
                 {/* ========== INTRO HEADER ========== */}
-                <div className="max-w-3xl mb-12 md:mb-20">
+                <div className="mb-12 max-w-3xl md:mb-20">
                     <span
-                        className="text-xs font-bold uppercase tracking-widest text-red-800 bg-red-50 px-3 py-1 rounded-full"
+                        className="rounded-lg bg-soft-nurture px-3 py-1 text-xs font-semibold uppercase tracking-widest text-charcoal"
                         data-directus={setAttr({ collection: "block_steps", item: data.id, fields: ["badge_text"], mode: "popover" })}
                     >
                         {badge}
                     </span>
 
                     <h2
-                        className="text-3xl md:text-5xl font-serif font-bold tracking-tight mt-3 mb-4 text-stone-900"
+                        className="mt-3 mb-4 font-heading text-3xl font-semibold italic tracking-tight text-charcoal md:text-5xl"
                         data-directus={setAttr({ collection: "block_steps", item: data.id, fields: ["title"], mode: "popover" })}
                     >
                         {title}
@@ -118,23 +118,23 @@ export default function Steps({ data }: StepsProps) {
 
                     {typeof data.headline === "string" && data.headline.includes("<") ? (
                         <div
-                            className="text-base md:text-lg text-stone-600 leading-relaxed prose-p:my-0"
+                            className="text-base leading-relaxed text-charcoal/70 prose-p:my-0 md:text-lg"
                             data-directus={setAttr({ collection: "block_steps", item: data.id, fields: ["headline"], mode: "popover" })}
                             dangerouslySetInnerHTML={{ __html: data.headline }}
                         />
                     ) : (
-                        <p className="text-base md:text-lg text-stone-600 leading-relaxed">
+                        <p className="text-base leading-relaxed text-charcoal/70 md:text-lg">
                             {subtitle}
                         </p>
                     )}
                 </div>
 
                 {/* ========== 2-SIDE LAYOUT ========== */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
 
                     {/* SIDE TRÁI: Ảnh Author */}
-                    <div className="lg:col-span-5 w-full lg:sticky lg:top-32 self-start">
-                        <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden shadow-xl border border-stone-200">
+                    <div className="w-full self-start lg:col-span-5 lg:sticky lg:top-32">
+                        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-rose-clay/35 shadow-xl">
                             {authorImgId ? (
                                 <DirectusImage
                                     uuid={authorImgId}

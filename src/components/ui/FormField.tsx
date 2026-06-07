@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-export const INPUT_FOCUS_CLASSES = 'focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4]';
-export const INPUT_BASE_CLASSES = `w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white ${INPUT_FOCUS_CLASSES} outline-none transition`;
+export const INPUT_FOCUS_CLASSES = 'focus:border-rose-clay/50';
+export const INPUT_BASE_CLASSES = `w-full rounded-xl border border-rose-clay/45 bg-cream px-4 py-2.5 ${INPUT_FOCUS_CLASSES} outline-none transition`;
 
 interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
 	label: string;
@@ -12,7 +12,7 @@ export default function FormField({ label, error, id, className, ...inputProps }
 	const fieldId = id || inputProps.name;
 	return (
 		<div>
-			<label htmlFor={fieldId} className="block text-sm font-medium text-[#1f2a1d] mb-1">
+			<label htmlFor={fieldId} className="block text-sm font-medium text-charcoal mb-1">
 				{label}
 			</label>
 			<input
@@ -20,7 +20,7 @@ export default function FormField({ label, error, id, className, ...inputProps }
 				className={`${INPUT_BASE_CLASSES} ${className || ''}`}
 				{...inputProps}
 			/>
-			{error && <p className="text-xs text-[#850E35] mt-1">{error}</p>}
+			{error && <p className="mt-1 text-xs text-charcoal/65">{error}</p>}
 		</div>
 	);
 }

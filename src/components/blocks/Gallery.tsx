@@ -132,12 +132,12 @@ const Gallery = ({ data }: GalleryProps) => {
   if (isFloating) return <FloatingGallery data={data} items={sortedItems} />;
 
   return (
-    <section className="bg-[#FCF5EE] py-16 text-[#3e2a2a] md:py-20">
+    <section className="bg-cream py-16 text-charcoal md:py-20">
       <div className="flex w-full flex-col gap-10 px-0">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-5 px-6 text-center sm:px-8">
           {title && (
             <h2
-              className="max-w-5xl text-balance font-heading text-4xl font-semibold leading-[1.08] text-[#850E35] md:text-5xl lg:text-6xl"
+              className="max-w-5xl text-balance font-heading text-4xl font-semibold italic leading-[1.08] text-charcoal md:text-5xl lg:text-6xl"
               data-directus={setAttr({
                 collection: 'block_gallery',
                 item: id,
@@ -151,7 +151,7 @@ const Gallery = ({ data }: GalleryProps) => {
 
           {headline && (
             <div
-              className="max-w-3xl text-pretty text-base leading-7 text-[#3e2a2a] md:text-lg md:leading-8"
+              className="max-w-3xl text-pretty text-base leading-7 text-charcoal/80 md:text-lg md:leading-8"
               data-directus={setAttr({
                 collection: 'block_gallery',
                 item: id,
@@ -200,11 +200,11 @@ const Gallery = ({ data }: GalleryProps) => {
                     />
 
                     <div className="absolute inset-x-4 bottom-4 md:inset-x-8 md:bottom-8">
-                      <div className="flex items-center gap-2 text-[#F2D1D1] md:gap-4">
+                      <div className="flex items-center gap-2 text-cream md:gap-4">
                         <span
                           role="button"
                           tabIndex={0}
-                          className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#F2D1D1] bg-black/14 backdrop-blur-[2px] transition hover:bg-black/24 md:h-11 md:w-11"
+                          className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-cream/70 bg-black/14 backdrop-blur-[2px] transition hover:bg-black/24 md:h-11 md:w-11"
                           onClick={(event) => {
                             event.stopPropagation();
                             openLightbox(index);
@@ -219,14 +219,14 @@ const Gallery = ({ data }: GalleryProps) => {
                         >
                           <Eye className="size-3.5 md:size-4" />
                         </span>
-                        <div className="min-w-0 border-l border-[#F2D1D1] pl-3 md:pl-4">
+                        <div className="min-w-0 border-l border-cream/70 pl-3 md:pl-4">
                           {item.title && (
-                            <p className="font-heading text-sm font-medium leading-tight text-[#F2D1D1] md:text-2xl">
+                            <p className="font-heading text-sm font-medium italic leading-tight text-cream md:text-2xl">
                               {item.title}
                             </p>
                           )}
                           {item.description && isActive && (
-                            <p className="mt-1 max-w-[30rem] text-xs leading-5 text-[#F2D1D1] md:mt-2 md:text-base md:leading-6">
+                            <p className="mt-1 max-w-[30rem] text-xs leading-5 text-cream/85 md:mt-2 md:text-base md:leading-6">
                               {item.description}
                             </p>
                           )}
@@ -292,7 +292,7 @@ const Gallery = ({ data }: GalleryProps) => {
                 <DialogClose asChild>
                   <button
                     type="button"
-                    className="absolute right-1 top-1 inline-flex h-10 w-10 -translate-y-full translate-x-full items-center justify-center rounded-full border border-white/40 bg-black/55 text-white backdrop-blur-sm transition hover:bg-black/75"
+                    className="absolute right-1 top-1 inline-flex h-10 w-10 -translate-y-full translate-x-full items-center justify-center rounded-xl border border-white/40 bg-black/55 text-white backdrop-blur-sm transition hover:bg-black/75"
                     aria-label="Dong lightbox"
                   >
                     <X className="size-5" />
@@ -307,7 +307,7 @@ const Gallery = ({ data }: GalleryProps) => {
                         e.stopPropagation();
                         showPrev();
                       }}
-                      className="absolute left-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm transition hover:bg-black/75"
+                      className="absolute left-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl bg-black/55 text-white backdrop-blur-sm transition hover:bg-black/75"
                       aria-label="Anh truoc"
                     >
                       <ArrowLeft className="size-5" />
@@ -318,7 +318,7 @@ const Gallery = ({ data }: GalleryProps) => {
                         e.stopPropagation();
                         showNext();
                       }}
-                      className="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-sm transition hover:bg-black/75"
+                      className="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl bg-black/55 text-white backdrop-blur-sm transition hover:bg-black/75"
                       aria-label="Anh tiep theo"
                     >
                       <ArrowRight className="size-5" />
@@ -523,7 +523,7 @@ function FloatingGallery({ data, items }: FloatingGalleryProps) {
                   initial={{ opacity: 0 }}
                   src={`${import.meta.env.PUBLIC_DIRECTUS_URL}/assets/${item.fileId}`}
                   alt={headline || title || `Ảnh ${index + 1}`}
-                  className={`${sizeClass} -translate-x-1/2 -translate-y-1/2 rounded-xl object-cover shadow-[0_10px_30px_rgba(133,14,53,0.08)] hover:scale-105 duration-200 cursor-pointer transition-transform max-w-none`}
+                  className={`${sizeClass} max-w-none -translate-x-1/2 -translate-y-1/2 rounded-2xl object-cover shadow-[0_10px_30px_rgba(111,134,149,0.12)] transition-transform duration-200 hover:scale-105 cursor-pointer`}
                 />
               </FloatingElement>
             );
@@ -533,13 +533,13 @@ function FloatingGallery({ data, items }: FloatingGalleryProps) {
 
       {/* ---- Text overlay ---- */}
       <motion.div
-        className="z-10 mx-auto flex w-[calc(100%-2rem)] max-w-3xl flex-col items-center gap-6 rounded-[28px] border border-white/45 bg-white/75 px-5 py-8 text-center shadow-[0_18px_50px_rgba(133,14,53,0.12)] backdrop-blur-sm md:gap-8 md:px-10 md:py-10"
+        className="z-10 mx-auto flex w-[calc(100%-2rem)] max-w-3xl flex-col items-center gap-6 rounded-[28px] border border-rose-clay/45 bg-white/75 px-5 py-8 text-center shadow-[0_18px_50px_rgba(111,134,149,0.14)] backdrop-blur-sm md:gap-8 md:px-10 md:py-10"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.88, delay: 1.5 }}
       >
         <h2
-          className="font-heading text-4xl font-bold not-italic leading-[1.02] tracking-[-0.02em] text-[#850E35] md:text-5xl lg:text-6xl"
+          className="font-heading text-4xl font-semibold italic leading-[1.02] tracking-[-0.02em] text-charcoal md:text-5xl lg:text-6xl"
           data-directus={setAttr({
             collection: 'block_gallery',
             item: id,
@@ -551,7 +551,7 @@ function FloatingGallery({ data, items }: FloatingGalleryProps) {
         </h2>
 
         <div
-          className="max-w-2xl text-pretty text-base leading-8 text-[#3e2a2a] md:text-lg md:leading-9"
+          className="max-w-2xl text-pretty text-base leading-8 text-charcoal/80 md:text-lg md:leading-9"
           data-directus={setAttr({
             collection: 'block_gallery',
             item: id,
@@ -563,7 +563,7 @@ function FloatingGallery({ data, items }: FloatingGalleryProps) {
 
         <a
           href="/lien-he"
-          className="mt-2 inline-flex rounded-xl bg-[#850E35] px-10 py-3.5 text-base font-medium text-[#FCF5EE] shadow-[0_8px_24px_rgba(133,14,53,0.18)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_12px_32px_rgba(133,14,53,0.28)]"
+          className="mt-2 inline-flex rounded-xl bg-dusty-blue px-10 py-3.5 text-base font-medium text-cream shadow-[0_8px_24px_rgba(111,134,149,0.18)] transition-all duration-300 hover:scale-[1.03] hover:bg-charcoal hover:shadow-[0_12px_32px_rgba(45,42,40,0.24)]"
         >
           Cùng kết nối
         </a>

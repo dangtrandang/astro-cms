@@ -6,7 +6,7 @@ import { LogIn, Menu, X } from 'lucide-react';
 interface NavigationBarProps {
   navigation?: {
     id: string;
-    items?: any[];
+    items?: any[] | null;
   };
   globals: {
     logo_on_light_bg?: string;
@@ -87,20 +87,20 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
           </a>
 
           {/* Desktop pill nav */}
-          <div className="hidden lg:flex items-center gap-1 bg-white/70 backdrop-blur-md rounded-full pl-6 pr-1 py-1 shadow-sm border border-white/60">
+          <div className="hidden lg:flex items-center gap-1 bg-white/70 backdrop-blur-md rounded-xl pl-6 pr-1 py-1 shadow-sm border border-white/60">
             {(navigation?.items || []).map((link: any, i: number) => (
               <a
                 key={link.id || i}
                 href={getHref(link)}
-                className={`text-sm px-3 py-2 rounded-full transition-colors hover:bg-[#f5e1e0] ${i === 0
-                  ? 'font-semibold text-[#1f2a1d]'
-                  : 'font-medium text-[#4b5b47] hover:text-[#1f2a1d]'
+                className={`text-sm px-3 py-2 rounded-lg transition-colors hover:bg-soft-nurture ${i === 0
+                  ? 'font-semibold text-charcoal'
+                  : 'font-medium text-charcoal/70 hover:text-charcoal'
                   }`}
               >
                 {link.title}
               </a>
             ))}
-            <button className="ml-2 bg-[#1f2a1d] hover:bg-[#850e35] active:bg-[#850e35] text-white text-sm font-medium px-5 py-2.5 rounded-full transition-colors">
+            <button className="ml-2 bg-dusty-blue hover:bg-charcoal active:bg-charcoal text-cream text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
               Try it Live
             </button>
           </div>
@@ -132,7 +132,7 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
             )}
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="lg:hidden relative flex items-center justify-center w-10 h-10 rounded-full bg-white/70 backdrop-blur-md border border-white/60 text-[#1f2a1d] transition-all duration-300 hover:bg-white/90"
+              className="lg:hidden relative flex items-center justify-center w-10 h-10 rounded-lg bg-white/70 backdrop-blur-md border border-white/60 text-charcoal transition-all duration-300 hover:bg-white/90"
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
             >
@@ -155,7 +155,7 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
           }`}
         onClick={() => setMenuOpen(false)}
       >
-        <div className="absolute inset-0 bg-[#1f2a1d]/40 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-charcoal/40 backdrop-blur-sm" />
       </div>
 
       {/* Mobile menu drawer — outside <header> stacking context */}
@@ -170,7 +170,7 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
                 key={link.id || i}
                 href={getHref(link)}
                 onClick={() => setMenuOpen(false)}
-                className={`text-2xl font-semibold text-[#1f2a1d] py-4 border-b border-[#1f2a1d]/10 transition-all duration-500 ${menuOpen ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
+                className={`text-2xl font-semibold text-charcoal py-4 border-b border-charcoal/10 transition-all duration-500 ${menuOpen ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
                   }`}
                 style={{ transitionDelay: menuOpen ? `${150 + i * 70}ms` : '0ms' }}
               >
@@ -208,7 +208,7 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
                 Đăng nhập
               </a>
             )}
-            <button className="mt-2 bg-[#1f2a1d] hover:bg-[#2a3827] text-white text-sm font-semibold px-5 py-3 rounded-full transition-colors">
+            <button className="mt-2 bg-dusty-blue hover:bg-charcoal text-cream text-sm font-semibold px-5 py-3 rounded-xl transition-colors">
               Try it Live
             </button>
           </div>

@@ -176,7 +176,7 @@ export default function BlogPostClient({
           <div
             className="group relative h-[320px] w-full overflow-hidden rounded-2xl sm:h-[380px] md:h-[480px]"
           >
-            <div className="absolute inset-0 bg-[#F2D1D1]">
+            <div className="absolute inset-0 bg-soft-nurture">
               {post.image && (
                 <DirectusImage
                   uuid={post.image as string}
@@ -194,7 +194,7 @@ export default function BlogPostClient({
               {categoryName && (
                 <a
                   href={categorySlug ? `/blog?category=${categorySlug}` : '#'}
-                  className="w-fit rounded-full bg-[#C6DCE4]/90 px-2.5 py-0.5 text-[11px] font-semibold text-[#850E35] backdrop-blur-sm sm:px-3 sm:py-1 sm:text-xs"
+                  className="w-fit rounded-lg bg-soft-nurture/90 px-2.5 py-0.5 text-[11px] font-semibold text-charcoal backdrop-blur-sm sm:px-3 sm:py-1 sm:text-xs"
                 >
                   {categoryName}
                 </a>
@@ -204,7 +204,7 @@ export default function BlogPostClient({
                 <Headline
                   as="h1"
                   headline={post.title}
-                  className="max-w-[80rem] !font-serif text-[1.7rem] font-semibold leading-tight !text-[#f5dcda] sm:text-4xl md:text-5xl"
+                  className="max-w-[80rem] !font-heading italic text-[1.7rem] font-semibold leading-tight !text-cream sm:text-4xl md:text-5xl"
                 />
               </div>
 
@@ -213,7 +213,7 @@ export default function BlogPostClient({
                   <div className="flex items-center gap-2 sm:flex-col sm:items-start sm:gap-1">
                     <p className="hidden text-[11px] font-semibold text-white/60 sm:block sm:text-xs">Tác giả</p>
                     <div className="flex items-center gap-2">
-                      <div className="relative h-8 w-8 overflow-hidden rounded-full ring-2 ring-white/40">
+                      <div className="relative h-8 w-8 overflow-hidden rounded-full">
                         {author?.image ? (
                           <DirectusImage
                             uuid={typeof author.image === 'string' ? author.image : (author.image as any)?.id}
@@ -222,7 +222,7 @@ export default function BlogPostClient({
                             className="object-cover"
                           />
                         ) : (
-                          <span className="flex h-full w-full items-center justify-center bg-[#850E35] text-[11px] font-bold text-white sm:text-xs">
+                          <span className="flex h-full w-full items-center justify-center bg-rose-clay text-[11px] font-bold text-charcoal sm:text-xs">
                             {authorName.charAt(0)}
                           </span>
                         )}
@@ -249,7 +249,7 @@ export default function BlogPostClient({
                         <li key={tag.slug}>
                           <a
                             href={`/blog?tag=${encodeURIComponent(tag.slug)}`}
-                            className="inline-block rounded-full px-2 py-0.5 text-[11px] font-medium text-white ring-1 ring-white/40 transition-colors duration-200 hover:bg-white/10 sm:px-2.5 sm:text-xs"
+                            className="inline-block rounded-lg bg-white/10 px-2 py-0.5 text-[11px] font-medium text-cream transition-colors duration-200 hover:bg-white/20 sm:px-2.5 sm:text-xs"
                           >
                             {tag.name}
                           </a>
@@ -263,14 +263,14 @@ export default function BlogPostClient({
           </div>
         </div>
 
-        <div className="mb-8 h-[2px] w-full bg-[#f8e7e3]" />
+        <div className="mb-8 h-[2px] w-full bg-soft-nurture" />
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,_2fr)_400px] gap-12 lg:items-start">
           <main className="text-justify">
             {/* ToC in content area */}
             {tocItems && tocItems.length > 0 && (
-              <nav aria-label="Mục lục bài viết" className="mb-10 p-5 rounded-xl bg-[#F2D1D1]/40">
-                <h3 className="font-serif text-lg font-bold text-[#850E35] mb-3">
+              <nav aria-label="Mục lục bài viết" className="mb-10 rounded-2xl bg-soft-nurture/60 p-5">
+                <h3 className="mb-3 font-heading text-lg font-semibold italic text-charcoal">
                   Nội dung bài viết
                 </h3>
                 <ul className="space-y-0.5">
@@ -282,10 +282,10 @@ export default function BlogPostClient({
                           href={`#${item.id}`}
                           onClick={(e) => handleTocClick(e, item.id)}
                           className={cn(
-                            'block py-1.5 text-sm transition-colors duration-200 border-l-2',
+                            'block border-l-2 py-1.5 text-sm transition-colors duration-200',
                             isActive
-                              ? 'text-[#850E35] font-medium border-[#850E35]'
-                              : 'text-gray-600 hover:text-[#850E35] border-transparent',
+                              ? 'border-rose-clay font-medium text-charcoal'
+                              : 'border-transparent text-charcoal/70 hover:text-charcoal',
                           )}
                         >
                           {item.text}
@@ -302,14 +302,14 @@ export default function BlogPostClient({
             />
 
             {(previousPost || nextPost) && (
-              <div className="mt-10 grid grid-cols-2 gap-3 border-t border-[#f8e7e3] pt-6 sm:gap-6">
+              <div className="mt-10 grid grid-cols-2 gap-3 border-t border-soft-nurture pt-6 sm:gap-6">
                 {previousPost ? (
                   <a href={`/blog/${previousPost.Slug}`} className="group block">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#f8e7e3] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#850E35] transition-colors group-hover:bg-[#F2D1D1]">
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-soft-nurture px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-charcoal transition-colors group-hover:bg-rose-clay/70">
                       <span aria-hidden="true">←</span>
                       <span>Bài trước</span>
                     </span>
-                    <span className="mt-2 hidden font-serif text-sm text-gray-500 transition-colors group-hover:text-[#850E35] sm:block">
+                    <span className="mt-2 hidden font-heading text-sm font-medium italic text-charcoal/60 transition-colors group-hover:text-charcoal sm:block">
                       {previousPost.title.length > 35 ? `${previousPost.title.slice(0, 35)}...` : previousPost.title}
                     </span>
                   </a>
@@ -319,11 +319,11 @@ export default function BlogPostClient({
 
                 {nextPost ? (
                   <a href={`/blog/${nextPost.Slug}`} className="group block text-right">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#f8e7e3] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#850E35] transition-colors group-hover:bg-[#F2D1D1]">
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-soft-nurture px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-charcoal transition-colors group-hover:bg-rose-clay/70">
                       <span>Bài sau</span>
                       <span aria-hidden="true">→</span>
                     </span>
-                    <span className="mt-2 hidden font-serif text-sm text-gray-500 transition-colors group-hover:text-[#850E35] sm:block">
+                    <span className="mt-2 hidden font-heading text-sm font-medium italic text-charcoal/60 transition-colors group-hover:text-charcoal sm:block">
                       {nextPost.title.length > 35 ? `${nextPost.title.slice(0, 35)}...` : nextPost.title}
                     </span>
                   </a>
@@ -334,11 +334,11 @@ export default function BlogPostClient({
             )}
           </main>
 
-          <aside className="p-6 rounded-xl max-w-[496px] bg-[#F2D1D1]/40 lg:sticky lg:top-24">
+          <aside className="max-w-[496px] rounded-2xl bg-soft-nurture/60 p-6 lg:sticky lg:top-24">
             {/* Author box */}
             {author && (
               <div
-                className="mb-[4.2rem] rounded-xl border border-[#F2D1D1] bg-[#f8e7e3] p-5"
+                className="mb-[4.2rem] rounded-2xl border border-rose-clay/60 bg-cream p-5"
               >
                 <div className="flex items-center gap-4">
                   {author.image ? (
@@ -350,19 +350,19 @@ export default function BlogPostClient({
                       height={64}
                     />
                   ) : (
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#850E35] text-lg font-bold text-white">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-rose-clay text-lg font-bold text-charcoal">
                       {authorName.charAt(0)}
                     </div>
                   )}
 
                   <div className="min-w-0">
-                    {authorName && <p className="font-serif text-xl font-semibold text-[#850E35]">{authorName}</p>}
+                    {authorName && <p className="font-heading text-xl font-semibold italic text-charcoal">{authorName}</p>}
                   </div>
                 </div>
 
                 {author.bio && (
                   <div
-                    className="mt-4 text-sm text-gray-700 [&_p]:mt-0 [&_p]:mb-3 [&_p:last-child]:mb-0"
+                    className="mt-4 text-sm text-charcoal/75 [&_p]:mt-0 [&_p]:mb-3 [&_p:last-child]:mb-0"
                     dangerouslySetInnerHTML={{ __html: author.bio }}
                   />
                 )}
@@ -374,7 +374,7 @@ export default function BlogPostClient({
               {/* Table of Contents */}
               {tocItems && tocItems.length > 0 && (
                 <nav ref={tocNavRef} aria-label="Mục lục bài viết">
-                  <h3 className="font-serif text-lg font-bold text-[#850E35] mb-3">
+                  <h3 className="mb-3 font-heading text-lg font-semibold italic text-charcoal">
                     Nội dung bài viết
                   </h3>
                   <ul className="space-y-0.5">
@@ -386,10 +386,10 @@ export default function BlogPostClient({
                             href={`#${item.id}`}
                             onClick={(e) => handleTocClick(e, item.id)}
                             className={cn(
-                              'block py-1.5 text-sm transition-colors duration-200 border-l-2',
+                              'block border-l-2 py-1.5 text-sm transition-colors duration-200',
                               isActive
-                                ? 'text-[#850E35] font-medium border-[#850E35]'
-                                : 'text-gray-600 hover:text-[#850E35] border-transparent',
+                                ? 'border-rose-clay font-medium text-charcoal'
+                                : 'border-transparent text-charcoal/70 hover:text-charcoal',
                             )}
                           >
                             {item.text}
@@ -403,7 +403,7 @@ export default function BlogPostClient({
 
               {/* Related Posts */}
               <div>
-                <h3 className="font-serif text-lg font-bold text-[#850E35] mb-3">Bài viết liên quan</h3>
+                <h3 className="mb-3 font-heading text-lg font-semibold italic text-charcoal">Bài viết liên quan</h3>
                 <div className="space-y-3">
                   {relatedPosts.map((relatedPost) => {
                     const postLink = `/blog/${(relatedPost as any).Slug || (relatedPost as any).slug}`;
@@ -423,7 +423,7 @@ export default function BlogPostClient({
                         <div className="flex-1 min-w-0">
                           <a
                             href={postLink}
-                            className="text-base font-normal text-gray-800 transition-colors hover:text-[#850E35] line-clamp-2 [font-family:inherit]"
+                            className="line-clamp-2 text-base font-normal text-charcoal transition-colors hover:text-rose-clay [font-family:inherit]"
                             title={relatedPost.title ?? undefined}
                           >
                             {relatedPost.title && relatedPost.title.length > 55
@@ -432,7 +432,7 @@ export default function BlogPostClient({
                           </a>
                           <a
                             href={postLink}
-                            className="inline-block mt-0.5 text-xs text-gray-400 hover:text-[#850E35] transition-colors"
+                            className="mt-0.5 inline-block text-xs text-charcoal/55 transition-colors hover:text-rose-clay"
                           >
                             Xem chi tiết →
                           </a>
@@ -445,13 +445,13 @@ export default function BlogPostClient({
 
               {tags && tags.length > 0 && (
                 <div>
-                  <h3 className="mb-3 font-serif text-lg font-bold text-[#850E35]">Từ khoá</h3>
+                  <h3 className="mb-3 font-heading text-lg font-semibold italic text-charcoal">Từ khoá</h3>
                   <ul className="flex flex-wrap gap-2">
                     {tags.map((tag) => (
                       <li key={tag.slug}>
                         <a
                           href={`/blog?tag=${encodeURIComponent(tag.slug)}`}
-                          className="inline-flex rounded-full bg-[#f8e7e3] px-3 py-1 text-xs font-medium text-[#850E35] transition-colors hover:bg-[#F2D1D1]"
+                          className="inline-flex rounded-lg bg-cream px-3 py-1 text-xs font-medium text-charcoal/75 transition-colors hover:bg-rose-clay/50 hover:text-charcoal"
                         >
                           {tag.name}
                         </a>

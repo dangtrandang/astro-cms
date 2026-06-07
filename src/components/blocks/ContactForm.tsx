@@ -48,16 +48,14 @@ export default function ContactForm({ data }: ContactFormBlockProps) {
     const firstImage = (image || [])[0]?.directus_files_id?.id;
 
     return (
-        <section className="bg-[#FCF5EE] py-16 lg:py-24">
+        <section className="bg-cream py-16 lg:py-24">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 {(headline || title) && (
-                    <div className="text-center mb-12">
+                    <div className="mb-12 text-center">
                         {title && (
                             <h2
-                                className="font-normal text-4xl md:text-5xl"
+                                className="font-heading text-4xl font-semibold italic text-charcoal md:text-5xl"
                                 style={{
-                                    fontFamily: "'Playfair Display', serif",
-                                    color: '#850E35',
                                     fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
                                     lineHeight: '1.15',
                                 }}
@@ -73,7 +71,7 @@ export default function ContactForm({ data }: ContactFormBlockProps) {
                         )}
                         {headline && (
                             <p
-                                className="mt-3 text-lg text-gray-600 font-body"
+                                className="mt-3 font-body text-lg text-charcoal/70"
                                 dangerouslySetInnerHTML={{ __html: headline }}
                                 data-directus={setAttr({
                                     collection: 'block_form',
@@ -86,21 +84,21 @@ export default function ContactForm({ data }: ContactFormBlockProps) {
                     </div>
                 )}
 
-                <div className="flex flex-col lg:flex-row items-stretch gap-12 lg:gap-16">
+                <div className="flex flex-col items-stretch gap-12 lg:flex-row lg:gap-16">
                     {/* Left Column — Form (60%) */}
                     <div className="lg:w-3/5">
                         <FormBuilder
                             form={formForBuilder}
                             submitVariant="custom"
-                            submitClassName="bg-[#850E35] text-[#FCF5EE] rounded-xl px-8 py-3 font-medium hover:bg-[#6b0b2a] transition-all duration-300 hover:shadow-[0_0_20px_rgba(133,14,53,0.3)]"
+                            submitClassName="rounded-xl bg-dusty-blue px-8 py-3 font-medium text-cream transition-all duration-300 hover:bg-charcoal hover:shadow-[0_0_20px_rgba(45,42,40,0.18)]"
                         />
                     </div>
 
                     {/* Right Column — Single floating image (40%) */}
-                    <div className="lg:w-2/5 flex items-center justify-center">
+                    <div className="flex items-center justify-center lg:w-2/5">
                         {firstImage && (
-                            <div className="w-full max-w-md rounded-xl animate-float">
-                                <DirectusImage uuid={firstImage} className="w-full h-auto rounded-xl" />
+                            <div className="animate-float w-full max-w-md rounded-2xl">
+                                <DirectusImage uuid={firstImage} className="h-auto w-full rounded-2xl" />
                             </div>
                         )}
                     </div>

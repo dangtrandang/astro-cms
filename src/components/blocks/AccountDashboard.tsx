@@ -140,37 +140,37 @@ export default function AccountDashboard({ user, contact: initialContact, blockC
 	};
 
 	return (
-		<div className="flex flex-col lg:flex-row min-h-[70vh] bg-white rounded-2xl shadow-lg border border-[#f5e1e0] overflow-hidden">
-			<div className="lg:w-72 xl:w-80 shrink-0 border-b lg:border-b-0 lg:border-r border-[#f5e1e0] bg-[#faf6f2] flex flex-col">
-					<div className="h-28 bg-gradient-to-r from-[#f1907c] to-[#e17055]" />
+		<div className="flex min-h-[70vh] flex-col overflow-hidden rounded-2xl border border-rose-clay/35 bg-white shadow-lg lg:flex-row">
+			<div className="flex shrink-0 flex-col border-b border-rose-clay/35 bg-cream lg:w-72 lg:border-b-0 lg:border-r xl:w-80">
+					<div className="h-28 bg-gradient-to-r from-soft-nurture via-rose-clay to-cream" />
 	
 					<div className="flex justify-center -mt-10 relative">
 						<div className="w-20 h-20 rounded-full border-4 border-white overflow-hidden shadow-md">
 							{avatarUrl ? (
-								<img src={avatarUrl} alt={fullName} className="w-full h-full object-cover bg-[#fcf5ee]" />
+								<img src={avatarUrl} alt={fullName} className="h-full w-full bg-cream object-cover" />
 							) : (
-								<div className="w-full h-full flex items-center justify-center text-2xl font-bold bg-gradient-to-br from-[#fcf5ee] to-[#f5e1e0] text-[#6b4f4f]">
+								<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-cream to-soft-nurture text-2xl font-bold text-charcoal">
 									{avatarInitial}
 								</div>
 							)}
 						</div>
 					</div>
 
-				<div className="text-center mt-3 px-4">
-					<h2 className="font-semibold text-[#1f2a1d] truncate">{fullName}</h2>
-					<p className="text-sm text-[#9bab92] truncate">{user.email}</p>
+				<div className="mt-3 px-4 text-center">
+					<h2 className="truncate font-heading text-xl font-semibold italic text-charcoal">{fullName}</h2>
+					<p className="truncate text-sm text-charcoal/55">{user.email}</p>
 				</div>
 
-				<nav className="mt-6 px-3 flex-1">
+				<nav className="mt-6 flex-1 px-3">
 					{tabs.map((tab) => (
 						<button
 							key={tab.key}
 							type="button"
 							onClick={() => handleTabClick(tab.key)}
-							className={`w-full text-left px-4 py-2.5 rounded-xl mb-1 text-sm font-medium transition-colors ${
+							className={`mb-1 w-full rounded-xl px-4 py-2.5 text-left text-sm font-medium transition-colors ${
 								activeTab === tab.key
-									? 'bg-[#1f2a1d] text-white'
-									: 'text-[#4a5a40] hover:bg-[#f5e1e0]'
+									? 'bg-soft-nurture text-charcoal'
+									: 'text-charcoal/75 hover:bg-rose-clay/70 hover:text-charcoal'
 							}`}
 						>
 							{tab.label}
@@ -182,7 +182,7 @@ export default function AccountDashboard({ user, contact: initialContact, blockC
 					<div className="px-3 pb-4">
 						<a
 							href="/api/auth/logout"
-							className="flex items-center justify-center gap-2 w-full px-4 py-2.5 border border-[#e8d5d5] text-[#6b4f4f] text-sm font-medium rounded-xl hover:bg-[#f5e1e0] transition-colors"
+							className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-clay/45 px-4 py-2.5 text-sm font-medium text-charcoal/70 transition-colors hover:bg-soft-nurture hover:text-charcoal"
 						>
 							<svg
 								width="16"
@@ -213,15 +213,15 @@ function AccountInfo({ user, contact, fullName }: { user: User; contact: Contact
 
 	return (
 		<div>
-			<h3 className="text-xl font-bold text-[#1f2a1d] mb-6">Thông tin tài khoản</h3>
+			<h3 className="mb-6 font-heading text-xl font-semibold italic text-charcoal">Thông tin tài khoản</h3>
 			<div className="space-y-4">
 				<InfoRow label="Họ tên" value={fullName} />
 				<InfoRow label="Email" value={user.email || 'Chưa cập nhật'} />
 				<InfoRow label="Điện thoại" value={contact?.phone || 'Chưa cập nhật'} />
 
-				<div className="p-4 bg-[#fcf5ee] rounded-xl">
-					<span className="text-sm text-[#9bab92]">Phương thức đăng nhập</span>
-					<p className="text-[#1f2a1d] font-medium mt-0.5 flex items-center gap-2">
+				<div className="rounded-xl bg-cream p-4">
+					<span className="text-sm text-charcoal/55">Phương thức đăng nhập</span>
+					<p className="mt-0.5 flex items-center gap-2 font-medium text-charcoal">
 						{providerLabel.icon}
 						{providerLabel.text}
 					</p>
@@ -263,9 +263,9 @@ function getProviderLabel(provider?: string | null, externalIdentifier?: string 
 
 function InfoRow({ label, value }: { label: string; value: string }) {
 	return (
-		<div className="p-4 bg-[#fcf5ee] rounded-xl">
-			<span className="text-sm text-[#9bab92]">{label}</span>
-			<p className="text-[#1f2a1d] font-medium mt-0.5">{value}</p>
+		<div className="rounded-xl bg-cream p-4">
+			<span className="text-sm text-charcoal/55">{label}</span>
+			<p className="mt-0.5 font-medium text-charcoal">{value}</p>
 		</div>
 	);
 }
@@ -346,9 +346,9 @@ function AccountEdit({
 
 	return (
 		<div>
-			<h3 className="text-xl font-bold text-[#1f2a1d] mb-2">Cập nhật thông tin</h3>
+			<h3 className="mb-2 font-heading text-xl font-semibold italic text-charcoal">Cập nhật thông tin</h3>
 			{isFreshAccount && (
-				<p className="text-sm text-[#6b7a65] mb-6">
+				<p className="mb-6 text-sm text-charcoal/65">
 					Vui lòng cung cấp số điện thoại để hoàn tất thiết lập tài khoản
 				</p>
 			)}
@@ -366,7 +366,7 @@ function AccountEdit({
 
 			<form onSubmit={handleSubmit} className="space-y-5">
 				<div>
-					<label htmlFor="edit_first_name" className="block text-sm font-medium text-[#1f2a1d] mb-1">
+					<label htmlFor="edit_first_name" className="mb-1 block text-sm font-medium text-charcoal">
 						Họ
 					</label>
 					<input
@@ -374,12 +374,12 @@ function AccountEdit({
 						id="edit_first_name"
 						name="first_name"
 						defaultValue={contact?.first_name || user.first_name || ''}
-						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
+						className="w-full rounded-xl border border-rose-clay/45 bg-white px-4 py-2.5 outline-none transition focus:border-rose-clay/50"
 					/>
 				</div>
 
 				<div>
-					<label htmlFor="edit_last_name" className="block text-sm font-medium text-[#1f2a1d] mb-1">
+					<label htmlFor="edit_last_name" className="mb-1 block text-sm font-medium text-charcoal">
 						Tên
 					</label>
 					<input
@@ -387,12 +387,12 @@ function AccountEdit({
 						id="edit_last_name"
 						name="last_name"
 						defaultValue={contact?.last_name || user.last_name || ''}
-						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
+						className="w-full rounded-xl border border-rose-clay/45 bg-white px-4 py-2.5 outline-none transition focus:border-rose-clay/50"
 					/>
 				</div>
 
 				<div>
-					<label htmlFor="edit_phone" className="block text-sm font-medium text-[#1f2a1d] mb-1">
+					<label htmlFor="edit_phone" className="mb-1 block text-sm font-medium text-charcoal">
 						Số điện thoại
 					</label>
 					<input
@@ -401,14 +401,14 @@ function AccountEdit({
 						name="phone"
 						placeholder="VD: 0912345678"
 						defaultValue={contact?.phone || ''}
-						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
+						className="w-full rounded-xl border border-rose-clay/45 bg-white px-4 py-2.5 outline-none transition focus:border-rose-clay/50"
 					/>
 				</div>
 
 				<button
 					type="submit"
 					disabled={submitting}
-					className="w-full bg-[#1f2a1d] hover:bg-[#850e35] disabled:bg-[#9bab92] text-white font-medium py-3 px-6 rounded-full transition-colors"
+					className="w-full rounded-xl bg-dusty-blue px-6 py-3 font-medium text-cream transition-colors hover:bg-charcoal disabled:bg-charcoal/35"
 				>
 					{submitting ? 'Đang lưu...' : 'Lưu thông tin'}
 				</button>
@@ -420,14 +420,14 @@ function AccountEdit({
 function SupportContent({ content }: { content?: string }) {
 	return (
 		<div>
-			<h3 className="text-xl font-bold text-[#1f2a1d] mb-6">Hỗ trợ</h3>
+			<h3 className="mb-6 font-heading text-xl font-semibold italic text-charcoal">Hỗ trợ</h3>
 			{content ? (
 				<div
-					className="prose prose-sm max-w-none text-[#3d4d35] whitespace-pre-wrap"
+					className="prose prose-sm max-w-none whitespace-pre-wrap text-charcoal/75 prose-headings:font-heading prose-headings:italic prose-headings:text-charcoal prose-p:text-charcoal/75 prose-strong:text-charcoal"
 					dangerouslySetInnerHTML={{ __html: simpleMarkdownToHtml(content) }}
 				/>
 			) : (
-				<p className="text-[#9bab92]">Chưa có nội dung hỗ trợ.</p>
+				<p className="text-charcoal/55">Chưa có nội dung hỗ trợ.</p>
 			)}
 		</div>
 	);
@@ -440,13 +440,13 @@ function simpleMarkdownToHtml(md: string): string {
 		.replace(/>/g, '>');
 	html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 	html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-	html = html.replace(/`(.+?)`/g, '<code class="bg-[#f5e1e0] px-1 rounded text-sm">$1</code>');
-	html = html.replace(/^### (.+)$/gm, '<h4 class="font-semibold text-[#1f2a1d] mt-4 mb-2">$1</h4>');
-	html = html.replace(/^## (.+)$/gm, '<h3 class="font-semibold text-[#1f2a1d] mt-4 mb-2">$1</h3>');
-	html = html.replace(/^# (.+)$/gm, '<h2 class="font-bold text-[#1f2a1d] mt-4 mb-2">$1</h2>');
-	html = html.replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-[#3d4d35]">$1</li>');
-	html = html.replace(/\n\n/g, '</p><p class="text-[#3d4d35]">');
-	html = '<p class="text-[#3d4d35]">' + html + '</p>';
+	html = html.replace(/`(.+?)`/g, '<code class="rounded bg-soft-nurture px-1 text-sm text-charcoal">$1</code>');
+	html = html.replace(/^### (.+)$/gm, '<h4 class="mt-4 mb-2 font-heading font-semibold italic text-charcoal">$1</h4>');
+	html = html.replace(/^## (.+)$/gm, '<h3 class="mt-4 mb-2 font-heading font-semibold italic text-charcoal">$1</h3>');
+	html = html.replace(/^# (.+)$/gm, '<h2 class="mt-4 mb-2 font-heading font-semibold italic text-charcoal">$1</h2>');
+	html = html.replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-charcoal/75">$1</li>');
+	html = html.replace(/\n\n/g, '</p><p class="text-charcoal/75">');
+	html = '<p class="text-charcoal/75">' + html + '</p>';
 	return html;
 }
 
@@ -509,7 +509,7 @@ function SecurityTab({ user }: { user: User }) {
 	if (done) {
 		return (
 			<div>
-				<h3 className="text-xl font-bold text-[#1f2a1d] mb-6">Bảo mật</h3>
+				<h3 className="mb-6 font-heading text-xl font-semibold italic text-charcoal">Bảo mật</h3>
 				<div className="p-6 bg-green-50 border border-green-200 rounded-xl text-center">
 					<div className="text-3xl mb-3">🔐</div>
 					<p className="text-green-800 font-semibold text-lg mb-2">Tài khoản đã được bảo vệ tuyệt đối</p>
@@ -568,7 +568,7 @@ function SecurityTab({ user }: { user: User }) {
 
 		return (
 			<div>
-				<h3 className="text-xl font-bold text-[#1f2a1d] mb-6">Bảo mật</h3>
+				<h3 className="mb-6 font-heading text-xl font-semibold italic text-charcoal">Bảo mật</h3>
 
 				<div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50/60 border border-emerald-100 rounded-xl px-4 py-3 mb-4">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
@@ -590,7 +590,7 @@ function SecurityTab({ user }: { user: User }) {
 
 				<form onSubmit={handleChangePassword} className="space-y-5">
 					<div>
-						<label htmlFor="sec_new_password" className="block text-sm font-medium text-[#1f2a1d] mb-1">
+						<label htmlFor="sec_new_password" className="mb-1 block text-sm font-medium text-charcoal">
 							Mật khẩu mới
 						</label>
 						<input
@@ -601,12 +601,12 @@ function SecurityTab({ user }: { user: User }) {
 							minLength={8}
 							autoComplete="new-password"
 							placeholder="Ít nhất 8 ký tự"
-							className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
+							className="w-full rounded-xl border border-rose-clay/45 bg-white px-4 py-2.5 outline-none transition focus:border-rose-clay/50"
 						/>
 					</div>
 
 					<div>
-						<label htmlFor="sec_confirm_new" className="block text-sm font-medium text-[#1f2a1d] mb-1">
+						<label htmlFor="sec_confirm_new" className="mb-1 block text-sm font-medium text-charcoal">
 							Xác nhận mật khẩu mới
 						</label>
 						<input
@@ -617,14 +617,14 @@ function SecurityTab({ user }: { user: User }) {
 							minLength={8}
 							autoComplete="new-password"
 							placeholder="Nhập lại mật khẩu mới"
-							className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
+							className="w-full rounded-xl border border-rose-clay/45 bg-white px-4 py-2.5 outline-none transition focus:border-rose-clay/50"
 						/>
 					</div>
 
 					<button
 						type="submit"
 						disabled={submitting}
-						className="w-full bg-[#c0392b] hover:bg-[#a93226] disabled:bg-[#9bab92] text-white font-medium py-3 px-6 rounded-full transition-colors"
+						className="w-full rounded-xl bg-dusty-blue px-6 py-3 font-medium text-cream transition-colors hover:bg-charcoal disabled:bg-charcoal/35"
 					>
 						{submitting ? 'Đang cập nhật...' : 'Đổi mật khẩu'}
 					</button>
@@ -635,7 +635,7 @@ function SecurityTab({ user }: { user: User }) {
 
 	return (
 		<div>
-			<h3 className="text-xl font-bold text-[#1f2a1d] mb-6">Bảo mật</h3>
+			<h3 className="mb-6 font-heading text-xl font-semibold italic text-charcoal">Bảo mật</h3>
 
 			<div className="p-4 bg-red-50/50 border border-red-200 rounded-xl mb-6">
 				<div className="flex items-start gap-3">
@@ -662,7 +662,7 @@ function SecurityTab({ user }: { user: User }) {
 
 			<form onSubmit={handleConvert} className="space-y-5">
 				<div>
-					<label htmlFor="sec_password" className="block text-sm font-medium text-[#1f2a1d] mb-1">
+					<label htmlFor="sec_password" className="mb-1 block text-sm font-medium text-charcoal">
 						Mật khẩu mới
 					</label>
 					<input
@@ -673,12 +673,12 @@ function SecurityTab({ user }: { user: User }) {
 						minLength={8}
 						autoComplete="new-password"
 						placeholder="Ít nhất 8 ký tự"
-						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
+						className="w-full rounded-xl border border-rose-clay/45 bg-white px-4 py-2.5 outline-none transition focus:border-rose-clay/50"
 					/>
 				</div>
 
 				<div>
-					<label htmlFor="sec_confirm" className="block text-sm font-medium text-[#1f2a1d] mb-1">
+					<label htmlFor="sec_confirm" className="mb-1 block text-sm font-medium text-charcoal">
 						Xác nhận mật khẩu
 					</label>
 					<input
@@ -689,14 +689,14 @@ function SecurityTab({ user }: { user: User }) {
 						minLength={8}
 						autoComplete="new-password"
 						placeholder="Nhập lại mật khẩu"
-						className="w-full px-4 py-2.5 border border-[#e8d5d5] rounded-xl bg-white focus:ring-2 focus:ring-[#C6DCE4]/30 focus:border-[#C6DCE4] outline-none transition"
+						className="w-full rounded-xl border border-rose-clay/45 bg-white px-4 py-2.5 outline-none transition focus:border-rose-clay/50"
 					/>
 				</div>
 
 				<button
 					type="submit"
 					disabled={submitting}
-					className="w-full bg-[#c0392b] hover:bg-[#a93226] disabled:bg-[#9bab92] text-white font-medium py-3 px-6 rounded-full transition-colors"
+					className="w-full rounded-xl bg-dusty-blue px-6 py-3 font-medium text-cream transition-colors hover:bg-charcoal disabled:bg-charcoal/35"
 				>
 					{submitting ? 'Đang xử lý...' : 'Ngắt kết nối Google & Lưu mật khẩu'}
 				</button>
@@ -707,16 +707,16 @@ function SecurityTab({ user }: { user: User }) {
 
 function PlaceholderTab({ tab, label }: { tab: string; label: string }) {
 	return (
-		<div className="flex flex-col items-center justify-center min-h-[40vh] text-center">
-			<div className="w-16 h-16 bg-[#fcf5ee] rounded-full flex items-center justify-center mb-4">
-				<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9bab92" strokeWidth="1.5">
+		<div className="flex min-h-[40vh] flex-col items-center justify-center text-center">
+			<div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-cream">
+				<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#DDB8B2" strokeWidth="1.5">
 					<path d="M12 2L2 7l10 5 10-5-10-5z" />
 					<path d="M2 17l10 5 10-5" />
 					<path d="M2 12l10 5 10-5" />
 				</svg>
 			</div>
-			<h3 className="text-lg font-semibold text-[#1f2a1d] mb-2">{label}</h3>
-			<p className="text-sm text-[#9bab92] max-w-sm">Tính năng này đang được phát triển. Vui lòng quay lại sau.</p>
+			<h3 className="mb-2 font-heading text-lg font-semibold italic text-charcoal">{label}</h3>
+			<p className="max-w-sm text-sm text-charcoal/55">Tính năng này đang được phát triển. Vui lòng quay lại sau.</p>
 		</div>
 	);
 }
