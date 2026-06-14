@@ -12,6 +12,7 @@
     "generate:types": "tsx ./src/lib/directus/generateDirectusTypes.ts"
   },
   "dependencies": {
+    "@astrojs/check": "0.9.9",
     "@astrojs/react": "5.0.1",
     "@astrojs/vercel": "10.0.2",
     "@directus/sdk": "20.0.3",

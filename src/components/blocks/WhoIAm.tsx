@@ -160,7 +160,7 @@ export default function WhoIAm({ data }: WhoIAmProps) {
                         dangerouslySetInnerHTML={{
                             __html:
                                 data.content ||
-                                '<p>De toi tu gioi thieu mot chut ve minh. Toi lam viec voi nang luong, bieu tuong va nhung tin hieu vu tru dang gui den cho ban. Thong qua Tarot, Than so hoc va nhung trai nghiem tam linh ca nhan, toi se giup ban nhin ro hon hanh trinh cua minh.</p>',
+                                '<p>Mình yêu huyền học. Nhưng mình không xem huyền học là câu trả lời. Điều khiến mình hứng thú hơn cả là những câu chuyện, những lựa chọn, và những góc nhìn khác nhau của con người. ... Tarot, Thần số hay Kinh Dịch chỉ là những công cụ giúp mình nhìn một vấn đề từ nhiều hướng hơn.</p>',
                         }}
                     />
 

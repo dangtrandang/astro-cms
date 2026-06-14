@@ -122,7 +122,7 @@ export default function Hero({ data }: HeroProps) {
   const headline = data.headline || 'Nhìn <span class="text-[#D28080]">rõ hơn</span><br />một chút.';
   const content =
     data.content ||
-    'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng huyền học, Bằng góc nhìn. Và bằng sự thấu hiểu.';
+    'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng những cuộc trò chuyện. Bằng góc nhìn. Và đôi khi, bằng huyền học.';
   const linkflowVideoSrc = resolveDirectusFileUrl(data.video) || LINKFLOW_VIDEO_URL;
   const linkflowImageSrc = resolveDirectusFileUrl(data.image);
 
@@ -130,7 +130,7 @@ export default function Hero({ data }: HeroProps) {
     const linkflowHeadline = headline || 'Nhìn <span class="text-[#D28080]">rõ hơn</span><br />một chút.';
     const linkflowContent =
       content ||
-      'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng huyền học, Bằng góc nhìn. Và bằng sự thấu hiểu.';
+      'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng những cuộc trò chuyện. Bằng góc nhìn. Và đôi khi, bằng huyền học.';
 
     return (
       <LinkflowHero

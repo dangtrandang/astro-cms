@@ -1,0 +1,66 @@
+---
+// src/pages/index.astro — Homepage hardcoded, không dùng Block Builder
+export const prerender = true;
+
+import Layout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/blocks/Hero';
+import WhoIAm from '@/components/blocks/WhoIAm';
+import Gallery from '@/components/blocks/Gallery';
+import Quote from '@/components/blocks/Quote';
+import { fetchHomepageData } from '@/lib/directus/fetchers';
+
+const data = await fetchHomepageData();
+
+const rawSeo = data.seo && typeof data.seo === 'object' ? data.seo : {};
+const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
+
+const metadata = {
+  title: rawSeo.title || 'Hồng Ngọc Huyền Học',
+  description: rawSeo.meta_description || 'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc.',
+  openGraph: {
+    title: rawSeo.title || 'Hồng Ngọc Huyền Học',
+    description: rawSeo.meta_description || '',
+    url: siteURL,
+    type: 'website',
+  },
+};
+---
+
+<Layout metadata={metadata} headerVariant="overlay">
+  <Hero data={{
+    id: 'homepage-hero',
+    headline: data.hero_headline,
+    content: data.hero_content,
+    image: data.hero_image,
+    video: data.hero_video,
+    variant: (data.hero_variant as 'default' | 'video' | 'linkflow') || 'linkflow',
+  }} />
+
+  <WhoIAm data={{
+    id: 'homepage-whoiam',
+    eyebrow: data.who_i_am_eyebrow,
+    headline: data.who_i_am_headline,
+    content: data.who_i_am_content,
+    portrait_image: data.who_i_am_portrait_image,
+    center_badge: data.who_i_am_center_badge,
+    right_items: data.who_i_am_right_items,
+    social_links: data.who_i_am_social_links,
+    theme_variant: (data.who_i_am_theme_variant as 'blue-mystic' | 'default') || 'default',
+  }} />
+
+  <Gallery client:load data={{
+    id: 'homepage-gallery',
+    headline: data.gallery_headline,
+    variant: (data.gallery_variant as 'grid' | 'accordion' | 'floating') || 'accordion',
+    background_color: data.gallery_background_color,
+    background_image: data.gallery_background_image,
+    gallery_items: data.gallery_images,
+  }} />
+
+  <Quote data={{
+    id: 'homepage-quote',
+    title: data.quote_title,
+    subtitle: data.quote_subtitle,
+    content: data.quote_content,
+  }} />
+</Layout>

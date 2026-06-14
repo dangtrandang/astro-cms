@@ -59,14 +59,6 @@ const pageFields = [
               ],
             },
           ] as any,
-          block_blog_archive: [
-            'id',
-            'headline',
-            'author_filter',
-            {
-              categories: [{ categories_id: ['id', 'title', 'slug'] }],
-            },
-          ] as any,
           block_form: [
             'id',
             'title',
@@ -126,135 +118,14 @@ const pageFields = [
             'social_links',
             'theme_variant',
           ] as any,
-          block_steps: [
-            'id',
-            'title',
-            'headline',
-            'show_step_numbers',
-            'alternate_image_position',
-            'badge_text',
-            'author_image',
-            {
-              steps: [
-                'id',
-                'sort',
-                'title',
-                'content',
-                'bg_color',
-                { image: ['id'] },
-                {
-                  button_group: [
-                    'id',
-                    {
-                      buttons: [
-                        'id',
-                        'label',
-                        'variant',
-                        'color',
-                        'type',
-                        'external_url',
-                        { page: ['permalink'] },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ] as any,
         },
       },
     ],
   },
 ] as const;
 
-const blogArchivePostFields = [
-  'id',
-  'title',
-  'summary',
-  'content',
-  'Slug',
-  'image',
-  'date_published',
-  { tags: [{ tags_id: ['name', 'slug'] }] },
-  { category: ['id', 'title', 'slug'] },
-  { author: ['id', 'name', 'image'] },
-] as any[];
-
-const BLOG_ARCHIVE_PAGE_SIZE = 10;
-
-const enrichBlogArchiveBlocks = async (page: Page, token?: string) => {
-  const blocks = Array.isArray(page.blocks) ? [...page.blocks] : [];
-  if (!blocks.length) return page;
-
-  const serverToken = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
-  const client = createAuthClient(token || serverToken);
-
-  const enrichedBlocks = await Promise.all(
-    blocks.map(async (block: any) => {
-      if (block?.collection !== 'block_blog_archive' || !block.item || typeof block.item !== 'object') {
-        return block;
-      }
-
-      const blockItem = block.item as any;
-      const categoryIds = Array.isArray(blockItem.categories)
-        ? blockItem.categories
-          .map((entry: any) => entry?.categories_id?.id ?? entry?.categories_id)
-          .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0)
-        : [];
-
-      const andConditions: any[] = [{ status: { _eq: 'published' } }];
-
-      if (blockItem.author_filter) {
-        andConditions.push({ author: { _eq: blockItem.author_filter } });
-      }
-
-      if (categoryIds.length > 0) {
-        andConditions.push({ category: { id: { _in: categoryIds } } });
-      }
-
-      const filter = andConditions.length > 1 ? { _and: andConditions } : andConditions[0];
-      const sortDir = blockItem.sort_mode === 'oldest' ? 'date_published' : '-date_published';
-
-      const [posts, countResponse] = await Promise.all([
-        client.request(
-          sdkReadItems('posts', {
-            filter: filter as any,
-            sort: [sortDir] as any[],
-            limit: BLOG_ARCHIVE_PAGE_SIZE,
-            page: 1,
-            fields: blogArchivePostFields,
-          }),
-        ),
-        client.request(
-          sdkAggregate('posts', {
-            aggregate: { count: '*' },
-            filter: filter as any,
-          }),
-        ),
-      ]);
-
-      const totalCount = Number((countResponse as any)[0]?.count ?? 0);
-
-      return {
-        ...block,
-        item: {
-          ...blockItem,
-          posts,
-          totalCount,
-          totalPages: Math.max(1, Math.ceil(totalCount / BLOG_ARCHIVE_PAGE_SIZE)),
-        },
-      };
-    }),
-  );
-
-  return {
-    ...page,
-    blocks: enrichedBlocks,
-  };
-};
-
 /**
- * Fetches page data by permalink, including all nested blocks and dynamically fetching blog posts if required.
+ * Fetches page data by permalink, including all nested blocks.
  */
 export const fetchPageData = async (
   permalink: string,
@@ -289,7 +160,7 @@ export const fetchPageData = async (
       throw new Error('Page not found');
     }
 
-    return enrichBlogArchiveBlocks(pageData[0], token);
+    return pageData[0];
   } catch {
     throw new Error(`Failed to fetch page with permalink "${permalink}"`);
   }
@@ -653,7 +524,7 @@ export const fetchPageDataById = async (id: string, version: string, token?: str
       ),
     )) as Page;
 
-    return enrichBlogArchiveBlocks(page, token);
+    return page;
   } catch {
     throw new Error('Failed to fetch versioned page');
   }
@@ -768,4 +639,127 @@ export const fetchPostByIdAndVersion = async (
   } catch {
     throw new Error('Failed to fetch versioned post');
   }
+};
+
+/**
+ * Fetch homepage data from the homepage singleton collection.
+ * Used by index.astro (hardcoded route, no Block Builder).
+ * 4 sections: Hero, WhoIAm, Gallery (accordion), Quote.
+ */
+export type HomepageData = {
+  hero_headline?: string | null;
+  hero_content?: string | null;
+  hero_image?: string | { id: string } | null;
+  hero_video?: string | { id: string } | null;
+  hero_variant?: string | null;
+  who_i_am_eyebrow?: string | null;
+  who_i_am_headline?: string | null;
+  who_i_am_content?: string | null;
+  who_i_am_portrait_image?: string | { id: string } | null;
+  who_i_am_center_badge?: string | null;
+  who_i_am_right_items?: any[] | null;
+  who_i_am_social_links?: any[] | null;
+  who_i_am_theme_variant?: string | null;
+  gallery_headline?: string | null;
+  gallery_variant?: string | null;
+  gallery_background_color?: string | null;
+  gallery_background_image?: string | { id: string } | null;
+  gallery_images?: any[] | null;
+  quote_title?: string | null;
+  quote_subtitle?: string | null;
+  quote_content?: string | null;
+  seo?: { title?: string | null; meta_description?: string | null; og_image?: string | null } | string | null;
+  hero_button_group?: { id: string; buttons?: any[] } | string | null;
+};
+
+const homepageFields = [
+  'hero_headline', 'hero_content', 'hero_image', 'hero_video', 'hero_variant',
+  { hero_button_group: [{ buttons: ['id', 'label', 'variant', 'color', 'type', 'external_url', { page: ['permalink'] }] }] },
+  'who_i_am_eyebrow', 'who_i_am_headline', 'who_i_am_content',
+  'who_i_am_portrait_image', 'who_i_am_center_badge',
+  'who_i_am_right_items', 'who_i_am_social_links', 'who_i_am_theme_variant',
+  'gallery_headline', 'gallery_variant', 'gallery_background_color',
+  'gallery_background_image',
+  { gallery_images: ['id', 'sort', { directus_files_id: ['id', 'title', 'description', 'width', 'height'] }] },
+  'quote_title', 'quote_subtitle', 'quote_content',
+  { seo: ['title', 'meta_description', 'og_image'] },
+] as any[];
+
+export const fetchHomepageData = async (): Promise<HomepageData> => {
+  try {
+    const data = await directus.request(
+      readSingleton('homepage', {
+        fields: homepageFields,
+      }),
+    ) as HomepageData;
+
+    return data ?? {};
+  } catch (error) {
+    console.error('fetchHomepageData error:', error);
+    return {};
+  }
+};
+
+export const BLOG_ARCHIVE_PAGE_SIZE = 10;
+
+const blogArchivePostFields = [
+  'id',
+  'title',
+  'summary',
+  'content',
+  'Slug',
+  'image',
+  'date_published',
+  { tags: [{ tags_id: ['name', 'slug'] }] },
+  { category: ['id', 'title', 'slug'] },
+  { author: ['id', 'name', 'image'] },
+] as any[];
+
+export const fetchBlogArchiveData = async (
+  page = 1,
+  authorFilter?: string,
+  categoryFilter?: string[],
+  sortMode?: 'newest' | 'oldest',
+): Promise<{ posts: any[]; totalCount: number; totalPages: number }> => {
+  const serverToken = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
+  const client = createAuthClient(serverToken);
+
+  const andConditions: any[] = [{ status: { _eq: 'published' } }];
+
+  if (authorFilter) {
+    andConditions.push({ author: { _eq: authorFilter } });
+  }
+
+  if (categoryFilter && categoryFilter.length > 0) {
+    andConditions.push({ category: { id: { _in: categoryFilter } } });
+  }
+
+  const filter = andConditions.length > 1 ? { _and: andConditions } : andConditions[0];
+  const sortDir = sortMode === 'oldest' ? 'date_published' : '-date_published';
+
+  const [posts, countResponse] = await Promise.all([
+    client.request(
+      sdkReadItems('posts', {
+        filter: filter as any,
+        sort: [sortDir] as any[],
+        limit: BLOG_ARCHIVE_PAGE_SIZE,
+        page,
+        fields: blogArchivePostFields,
+      }),
+    ),
+    client.request(
+      sdkAggregate('posts', {
+        aggregate: { count: '*' },
+        filter: filter as any,
+      }),
+    ),
+  ]);
+
+  const totalCount = Number((countResponse as any)[0]?.count ?? 0);
+
+  return {
+    posts: posts as any[],
+    totalCount,
+    totalPages: Math.max(1, Math.ceil(totalCount / BLOG_ARCHIVE_PAGE_SIZE)),
+  };
 };

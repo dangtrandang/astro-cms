@@ -420,6 +420,35 @@ export interface Globals {
 	theme?: Record<string, any> | null;
 }
 
+export interface Homepage {
+	/** @primaryKey */
+	id: string;
+	hero_eyebrow?: string | null;
+	hero_headline?: string | null;
+	hero_content?: string | null;
+	hero_image?: DirectusFile | string | null;
+	hero_video?: DirectusFile | string | null;
+	hero_variant?: 'default' | 'video' | 'linkflow' | null;
+	hero_button_group?: BlockButtonGroup | string | null;
+	who_i_am_eyebrow?: string | null;
+	who_i_am_headline?: string | null;
+	who_i_am_content?: string | null;
+	who_i_am_portrait_image?: DirectusFile | string | null;
+	who_i_am_center_badge?: string | null;
+	who_i_am_right_items?: Record<string, any>[] | null;
+	who_i_am_social_links?: Record<string, any>[] | null;
+	who_i_am_theme_variant?: 'blue-mystic' | 'default' | null;
+	gallery_headline?: string | null;
+	gallery_variant?: 'accordion' | 'grid' | 'floating' | null;
+	gallery_background_color?: string | null;
+	gallery_background_image?: DirectusFile | string | null;
+	gallery_items?: Record<string, any>[] | null;
+	quote_title?: string | null;
+	quote_subtitle?: string | null;
+	quote_content?: string | null;
+	seo?: Seo | string | null;
+}
+
 export interface HelpArticle {
 	content?: string | null;
 	date_created?: string | null;
@@ -1663,6 +1692,7 @@ export interface Schema {
 	form_submissions: FormSubmission[];
 	forms: Form[];
 	globals: Globals;
+	homepage: Homepage;
 	help_articles: HelpArticle[];
 	help_collections: HelpCollection[];
 	help_feedback: HelpFeedback[];
@@ -1774,6 +1804,7 @@ export enum CollectionNames {
 	form_submissions = 'form_submissions',
 	forms = 'forms',
 	globals = 'globals',
+	homepage = 'homepage',
 	help_articles = 'help_articles',
 	help_collections = 'help_collections',
 	help_feedback = 'help_feedback',

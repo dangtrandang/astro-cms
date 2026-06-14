@@ -1,0 +1,33 @@
+---
+import Layout from '@/layouts/BaseLayout.astro';
+import { fetchBlogArchiveData } from '@/lib/directus/fetchers';
+import BlogArchive from '@/components/blocks/BlogArchive';
+
+export const prerender = false;
+
+const { posts, totalCount, totalPages } = await fetchBlogArchiveData(1);
+
+const blogArchiveData = {
+  id: 'blog-index',
+  posts,
+  totalCount,
+  totalPages,
+};
+
+const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
+
+const metadata = {
+  title: 'Blog',
+  description: 'Các bài viết về huyền học, tarot và chiêm nghiệm cuộc sống',
+  openGraph: {
+    title: 'Blog',
+    description: 'Các bài viết về huyền học, tarot và chiêm nghiệm cuộc sống',
+    url: `${siteURL}/blog`,
+    type: 'website',
+  },
+};
+---
+
+<Layout metadata={metadata}>
+  <BlogArchive client:load data={blogArchiveData} />
+</Layout>
