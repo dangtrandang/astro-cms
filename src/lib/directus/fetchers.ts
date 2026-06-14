@@ -686,8 +686,14 @@ const homepageFields = [
 ] as any[];
 
 export const fetchHomepageData = async (): Promise<HomepageData> => {
+  const serverToken = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
+  if (!serverToken) {
+    console.warn('fetchHomepageData: DIRECTUS_SERVER_TOKEN not set, using unauthenticated client');
+  }
+
   try {
-    const data = await directus.request(
+    const client = createAuthClient(serverToken);
+    const data = await client.request(
       readSingleton('homepage', {
         fields: homepageFields,
       }),
