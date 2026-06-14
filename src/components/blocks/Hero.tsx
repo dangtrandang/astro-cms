@@ -4,6 +4,8 @@ import type { ButtonProps } from '@/components/blocks/Button';
 const LINKFLOW_VIDEO_URL =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260511_131941_d136af49-e243-493a-be14-6ff3f24e09e6.mp4';
 
+const SAFE_FALLBACK_VIDEO_URL = LINKFLOW_VIDEO_URL;
+
 interface HeroProps {
   data: {
     id: string;
@@ -123,25 +125,21 @@ export default function Hero({ data }: HeroProps) {
   const content =
     data.content ||
     'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng những cuộc trò chuyện. Bằng góc nhìn. Và đôi khi, bằng huyền học.';
-  const linkflowVideoSrc = resolveDirectusFileUrl(data.video) || LINKFLOW_VIDEO_URL;
+  const linkflowVideoSrc = resolveDirectusFileUrl(data.video) || LINKFLOW_VIDEO_URL || SAFE_FALLBACK_VIDEO_URL;
   const linkflowImageSrc = resolveDirectusFileUrl(data.image);
 
-  if (isHeroLinkflowVariant(data.variant)) {
-    const linkflowHeadline = headline || 'Nhìn <span class="text-[#D28080]">rõ hơn</span><br />một chút.';
-    const linkflowContent =
-      content ||
-      'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng những cuộc trò chuyện. Bằng góc nhìn. Và đôi khi, bằng huyền học.';
+  const linkflowHeadline = headline || 'Nhìn <span class="text-[#D28080]">rõ hơn</span><br />một chút.';
+  const linkflowContent =
+    content ||
+    'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng những cuộc trò chuyện. Bằng góc nhìn. Và đôi khi, bằng huyền học.';
 
-    return (
-      <LinkflowHero
-        linkflowHeadline={linkflowHeadline}
-        linkflowContent={linkflowContent}
-        heroId={data.id}
-        videoSrc={linkflowVideoSrc}
-        imageSrc={linkflowImageSrc}
-      />
-    );
-  }
-
-  return null;
+  return (
+    <LinkflowHero
+      linkflowHeadline={linkflowHeadline}
+      linkflowContent={linkflowContent}
+      heroId={data.id}
+      videoSrc={linkflowVideoSrc}
+      imageSrc={linkflowImageSrc}
+    />
+  );
 }
