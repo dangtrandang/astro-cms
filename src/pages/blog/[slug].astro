@@ -181,11 +181,12 @@ const { previousPost, nextPost } = await fetchAdjacentPosts(post);
 const author = post.author && typeof post.author === 'object' ? (post.author as Team) : null;
 const authorName = (author as Team)?.name || '';
 
-// Category + Meta Data
-const category = typeof post.category === 'object' && post.category !== null ? post.category : null;
-const categoryName = (category as any)?.title ?? null;
-const categoryColor = (category as any)?.color ?? null;
-const categorySlug = (category as any)?.slug ?? null;
+// Category + Meta Data (M2M qua junction posts_categories)
+const categories = Array.isArray((post as any).categories) ? (post as any).categories : [];
+const firstCat = categories[0]?.categories_id ?? null;
+const categoryName = firstCat?.title ?? null;
+const categoryColor = firstCat?.color ?? null;
+const categorySlug = firstCat?.slug ?? null;
 
 // M2M relation: post.tags là PostTagItem[], mỗi item có .tags_id là object { name, slug }
 const tags: Array<{ name: string; slug: string }> | null =
@@ -208,17 +209,31 @@ const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
 const postUrl = `${siteURL}/blog/${slug}`;
 const ogImage = post.image ? getDirectusAssetURL(post.image as string) : null;
 
-const metadata = {
-  title: post?.seo?.title ?? post.title ?? '',
-  description: post?.seo?.meta_description ?? '',
+const seo = (post?.seo ?? null) as any;
+
+const metadata: any = {
+  title: seo?.title ?? post.title ?? '',
+  description: seo?.meta_description ?? '',
   openGraph: {
-    title: post?.seo?.title ?? post.title ?? '',
-    description: post?.seo?.meta_description ?? '',
+    title: seo?.title ?? post.title ?? '',
+    description: seo?.meta_description ?? '',
     url: postUrl,
     type: 'article',
     images: ogImage ? [{ url: ogImage }] : undefined,
   },
 };
+
+// Pipe: render robots/canonical nếu Directus có dữ liệu
+if (seo?.no_index || seo?.no_follow) {
+  const parts: string[] = [];
+  if (seo.no_index) parts.push('noindex');
+  if (seo.no_follow) parts.push('nofollow');
+  if (parts.length) metadata.robots = parts.join(', ');
+}
+
+if (seo?.canonical_url) {
+  metadata.canonical = seo.canonical_url;
+}
 
 // Route caching (Astro v6): only cache published posts; never cache preview/draft
 if (Astro.cache && Astro.cache.enabled) {

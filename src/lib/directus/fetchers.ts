@@ -338,7 +338,7 @@ export const fetchPostBySlug = async (slug: string, draft = false, token?: strin
           'Slug',
           'seo',
           { tags: [{ tags_id: ['name', 'slug'] }] },
-          { category: ['id', 'title', 'color', 'slug'] },
+          { categories: [{ categories_id: ['id', 'title', 'color', 'slug'] }] },
           { author: ['id', 'name', 'image', 'bio'] },
         ] as any[],
       }),
@@ -684,7 +684,7 @@ export const fetchPostByIdAndVersion = async (
       'Slug',
       'seo',
       { tags: [{ tags_id: ['name', 'slug'] }] },
-      { category: ['id', 'title', 'color', 'slug'] },
+      { categories: [{ categories_id: ['id', 'title', 'color', 'slug'] }] },
       { author: ['id', 'name', 'image', 'bio'] },
     ] as const;
 

@@ -194,7 +194,8 @@ export default function BlogPostClient({
               {categoryName && (
                 <a
                   href={categorySlug ? `/blog/danh-muc/${categorySlug}` : '#'}
-                  className="w-fit rounded-lg bg-soft-nurture/90 px-2.5 py-0.5 text-[11px] font-semibold text-charcoal backdrop-blur-sm sm:px-3 sm:py-1 sm:text-xs"
+                  className="w-fit rounded-lg px-2.5 py-0.5 text-[11px] font-semibold text-charcoal backdrop-blur-sm sm:px-3 sm:py-1 sm:text-xs"
+                  style={{ backgroundColor: 'rgb(238,209,209)' }}
                 >
                   {categoryName}
                 </a>
