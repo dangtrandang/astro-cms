@@ -51,6 +51,7 @@ const DynamicForm = ({ fields, onSubmit, submitLabel, id, submitVariant, submitC
   return (
     <Form {...form}>
       <form
+        method="POST"
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-wrap gap-4"
         data-directus={setAttr({

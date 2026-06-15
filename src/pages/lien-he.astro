@@ -14,7 +14,7 @@ const metadata = {
 
 <Layout metadata={metadata}>
   <div class="min-h-[70vh] px-4 py-8 lg:py-12">
-    <ContactForm data={{
+    <ContactForm client:load data={{
       id: data.id,
       title: data.title,
       headline: data.form_headline,
