@@ -28,7 +28,7 @@ interface Post {
   image?: string | null;
   date_published?: string | null;
   tags?: Array<{ tags_id?: { name?: string; slug?: string } }> | null;
-  category?: Category | null;
+  categories?: Array<{ categories_id?: Category }> | null;
   author?: Author | null;
 }
 
@@ -78,11 +78,11 @@ function getExcerpt(post: Post, wordLimit = 25): string {
 
 // ─── Post Card ────────────────────────────────────────────────────────────────
 
-function PostCard({ post }: { post: Post }) {
+function PostCard({ post, onTagClick }: { post: Post; onTagClick?: (slug: string) => void }) {
   const imageId = typeof post.image === 'string' ? post.image : (post.image as any)?.id;
   const slug = post.Slug;
   const date = formatDate(post.date_published);
-  const categoryTitle = post.category?.title;
+  const categoryTitle = post.categories?.[0]?.categories_id?.title;
   const authorName = post.author?.name;
   const authorImageId = post.author?.image;
   const excerpt = getExcerpt(post);
@@ -142,12 +142,18 @@ function PostCard({ post }: { post: Post }) {
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {post.tags.slice(0, 3).map((tag) => (
-              <span
+              <button
                 key={tag.tags_id?.slug || tag.tags_id?.name}
-                className="rounded-lg bg-cream px-2.5 py-0.5 text-xs text-charcoal/50"
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const value = tag.tags_id?.slug || tag.tags_id?.name;
+                  if (value) onTagClick?.(value);
+                }}
+                className="rounded-lg bg-cream px-2.5 py-0.5 text-xs text-charcoal/50 hover:bg-soft-nurture hover:text-charcoal transition cursor-pointer"
               >
                 {tag.tags_id?.name || ''}
-              </span>
+              </button>
             ))}
           </div>
         )}
@@ -179,11 +185,11 @@ function PostCard({ post }: { post: Post }) {
 
 // ─── Featured Post (Hero) ────────────────────────────────────────────────────
 
-function FeaturedPost({ post }: { post: Post }) {
+function FeaturedPost({ post, onTagClick }: { post: Post; onTagClick?: (slug: string) => void }) {
   const imageId = typeof post.image === 'string' ? post.image : (post.image as any)?.id;
   const slug = post.Slug;
   const date = formatDate(post.date_published);
-  const categoryTitle = post.category?.title;
+  const categoryTitle = post.categories?.[0]?.categories_id?.title;
   const authorName = post.author?.name;
   const authorImageId = post.author?.image;
   const excerpt = getExcerpt(post);
@@ -275,11 +281,18 @@ function FeaturedPost({ post }: { post: Post }) {
               <p className="text-xs font-semibold text-white/60">Từ khoá</p>
               <ul className="flex gap-2">
                 {post.tags.slice(0, 3).map((tag) => (
-                  <li
-                    key={tag.tags_id?.slug || tag.tags_id?.name}
-                    className="rounded-lg px-2.5 py-0.5 text-xs font-medium text-white"
-                  >
-                    {tag.tags_id?.name || ''}
+                  <li key={tag.tags_id?.slug || tag.tags_id?.name}>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const value = tag.tags_id?.slug || tag.tags_id?.name;
+                        if (value) onTagClick?.(value);
+                      }}
+                      className="rounded-lg px-2.5 py-0.5 text-xs font-medium text-white hover:text-rose-clay hover:bg-white/10 transition cursor-pointer"
+                    >
+                      {tag.tags_id?.name || ''}
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -405,6 +418,8 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   const monthsFetched = useRef(false);
 
+  const [activeTag, setActiveTag] = useState<string>('');
+
   // Load available months once on mount only
   useEffect(() => {
     if (monthsFetched.current) return;
@@ -423,7 +438,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
   }, []);
 
   const fetchArchivePosts = useCallback(
-    async (page: number, categoryId: string, sort: string, month: string) => {
+    async (page: number, categoryId: string, sort: string, month: string, tag?: string) => {
       const params = new URLSearchParams({ page: String(page), limit: '10', sort });
 
       if (author_filter) {
@@ -440,6 +455,10 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
         params.set('month', month);
       }
 
+      if (tag) {
+        params.set('tag', tag);
+      }
+
       const res = await fetch(`/api/blog-archive-posts?${params.toString()}`);
       if (!res.ok) throw new Error('Fetch failed');
       return res.json();
@@ -448,11 +467,11 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
   );
 
   const runFetch = useCallback(
-    async (page: number, categoryId: string, sort: string, month: string) => {
+    async (page: number, categoryId: string, sort: string, month: string, tag?: string) => {
       setLoading(true);
       setIsTransitioning(true);
       try {
-        const result = await fetchArchivePosts(page, categoryId, sort, month);
+        const result = await fetchArchivePosts(page, categoryId, sort, month, tag);
         setPosts(result.posts ?? []);
         setTotalPages(result.totalPages ?? 1);
       } catch {
@@ -472,7 +491,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
       setActiveCategoryId(categoryId);
       setActiveMonth('all');
       setCurrentPage(1);
-      runFetch(1, categoryId, sortMode, 'all');
+      runFetch(1, categoryId, sortMode, 'all', activeTag);
     },
     [loading, isTransitioning, activeCategoryId, sortMode, runFetch],
   );
@@ -482,7 +501,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
       if (loading || isTransitioning || sort === sortMode) return;
       setSortMode(sort);
       setCurrentPage(1);
-      runFetch(1, activeCategoryId, sort, activeMonth);
+      runFetch(1, activeCategoryId, sort, activeMonth, activeTag);
     },
     [loading, isTransitioning, sortMode, activeCategoryId, activeMonth, runFetch],
   );
@@ -492,7 +511,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
       if (loading || isTransitioning || month === activeMonth) return;
       setActiveMonth(month);
       setCurrentPage(1);
-      runFetch(1, activeCategoryId, sortMode, month);
+      runFetch(1, activeCategoryId, sortMode, month, activeTag);
     },
     [loading, isTransitioning, activeMonth, activeCategoryId, sortMode, runFetch],
   );
@@ -503,7 +522,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
       setCurrentPage(page);
       setLoading(true);
       setIsTransitioning(true);
-      fetchArchivePosts(page, activeCategoryId, sortMode, activeMonth)
+      fetchArchivePosts(page, activeCategoryId, sortMode, activeMonth, activeTag)
         .then((result) => {
           setPosts(result.posts ?? []);
           setTotalPages(result.totalPages ?? 1);
@@ -523,6 +542,16 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
 
   const featuredPost = posts[0] ?? null;
   const gridPosts = posts.slice(1);
+
+  const handleTagClick = useCallback(
+    (tagValue: string) => {
+      if (loading || isTransitioning || !tagValue || tagValue === activeTag) return;
+      setActiveTag(tagValue);
+      setCurrentPage(1);
+      runFetch(1, activeCategoryId, sortMode, activeMonth, tagValue);
+    },
+    [loading, isTransitioning, activeTag, activeCategoryId, activeMonth, sortMode, runFetch],
+  );
 
   return (
     <section className="bg-cream py-16 md:py-24">
@@ -547,7 +576,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
         </div>
 
         {/* Featured post */}
-        {featuredPost && <FeaturedPost post={featuredPost} />}
+        {featuredPost && <FeaturedPost post={featuredPost} onTagClick={handleTagClick} />}
 
 
         {availableCategories.length > 0 && (
@@ -648,7 +677,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
               <ul className="grid auto-rows-fr grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
                 {gridPosts.map((post) => (
                   <li key={post.id} className="h-full">
-                    <PostCard post={post} />
+                    <PostCard post={post} onTagClick={handleTagClick} />
                   </li>
                 ))}
               </ul>

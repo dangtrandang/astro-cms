@@ -1,0 +1,25 @@
+---
+import Layout from '@/layouts/BaseLayout.astro';
+import { fetchPageLienHe } from '@/lib/directus/fetchers';
+import ContactForm from '@/components/blocks/ContactForm';
+
+const data = await fetchPageLienHe();
+const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
+const metadata = {
+  title: 'Liên hệ | Hồng Ngọc Huyền Học',
+  description: 'Liên hệ với Hồng Ngọc để được tư vấn',
+  openGraph: { title: 'Liên hệ | Hồng Ngọc Huyền Học', description: '', url: `${siteURL}/lien-he`, type: 'website' },
+};
+---
+
+<Layout metadata={metadata}>
+  <div class="min-h-[70vh] px-4 py-8 lg:py-12">
+    <ContactForm data={{
+      id: data.id,
+      title: data.title,
+      headline: data.form_headline,
+      form: data.contact_form,
+      image: data.image,
+    }} />
+  </div>
+</Layout>

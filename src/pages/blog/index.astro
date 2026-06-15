@@ -1,17 +1,23 @@
 ---
 import Layout from '@/layouts/BaseLayout.astro';
-import { fetchBlogArchiveData } from '@/lib/directus/fetchers';
+import { fetchBlogArchiveData, fetchCategories } from '@/lib/directus/fetchers';
 import BlogArchive from '@/components/blocks/BlogArchive';
 
 export const prerender = false;
 
-const { posts, totalCount, totalPages } = await fetchBlogArchiveData(1);
+const [{ posts, totalCount, totalPages }, rawCategories] = await Promise.all([
+  fetchBlogArchiveData(1),
+  fetchCategories(),
+]);
+
+const categories = rawCategories.map((cat: any) => ({ categories_id: cat }));
 
 const blogArchiveData = {
   id: 'blog-index',
   posts,
   totalCount,
   totalPages,
+  categories,
 };
 
 const siteURL = import.meta.env.PUBLIC_SITE_URL || '';

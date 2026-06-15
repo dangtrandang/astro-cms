@@ -1,0 +1,21 @@
+---
+import Layout from '@/layouts/BaseLayout.astro';
+import { fetchPageChinhSachBaoMat } from '@/lib/directus/fetchers';
+import RichText from '@/components/blocks/RichText';
+
+const data = await fetchPageChinhSachBaoMat();
+const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
+const metadata = {
+  title: 'Chính sách Bảo mật | Hồng Ngọc Huyền Học',
+  description: '',
+  openGraph: { title: 'Chính sách Bảo mật | Hồng Ngọc Huyền Học', description: '', url: `${siteURL}/chinh-sach-bao-mat`, type: 'website' },
+};
+---
+
+<Layout metadata={metadata}>
+  <RichText data={{
+    id: data.id,
+    headline: data.body_headline || 'Chính sách Bảo mật',
+    content: data.body_content,
+  }} />
+</Layout>

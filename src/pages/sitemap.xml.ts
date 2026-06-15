@@ -1,4 +1,4 @@
-import { fetchAllPages, fetchAllPosts } from '@/lib/directus/fetchers';
+import { fetchAllPosts } from '@/lib/directus/fetchers';
 
 export async function GET() {
   const siteUrl = import.meta.env.PUBLIC_SITE_URL;
@@ -8,11 +8,21 @@ export async function GET() {
   }
 
   try {
-    const [pages, posts] = await Promise.all([fetchAllPages(), fetchAllPosts()]);
+    const staticPages = [
+      '/',
+      '/gioi-thieu',
+      '/lien-he',
+      '/chinh-sach-bao-mat',
+      '/dieu-khoan-dich-vu',
+      '/work-with-me',
+      '/blog',
+    ];
 
-    const pageUrls = pages.map((page) => ({
-      url: `${siteUrl}${page.permalink}`,
-      lastModified: page.published_at || new Date().toISOString(),
+    const posts = await fetchAllPosts();
+
+    const pageUrls = staticPages.map((slug) => ({
+      url: `${siteUrl}${slug}`,
+      lastModified: new Date().toISOString(),
     }));
 
     const postUrls = posts.map((post) => ({

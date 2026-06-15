@@ -1,0 +1,24 @@
+---
+import Layout from '@/layouts/BaseLayout.astro';
+import { fetchPageWorkWithMe } from '@/lib/directus/fetchers';
+import Hero from '@/components/blocks/Hero';
+
+const data = await fetchPageWorkWithMe();
+const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
+const metadata = {
+  title: 'Work with me | Hồng Ngọc Huyền Học',
+  description: '',
+  openGraph: { title: 'Work with me | Hồng Ngọc Huyền Học', description: '', url: `${siteURL}/work-with-me`, type: 'website' },
+};
+---
+
+<Layout metadata={metadata}>
+  <Hero data={{
+    id: data.id,
+    headline: data.hero_headline,
+    content: data.hero_content,
+    image: data.hero_image,
+    variant: (data.hero_variant as 'default' | 'video' | 'linkflow') || 'linkflow',
+    button_group: data.hero_button_group,
+  }} />
+</Layout>

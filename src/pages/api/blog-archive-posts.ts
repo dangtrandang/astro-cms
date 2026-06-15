@@ -25,9 +25,9 @@ export const GET: APIRoute = async ({ url }) => {
     const andConditions: any[] = [{ status: { _eq: 'published' } }];
 
     if (categoryIds.length > 0) {
-      andConditions.push({ category: { id: { _in: categoryIds } } });
+      andConditions.push({ categories: { categories_id: { id: { _in: categoryIds } } } });
     } else if (categorySlug && categorySlug !== 'all') {
-      andConditions.push({ category: { slug: { _eq: categorySlug } } });
+      andConditions.push({ categories: { categories_id: { slug: { _eq: categorySlug } } } });
     }
 
     if (authorId) {
@@ -49,7 +49,7 @@ export const GET: APIRoute = async ({ url }) => {
     if (tag) {
       andConditions.push({
         tags: {
-          tags_id: { slug: { _eq: tag } },
+          tags_id: { _or: [{ slug: { _eq: tag } }, { name: { _eq: tag } }] },
         },
       });
     }
@@ -75,7 +75,7 @@ export const GET: APIRoute = async ({ url }) => {
         'image',
         'date_published',
         { tags: [{ tags_id: ['name', 'slug'] }] },
-        { category: ['id', 'title', 'slug'] },
+        { categories: [{ categories_id: ['id', 'title', 'slug'] }] },
         { author: ['id', 'name', 'image'] },
       ],
     };

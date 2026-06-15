@@ -1,0 +1,21 @@
+---
+import Layout from '@/layouts/BaseLayout.astro';
+import { fetchPageDieuKhoanDichVu } from '@/lib/directus/fetchers';
+import RichText from '@/components/blocks/RichText';
+
+const data = await fetchPageDieuKhoanDichVu();
+const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
+const metadata = {
+  title: 'Điều khoản Dịch vụ | Hồng Ngọc Huyền Học',
+  description: '',
+  openGraph: { title: 'Điều khoản Dịch vụ | Hồng Ngọc Huyền Học', description: '', url: `${siteURL}/dieu-khoan-dich-vu`, type: 'website' },
+};
+---
+
+<Layout metadata={metadata}>
+  <RichText data={{
+    id: data.id,
+    headline: data.body_headline || 'Điều khoản Dịch vụ',
+    content: data.body_content,
+  }} />
+</Layout>

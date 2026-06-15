@@ -1,0 +1,36 @@
+---
+import Layout from '@/layouts/BaseLayout.astro';
+import { fetchPageGioiThieu } from '@/lib/directus/fetchers';
+import WhoIAm from '@/components/blocks/WhoIAm';
+import Gallery from '@/components/blocks/Gallery';
+
+const data = await fetchPageGioiThieu();
+const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
+const metadata = {
+  title: 'Giới thiệu | Hồng Ngọc Huyền Học',
+  description: '',
+  openGraph: { title: 'Giới thiệu | Hồng Ngọc Huyền Học', description: '', url: `${siteURL}/gioi-thieu`, type: 'website' },
+};
+---
+
+<Layout metadata={metadata}>
+  <WhoIAm data={{
+    id: data.id,
+    eyebrow: data.who_i_am_eyebrow,
+    headline: data.who_i_am_headline,
+    content: data.who_i_am_content,
+    portrait_image: data.who_i_am_portrait_image,
+    center_badge: data.who_i_am_center_badge,
+    right_items: data.who_i_am_right_items,
+    social_links: data.who_i_am_social_links,
+    theme_variant: (data.who_i_am_theme_variant as 'blue-mystic' | 'default') || 'default',
+  }} />
+  <Gallery client:load data={{
+    id: `gallery-${data.id}`,
+    headline: data.gallery_headline,
+    variant: (data.gallery_variant as 'grid' | 'accordion' | 'floating') || 'accordion',
+    background_color: data.gallery_background_color,
+    background_image: data.gallery_background_image,
+    gallery_items: data.gallery_images,
+  }} />
+</Layout>

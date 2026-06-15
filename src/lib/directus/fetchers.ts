@@ -167,6 +167,72 @@ export const fetchPageData = async (
 };
 
 /**
+ * Singleton page fetchers — each page has its own Directus singleton collection.
+ */
+
+export const fetchPageLienHe = async () => {
+  try {
+    const serverToken = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
+    const client = createAuthClient(serverToken);
+    const page = await client.request(readSingleton('page_lien_he', {
+      fields: ['id', 'seo'],
+    }));
+    const blockFormResult = await client.request(readItems('block_form', {
+      filter: { form: { key: { _eq: 'contact' } } },
+      fields: ['id', 'title', 'headline',
+        { form: ['id', 'title', 'on_success', 'submit_label', 'success_message', 'schema'] },
+        { image: [{ directus_files_id: ['id'] }] },
+      ],
+      limit: 1,
+    }));
+    const block = (blockFormResult as any[])?.[0] ?? null;
+    return {
+      id: (page as any)?.id ?? '',
+      title: block?.title ?? null,
+      form_headline: block?.headline ?? null,
+      contact_form: block?.form ?? null,
+      image: block?.image ?? null,
+      seo: (page as any)?.seo ?? null,
+    };
+  } catch (err) {
+    console.error('fetchPageLienHe error:', err);
+    return { id: '', title: null, form_headline: null, contact_form: null, image: null, seo: null };
+  }
+};
+
+export const fetchPageGioiThieu = async () => {
+  try {
+    return await directus.request(readSingleton('page_gioi_thieu', {
+      fields: ['id', 'who_i_am_eyebrow', 'who_i_am_headline', 'who_i_am_content', 'who_i_am_portrait_image', 'who_i_am_center_badge', 'who_i_am_right_items', 'who_i_am_social_links', 'who_i_am_theme_variant', 'gallery_headline', 'gallery_variant', 'gallery_background_color', 'gallery_background_image', { gallery_images: ['directus_files_id'] }, 'seo'],
+    })) as any;
+  } catch { return { id: '', who_i_am_headline: null, seo: null }; }
+};
+
+export const fetchPageChinhSachBaoMat = async () => {
+  try {
+    return await directus.request(readSingleton('page_chinh_sach_bao_mat', {
+      fields: ['id', 'body_headline', 'body_content', 'seo'],
+    })) as any;
+  } catch { return { id: '', body_headline: null, body_content: null, seo: null }; }
+};
+
+export const fetchPageDieuKhoanDichVu = async () => {
+  try {
+    return await directus.request(readSingleton('page_dieu_khoan_dich_vu', {
+      fields: ['id', 'body_headline', 'body_content', 'seo'],
+    })) as any;
+  } catch { return { id: '', body_headline: null, body_content: null, seo: null }; }
+};
+
+export const fetchPageWorkWithMe = async () => {
+  try {
+    return await directus.request(readSingleton('page_work_with_me', {
+      fields: ['id', 'hero_headline', 'hero_content', 'hero_image', 'hero_variant', { hero_button_group: [{ buttons: ['id', 'label', 'variant', 'color', 'type', 'external_url', { page: ['permalink'] }] }] }, 'seo'],
+    })) as any;
+  } catch { return { id: '', hero_headline: null, hero_content: null, seo: null }; }
+};
+
+/**
  * Fetches global site data, header navigation, and footer navigation.
  */
 export const fetchSiteData = async () => {
@@ -717,7 +783,7 @@ const blogArchivePostFields = [
   'image',
   'date_published',
   { tags: [{ tags_id: ['name', 'slug'] }] },
-  { category: ['id', 'title', 'slug'] },
+  { categories: [{ categories_id: ['id', 'title', 'slug'] }] },
   { author: ['id', 'name', 'image'] },
 ] as any[];
 
@@ -737,7 +803,7 @@ export const fetchBlogArchiveData = async (
   }
 
   if (categoryFilter && categoryFilter.length > 0) {
-    andConditions.push({ category: { id: { _in: categoryFilter } } });
+    andConditions.push({ categories: { categories_id: { id: { _in: categoryFilter } } } });
   }
 
   const filter = andConditions.length > 1 ? { _and: andConditions } : andConditions[0];
@@ -768,4 +834,22 @@ export const fetchBlogArchiveData = async (
     totalCount,
     totalPages: Math.max(1, Math.ceil(totalCount / BLOG_ARCHIVE_PAGE_SIZE)),
   };
+};
+
+export const fetchCategories = async () => {
+  try {
+    const serverToken = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
+    const client = createAuthClient(serverToken);
+    const categories = await client.request(
+      readItems('categories', {
+        fields: ['id', 'title', 'slug'],
+        sort: ['sort'],
+        limit: -1,
+      }),
+    );
+    return (categories as any[]) ?? [];
+  } catch {
+    console.error('fetchCategories error');
+    return [];
+  }
 };
