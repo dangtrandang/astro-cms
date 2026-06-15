@@ -193,7 +193,7 @@ export default function BlogPostClient({
             <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-4 sm:gap-4 sm:p-6 md:p-8">
               {categoryName && (
                 <a
-                  href={categorySlug ? `/blog?category=${categorySlug}` : '#'}
+                  href={categorySlug ? `/blog/danh-muc/${categorySlug}` : '#'}
                   className="w-fit rounded-lg bg-soft-nurture/90 px-2.5 py-0.5 text-[11px] font-semibold text-charcoal backdrop-blur-sm sm:px-3 sm:py-1 sm:text-xs"
                 >
                   {categoryName}
@@ -248,7 +248,7 @@ export default function BlogPostClient({
                       {tags.slice(0, 3).map((tag) => (
                         <li key={tag.slug}>
                           <a
-                            href={`/blog?tag=${encodeURIComponent(tag.slug)}`}
+                            href={`/blog/tu-khoa/${encodeURIComponent(tag.slug || tag.name)}`}
                             className="inline-block rounded-lg bg-white/10 px-2 py-0.5 text-[11px] font-medium text-cream transition-colors duration-200 hover:bg-white/20 sm:px-2.5 sm:text-xs"
                           >
                             {tag.name}
@@ -450,7 +450,7 @@ export default function BlogPostClient({
                     {tags.map((tag) => (
                       <li key={tag.slug}>
                         <a
-                          href={`/blog?tag=${encodeURIComponent(tag.slug)}`}
+                          href={`/blog/tu-khoa/${encodeURIComponent(tag.slug || tag.name)}`}
                           className="inline-flex rounded-lg bg-cream px-3 py-1 text-xs font-medium text-charcoal/75 transition-colors hover:bg-rose-clay/50 hover:text-charcoal"
                         >
                           {tag.name}

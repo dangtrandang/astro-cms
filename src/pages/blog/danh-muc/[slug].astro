@@ -1,0 +1,61 @@
+---
+import Layout from '@/layouts/BaseLayout.astro';
+import { fetchBlogArchiveData, fetchCategories, fetchCategoryBySlug } from '@/lib/directus/fetchers';
+import BlogArchive from '@/components/blocks/BlogArchive';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+const [{ posts, totalCount, totalPages }, rawCategories, category] = await Promise.all([
+  fetchBlogArchiveData(1, undefined, undefined, undefined, slug, undefined),
+  fetchCategories(),
+  fetchCategoryBySlug(slug!),
+]);
+
+const categories = rawCategories.map((cat: any) => ({ categories_id: cat }));
+
+const blogArchiveData = {
+  id: `category-${slug}`,
+  posts,
+  totalCount,
+  totalPages,
+  categories,
+};
+
+const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
+
+// SEO: Directus-first. categories.seo → fallback to category.title → hardcoded slug.
+// Currently all categories have seo = null in the CMS.
+const catSeo = category?.seo ?? null;
+const catTitle = category?.title ?? slug;
+const seoTitle = catSeo?.title ?? `Danh mục: ${catTitle}`;
+const seoDesc = catSeo?.meta_description ?? `Bài viết trong danh mục ${catTitle}`;
+
+const metadata: any = {
+  title: seoTitle,
+  description: seoDesc,
+  openGraph: {
+    title: seoTitle,
+    description: seoDesc,
+    url: `${siteURL}/blog/danh-muc/${slug}`,
+    type: 'website',
+  },
+};
+
+// Only pass robots if explicitly set in Directus
+if (catSeo?.no_index || catSeo?.no_follow) {
+  const parts: string[] = [];
+  if (catSeo.no_index) parts.push('noindex');
+  if (catSeo.no_follow) parts.push('nofollow');
+  if (parts.length) metadata.robots = parts.join(', ');
+}
+
+if (catSeo?.canonical_url) {
+  metadata.canonical = catSeo.canonical_url;
+}
+---
+
+<Layout metadata={metadata}>
+  <BlogArchive client:load data={blogArchiveData} />
+</Layout>

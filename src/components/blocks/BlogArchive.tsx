@@ -147,7 +147,7 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick?: (slug: string
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
-                  const value = tag.tags_id?.slug || tag.tags_id?.name;
+                  const value = tag.tags_id?.slug;
                   if (value) onTagClick?.(value);
                 }}
                 className="rounded-lg bg-cream px-2.5 py-0.5 text-xs text-charcoal/50 hover:bg-soft-nurture hover:text-charcoal transition cursor-pointer"
@@ -286,7 +286,7 @@ function FeaturedPost({ post, onTagClick }: { post: Post; onTagClick?: (slug: st
                       type="button"
                       onClick={(e) => {
                         e.preventDefault();
-                        const value = tag.tags_id?.slug || tag.tags_id?.name;
+                        const value = tag.tags_id?.slug;
                         if (value) onTagClick?.(value);
                       }}
                       className="rounded-lg px-2.5 py-0.5 text-xs font-medium text-white hover:text-rose-clay hover:bg-white/10 transition cursor-pointer"
@@ -407,7 +407,16 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
     [availableCategories],
   );
 
-  const [activeCategoryId, setActiveCategoryId] = useState<string>('all');
+  const slugToCategory = useMemo(() => {
+    const map = new Map<string, Category>();
+    for (const cat of availableCategories) {
+      if (cat.slug) map.set(cat.slug, cat);
+    }
+    return map;
+  }, [availableCategories]);
+
+  const [activeCategorySlug, setActiveCategorySlug] = useState<string>('');
+  const [activeTag, setActiveTag] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [posts, setPosts] = useState<Post[]>(initialPosts ?? []);
   const [totalPages, setTotalPages] = useState(initialTotalPages ?? 1);
@@ -418,7 +427,11 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   const monthsFetched = useRef(false);
 
-  const [activeTag, setActiveTag] = useState<string>('');
+  const activeCategoryId = useMemo(() => {
+    if (!activeCategorySlug) return 'all';
+    const cat = slugToCategory.get(activeCategorySlug);
+    return cat?.id ?? 'all';
+  }, [activeCategorySlug, slugToCategory]);
 
   // Load available months once on mount only
   useEffect(() => {
@@ -485,73 +498,61 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
     [fetchArchivePosts],
   );
 
+  // Category + Tag → real navigation (route-based). Sort + Month → state-only.
   const handleCategoryChange = useCallback(
-    (categoryId: string) => {
-      if (loading || isTransitioning || categoryId === activeCategoryId) return;
-      setActiveCategoryId(categoryId);
-      setActiveMonth('all');
-      setCurrentPage(1);
-      runFetch(1, categoryId, sortMode, 'all', activeTag);
+    (slug: string) => {
+      if (loading || isTransitioning) return;
+      if (slug === 'all') {
+        window.location.href = '/blog';
+      } else {
+        window.location.href = `/blog/danh-muc/${slug}`;
+      }
     },
-    [loading, isTransitioning, activeCategoryId, sortMode, runFetch],
+    [loading, isTransitioning],
   );
 
   const handleSortChange = useCallback(
     (sort: 'newest' | 'oldest') => {
-      if (loading || isTransitioning || sort === sortMode) return;
+      if (loading || isTransitioning) return;
       setSortMode(sort);
       setCurrentPage(1);
-      runFetch(1, activeCategoryId, sort, activeMonth, activeTag);
+      const catId = activeCategoryId;
+      runFetch(1, catId, sort, activeMonth, activeTag);
     },
-    [loading, isTransitioning, sortMode, activeCategoryId, activeMonth, runFetch],
+    [loading, isTransitioning, activeCategoryId, activeMonth, activeTag, runFetch],
   );
 
   const handleMonthChange = useCallback(
     (month: string) => {
-      if (loading || isTransitioning || month === activeMonth) return;
+      if (loading || isTransitioning) return;
       setActiveMonth(month);
       setCurrentPage(1);
-      runFetch(1, activeCategoryId, sortMode, month, activeTag);
+      const catId = activeCategoryId;
+      runFetch(1, catId, sortMode, month, activeTag);
     },
-    [loading, isTransitioning, activeMonth, activeCategoryId, sortMode, runFetch],
+    [loading, isTransitioning, activeCategoryId, sortMode, activeTag, runFetch],
   );
 
   const handlePageChange = useCallback(
     (page: number) => {
-      if (page < 1 || page > totalPages || loading || isTransitioning || page === currentPage) return;
+      if (loading || isTransitioning || page < 1 || page > totalPages) return;
       setCurrentPage(page);
-      setLoading(true);
-      setIsTransitioning(true);
-      fetchArchivePosts(page, activeCategoryId, sortMode, activeMonth, activeTag)
-        .then((result) => {
-          setPosts(result.posts ?? []);
-          setTotalPages(result.totalPages ?? 1);
-        })
-        .catch(() => {
-          setPosts([]);
-          setTotalPages(1);
-        })
-        .finally(() => {
-          setLoading(false);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          window.setTimeout(() => setIsTransitioning(false), 220);
-        });
+      const catId = activeCategoryId;
+      runFetch(page, catId, sortMode, activeMonth, activeTag);
     },
-    [activeCategoryId, activeMonth, currentPage, fetchArchivePosts, isTransitioning, loading, sortMode, totalPages],
+    [loading, isTransitioning, activeCategoryId, activeMonth, activeTag, runFetch, sortMode, totalPages],
+  );
+
+  const handleTagClick = useCallback(
+    (tagValue: string) => {
+      if (loading || isTransitioning || !tagValue) return;
+      window.location.href = `/blog/tu-khoa/${tagValue}`;
+    },
+    [loading, isTransitioning],
   );
 
   const featuredPost = posts[0] ?? null;
   const gridPosts = posts.slice(1);
-
-  const handleTagClick = useCallback(
-    (tagValue: string) => {
-      if (loading || isTransitioning || !tagValue || tagValue === activeTag) return;
-      setActiveTag(tagValue);
-      setCurrentPage(1);
-      runFetch(1, activeCategoryId, sortMode, activeMonth, tagValue);
-    },
-    [loading, isTransitioning, activeTag, activeCategoryId, activeMonth, sortMode, runFetch],
-  );
 
   return (
     <section className="bg-cream py-16 md:py-24">
@@ -585,7 +586,7 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
               type="button"
               onClick={() => handleCategoryChange('all')}
               disabled={loading || isTransitioning}
-              className={`rounded-lg px-4 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeCategoryId === 'all'
+              className={`rounded-lg px-4 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${!activeCategorySlug
                 ? 'bg-soft-nurture text-charcoal'
                 : 'bg-white text-charcoal/75 hover:bg-soft-nurture hover:text-charcoal'
                 }`}
@@ -596,9 +597,9 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
               <button
                 key={category.id}
                 type="button"
-                onClick={() => handleCategoryChange(category.id)}
+                onClick={() => handleCategoryChange(category.slug)}
                 disabled={loading || isTransitioning}
-                className={`rounded-lg px-4 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeCategoryId === category.id
+                className={`rounded-lg px-4 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeCategorySlug === category.slug
                   ? 'bg-soft-nurture text-charcoal'
                   : 'bg-white text-charcoal/75 hover:bg-soft-nurture hover:text-charcoal'
                   }`}

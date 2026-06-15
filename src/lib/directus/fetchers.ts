@@ -792,6 +792,8 @@ export const fetchBlogArchiveData = async (
   authorFilter?: string,
   categoryFilter?: string[],
   sortMode?: 'newest' | 'oldest',
+  categorySlug?: string,
+  tagSlug?: string,
 ): Promise<{ posts: any[]; totalCount: number; totalPages: number }> => {
   const serverToken = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
   const client = createAuthClient(serverToken);
@@ -802,8 +804,14 @@ export const fetchBlogArchiveData = async (
     andConditions.push({ author: { _eq: authorFilter } });
   }
 
-  if (categoryFilter && categoryFilter.length > 0) {
+  if (categorySlug) {
+    andConditions.push({ categories: { categories_id: { slug: { _eq: categorySlug } } } });
+  } else if (categoryFilter && categoryFilter.length > 0) {
     andConditions.push({ categories: { categories_id: { id: { _in: categoryFilter } } } });
+  }
+
+  if (tagSlug) {
+    andConditions.push({ tags: { tags_id: { slug: { _eq: tagSlug } } } });
   }
 
   const filter = andConditions.length > 1 ? { _and: andConditions } : andConditions[0];
@@ -834,6 +842,39 @@ export const fetchBlogArchiveData = async (
     totalCount,
     totalPages: Math.max(1, Math.ceil(totalCount / BLOG_ARCHIVE_PAGE_SIZE)),
   };
+};
+
+export const fetchPageBlogSeo = async () => {
+  const serverToken = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
+  const client = createAuthClient(serverToken);
+  try {
+    const items = await client.request(
+      readItems('page_blog', {
+        fields: [{ seo: ['title', 'meta_description', 'no_index', 'no_follow', 'canonical_url', 'og_image'] }],
+        limit: 1,
+      }),
+    );
+    return (items as any[])?.[0]?.seo ?? null;
+  } catch {
+    return null;
+  }
+};
+
+export const fetchCategoryBySlug = async (slug: string) => {
+  const serverToken = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
+  const client = createAuthClient(serverToken);
+  try {
+    const items = await client.request(
+      readItems('categories', {
+        filter: { slug: { _eq: slug } },
+        fields: ['id', 'title', 'slug', { seo: ['title', 'meta_description', 'no_index', 'no_follow', 'canonical_url', 'og_image'] }],
+        limit: 1,
+      }),
+    );
+    return (items as any[])?.[0] ?? null;
+  } catch {
+    return null;
+  }
 };
 
 export const fetchCategories = async () => {

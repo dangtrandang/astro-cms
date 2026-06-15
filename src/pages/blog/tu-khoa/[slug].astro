@@ -1,0 +1,56 @@
+---
+import Layout from '@/layouts/BaseLayout.astro';
+import { fetchBlogArchiveData, fetchCategories } from '@/lib/directus/fetchers';
+import BlogArchive from '@/components/blocks/BlogArchive';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+const [{ posts, totalCount, totalPages }, rawCategories] = await Promise.all([
+  fetchBlogArchiveData(1, undefined, undefined, undefined, undefined, slug!),
+  fetchCategories(),
+]);
+
+const categories = rawCategories.map((cat: any) => ({ categories_id: cat }));
+
+const blogArchiveData = {
+  id: `tag-${slug}`,
+  posts,
+  totalCount,
+  totalPages,
+  categories,
+};
+
+const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
+
+/*
+ * SEO note:
+ * The `tags` collection currently has no `seo` field in the Directus schema
+ * (fields: id, name, slug). Therefore no SEO metadata can be fetched from the CMS
+ * for this route. The following hardcoded values serve as fallback display.
+ *
+ * Options for future consideration:
+ *   a) Keep as navigation-only page (add noindex via Directus if seo field is added)
+ *   b) Add `seo` M2O field to `tags` collection to make it a proper landing page
+ *   c) Remove tag archive route entirely if not needed
+ *
+ * No SEO policy (index/noindex/canonical) is applied from the frontend.
+ * All such decisions belong to the CMS (Directus).
+ */
+
+const metadata = {
+  title: `Từ khoá: ${slug}`,
+  description: `Bài viết với từ khoá ${slug}`,
+  openGraph: {
+    title: `Từ khoá: ${slug}`,
+    description: `Bài viết với từ khoá ${slug}`,
+    url: `${siteURL}/blog/tu-khoa/${slug}`,
+    type: 'website',
+  },
+};
+---
+
+<Layout metadata={metadata}>
+  <BlogArchive client:load data={blogArchiveData} />
+</Layout>

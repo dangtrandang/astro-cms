@@ -1,13 +1,14 @@
 ---
 import Layout from '@/layouts/BaseLayout.astro';
-import { fetchBlogArchiveData, fetchCategories } from '@/lib/directus/fetchers';
+import { fetchBlogArchiveData, fetchCategories, fetchPageBlogSeo } from '@/lib/directus/fetchers';
 import BlogArchive from '@/components/blocks/BlogArchive';
 
 export const prerender = false;
 
-const [{ posts, totalCount, totalPages }, rawCategories] = await Promise.all([
+const [{ posts, totalCount, totalPages }, rawCategories, pageBlogSeo] = await Promise.all([
   fetchBlogArchiveData(1),
   fetchCategories(),
+  fetchPageBlogSeo(),
 ]);
 
 const categories = rawCategories.map((cat: any) => ({ categories_id: cat }));
@@ -22,16 +23,33 @@ const blogArchiveData = {
 
 const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
 
-const metadata = {
-  title: 'Blog',
-  description: 'Các bài viết về huyền học, tarot và chiêm nghiệm cuộc sống',
+// SEO: Directus-first. page_blog.seo → fallback to hardcoded defaults.
+// Currently page_blog.seo is null in the CMS; hardcoded values serve as fallback.
+const seoTitle = pageBlogSeo?.title ?? 'Blog';
+const seoDesc = pageBlogSeo?.meta_description ?? 'Các bài viết về huyền học, tarot và chiêm nghiệm cuộc sống';
+
+const metadata: any = {
+  title: seoTitle,
+  description: seoDesc,
   openGraph: {
-    title: 'Blog',
-    description: 'Các bài viết về huyền học, tarot và chiêm nghiệm cuộc sống',
+    title: seoTitle,
+    description: seoDesc,
     url: `${siteURL}/blog`,
     type: 'website',
   },
 };
+
+// Only pass robots if explicitly set in Directus (no_index or no_follow)
+if (pageBlogSeo?.no_index || pageBlogSeo?.no_follow) {
+  const parts: string[] = [];
+  if (pageBlogSeo.no_index) parts.push('noindex');
+  if (pageBlogSeo.no_follow) parts.push('nofollow');
+  if (parts.length) metadata.robots = parts.join(', ');
+}
+
+if (pageBlogSeo?.canonical_url) {
+  metadata.canonical = pageBlogSeo.canonical_url;
+}
 ---
 
 <Layout metadata={metadata}>

@@ -49,7 +49,7 @@ export const GET: APIRoute = async ({ url }) => {
     if (tag) {
       andConditions.push({
         tags: {
-          tags_id: { _or: [{ slug: { _eq: tag } }, { name: { _eq: tag } }] },
+          tags_id: { slug: { _eq: tag } },
         },
       });
     }

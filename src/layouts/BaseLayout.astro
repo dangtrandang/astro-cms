@@ -34,6 +34,29 @@ const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTit
       </>
     )}
 
+    {metadata?.robots && (
+      <meta name="robots" content={metadata.robots} />
+    )}
+
+    {metadata?.canonical && (
+      <link rel="canonical" href={metadata.canonical} />
+    )}
+
+    {metadata?.openGraph?.images && (
+      metadata.openGraph.images.map((img: any, i: number) => (
+        <meta property="og:image" content={img.url} />
+      ))
+    )}
+
+    {metadata?.twitter?.card && (
+      <>
+        <meta name="twitter:card" content={metadata.twitter.card} />
+        {metadata.twitter.title && <meta name="twitter:title" content={metadata.twitter.title} />}
+        {metadata.twitter.description && <meta name="twitter:description" content={metadata.twitter.description} />}
+        {metadata.twitter.image && <meta name="twitter:image" content={metadata.twitter.image} />}
+      </>
+    )}
+
 
     <style is:inline>
       /* ── Top Progress Bar (Gradient Pill) ── */
