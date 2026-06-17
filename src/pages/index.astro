@@ -6,7 +6,6 @@ import Layout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/blocks/Hero';
 import WhoIAm from '@/components/blocks/WhoIAm';
 import Gallery from '@/components/blocks/Gallery';
-import Quote from '@/components/blocks/Quote';
 import { fetchHomepageData } from '@/lib/directus/fetchers';
 
 const data = await fetchHomepageData();
@@ -57,10 +56,4 @@ const metadata = {
     gallery_items: data.gallery_images,
   }} />
 
-  <Quote data={{
-    id: 'homepage-quote',
-    title: data.quote_title,
-    subtitle: data.quote_subtitle,
-    content: data.quote_content,
-  }} />
 </Layout>

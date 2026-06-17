@@ -710,7 +710,7 @@ export const fetchPostByIdAndVersion = async (
 /**
  * Fetch homepage data from the homepage singleton collection.
  * Used by index.astro (hardcoded route, no Block Builder).
- * 4 sections: Hero, WhoIAm, Gallery (accordion), Quote.
+ * 3 sections: Hero, WhoIAm, Gallery (accordion).
  */
 export type HomepageData = {
   hero_headline?: string | null;
@@ -731,9 +731,6 @@ export type HomepageData = {
   gallery_background_color?: string | null;
   gallery_background_image?: string | { id: string } | null;
   gallery_images?: any[] | null;
-  quote_title?: string | null;
-  quote_subtitle?: string | null;
-  quote_content?: string | null;
   seo?: { title?: string | null; meta_description?: string | null; og_image?: string | null } | string | null;
   hero_button_group?: { id: string; buttons?: any[] } | string | null;
 };
@@ -747,7 +744,6 @@ const homepageFields = [
   'gallery_headline', 'gallery_variant', 'gallery_background_color',
   'gallery_background_image',
   { gallery_images: ['id', 'sort', { directus_files_id: ['id', 'title', 'description', 'width', 'height'] }] },
-  'quote_title', 'quote_subtitle', 'quote_content',
   { seo: ['title', 'meta_description', 'og_image'] },
 ] as any[];
 

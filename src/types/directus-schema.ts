@@ -443,9 +443,6 @@ export interface Homepage {
 	gallery_background_color?: string | null;
 	gallery_background_image?: DirectusFile | string | null;
 	gallery_items?: Record<string, any>[] | null;
-	quote_title?: string | null;
-	quote_subtitle?: string | null;
-	quote_content?: string | null;
 	seo?: Seo | string | null;
 }
 
