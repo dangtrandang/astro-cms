@@ -4,6 +4,7 @@ export const prerender = true;
 
 import Layout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/blocks/Hero';
+import QuoteSection from '@/components/blocks/QuoteSection';
 import WhoIAm from '@/components/blocks/WhoIAm';
 import Gallery from '@/components/blocks/Gallery';
 import { fetchHomepageData } from '@/lib/directus/fetchers';
@@ -34,6 +35,8 @@ const metadata = {
     video: data.hero_video,
     variant: (data.hero_variant as 'default' | 'video' | 'linkflow') || 'linkflow',
   }} />
+
+  <QuoteSection client:load />
 
   <WhoIAm data={{
     id: 'homepage-whoiam',
