@@ -6,10 +6,13 @@ import Layout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/blocks/Hero';
 import QuoteSection from '@/components/blocks/QuoteSection';
 import WhoIAm from '@/components/blocks/WhoIAm';
+import FeedSection from '@/components/blocks/FeedSection';
 import Gallery from '@/components/blocks/Gallery';
 import { fetchHomepageData } from '@/lib/directus/fetchers';
+import { fetchYouTubeVideos } from '@/lib/social-feed/youtube';
 
 const data = await fetchHomepageData();
+const socialItems = await fetchYouTubeVideos(6);
 
 const rawSeo = data.seo && typeof data.seo === 'object' ? data.seo : {};
 const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
@@ -49,6 +52,8 @@ const metadata = {
     social_links: data.who_i_am_social_links,
     theme_variant: (data.who_i_am_theme_variant as 'blue-mystic' | 'default') || 'default',
   }} />
+
+  <FeedSection client:load items={socialItems} />
 
   <Gallery client:load data={{
     id: 'homepage-gallery',
