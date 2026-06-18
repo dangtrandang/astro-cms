@@ -36,12 +36,19 @@ export const GET: APIRoute = async ({ url }) => {
 
     // Filter by month/year if provided (format: "2025-07")
     if (filterMonth) {
-      const [year, month] = filterMonth.split('-');
-      if (year && month) {
-        const startDate = `${year}-${month}-01T00:00:00`;
-        const nextMonth = Number(month) === 12 ? `${Number(year) + 1}-01-01T00:00:00` : `${year}-${String(Number(month) + 1).padStart(2, '0')}-01T00:00:00`;
-        andConditions.push({ date_published: { _gte: startDate } });
-        andConditions.push({ date_published: { _lt: nextMonth } });
+      const match = filterMonth.match(/^(\d{4})-(\d{2})$/);
+      if (match) {
+        const year = Number(match[1]);
+        const monthIndex = Number(match[2]) - 1;
+        const monthStart = new Date(Date.UTC(year, monthIndex, 1)).toISOString();
+        const nextMonthStart = new Date(Date.UTC(year, monthIndex + 1, 1)).toISOString();
+
+        andConditions.push({
+          date_published: {
+            _gte: monthStart,
+            _lt: nextMonthStart,
+          },
+        });
       }
     }
 
@@ -55,7 +62,9 @@ export const GET: APIRoute = async ({ url }) => {
     }
 
     const filter = andConditions.length > 1 ? { _and: andConditions } : andConditions[0];
-    const sortDir = sortMode === 'oldest' ? 'date_published' : '-date_published';
+    const sortDir = sortMode === 'oldest'
+      ? ['-is_sticky', '-sticky_priority', 'date_published']
+      : ['-is_sticky', '-sticky_priority', '-date_published'];
 
     // Directus aggregate() không hỗ trợ deep nested filter (M2M).
     // → Khi có tag, fetch toàn bộ rồi đếm + paginate client-side.
@@ -63,7 +72,7 @@ export const GET: APIRoute = async ({ url }) => {
 
     const readParams: any = {
       filter: filter as any,
-      sort: [sortDir] as any[],
+      sort: sortDir as any[],
       limit: hasTagFilter ? -1 : limit,
       page: hasTagFilter ? 1 : page,
       fields: [
@@ -74,6 +83,8 @@ export const GET: APIRoute = async ({ url }) => {
         'Slug',
         'image',
         'date_published',
+        'is_sticky',
+        'sticky_priority',
         { tags: [{ tags_id: ['name', 'slug'] }] },
         { categories: [{ categories_id: ['id', 'title', 'slug'] }] },
         { author: ['id', 'name', 'image'] },

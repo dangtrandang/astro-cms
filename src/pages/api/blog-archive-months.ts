@@ -40,12 +40,15 @@ export const GET: APIRoute = async ({ url }) => {
             }),
         );
 
-        // Extract unique year-month values from dates
+        // Extract unique year-month values from raw ISO-like strings.
+        // Keep the exact YYYY-MM prefix so it matches the API filter
+        // in [`_starts_with`](astro-cms/src/pages/api/blog-archive-posts.ts:39)
+        // without timezone shifting.
         const monthSet = new Set<string>();
         for (const post of posts as any[]) {
-            if (post.date_published) {
-                const d = new Date(post.date_published);
-                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            const value = typeof post.date_published === 'string' ? post.date_published : '';
+            const key = value.slice(0, 7);
+            if (/^\d{4}-\d{2}$/.test(key)) {
                 monthSet.add(key);
             }
         }

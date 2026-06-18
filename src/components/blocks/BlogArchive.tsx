@@ -27,6 +27,8 @@ interface Post {
   Slug: string; // ⚠️ S hoa — PostgreSQL case-sensitive
   image?: string | null;
   date_published?: string | null;
+  is_sticky?: boolean | null;
+  sticky_priority?: number | null;
   tags?: Array<{ tags_id?: { name?: string; slug?: string } }> | null;
   categories?: Array<{ categories_id?: Category }> | null;
   author?: Author | null;
@@ -82,7 +84,9 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick?: (slug: string
   const imageId = typeof post.image === 'string' ? post.image : (post.image as any)?.id;
   const slug = post.Slug;
   const date = formatDate(post.date_published);
-  const categoryTitle = post.categories?.[0]?.categories_id?.title;
+  const categoryTitles = (post.categories ?? [])
+    .map((entry) => entry?.categories_id?.title)
+    .filter((value): value is string => !!value);
   const authorName = post.author?.name;
   const authorImageId = post.author?.image;
   const excerpt = getExcerpt(post);
@@ -120,11 +124,21 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick?: (slug: string
             </svg>
           </div>
         )}
-        {/* Category badge */}
-        {categoryTitle && (
-          <span className="absolute left-3 top-3 rounded-lg bg-soft-nurture/90 px-3 py-1 text-xs font-semibold text-charcoal backdrop-blur-sm">
-            {categoryTitle}
+        {/* Sticky badge */}
+        {post.is_sticky && (
+          <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-lg bg-[#6F8695]/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm shadow-sm">
+            Nổi bật
           </span>
+        )}
+        {/* Category badge */}
+        {categoryTitles.length > 0 && (
+          <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+            {categoryTitles.map((categoryTitle) => (
+              <span key={categoryTitle} className="rounded-md bg-soft-nurture/90 px-2 py-0.5 text-[10px] font-semibold text-charcoal backdrop-blur-sm">
+                {categoryTitle}
+              </span>
+            ))}
+          </div>
         )}
       </div>
 
@@ -189,7 +203,9 @@ function FeaturedPost({ post, onTagClick }: { post: Post; onTagClick?: (slug: st
   const imageId = typeof post.image === 'string' ? post.image : (post.image as any)?.id;
   const slug = post.Slug;
   const date = formatDate(post.date_published);
-  const categoryTitle = post.categories?.[0]?.categories_id?.title;
+  const categoryTitles = (post.categories ?? [])
+    .map((entry) => entry?.categories_id?.title)
+    .filter((value): value is string => !!value);
   const authorName = post.author?.name;
   const authorImageId = post.author?.image;
   const excerpt = getExcerpt(post);
@@ -213,15 +229,26 @@ function FeaturedPost({ post, onTagClick }: { post: Post; onTagClick?: (slug: st
         )}
       </div>
 
+      {/* Sticky badge */}
+      {post.is_sticky && (
+        <span className="absolute top-4 right-4 z-10 inline-flex items-center gap-1 rounded-lg bg-[#6F8695]/90 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white backdrop-blur-sm shadow-sm">
+          Nổi bật
+        </span>
+      )}
+
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
       {/* Content */}
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 sm:gap-4 p-4 sm:p-6 md:p-8">
-        {categoryTitle && (
-          <span className="w-fit rounded-lg bg-soft-nurture/90 px-3 py-1 text-xs font-semibold text-charcoal backdrop-blur-sm">
-            {categoryTitle}
-          </span>
+        {categoryTitles.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {categoryTitles.map((categoryTitle) => (
+              <span key={categoryTitle} className="w-fit rounded-md bg-soft-nurture/90 px-2 py-0.5 text-[10px] font-semibold text-charcoal backdrop-blur-sm">
+                {categoryTitle}
+              </span>
+            ))}
+          </div>
         )}
 
         <div className="flex items-start justify-between gap-4">
@@ -433,6 +460,12 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
     return cat?.id ?? 'all';
   }, [activeCategorySlug, slugToCategory]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const match = window.location.pathname.match(/^\/blog\/danh-muc\/([^/]+)\/?$/);
+    setActiveCategorySlug(match?.[1] ?? '');
+  }, []);
+
   // Load available months once on mount only
   useEffect(() => {
     if (monthsFetched.current) return;
@@ -527,18 +560,17 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
       if (loading || isTransitioning) return;
       setActiveMonth(month);
       setCurrentPage(1);
-      const catId = activeCategoryId;
-      runFetch(1, catId, sortMode, month, activeTag);
+      runFetch(1, activeCategoryId, sortMode, month, activeTag);
     },
     [loading, isTransitioning, activeCategoryId, sortMode, activeTag, runFetch],
   );
 
   const handlePageChange = useCallback(
     (page: number) => {
-      if (loading || isTransitioning || page < 1 || page > totalPages) return;
+      if (loading || isTransitioning) return;
+      if (page < 1 || page > totalPages) return;
       setCurrentPage(page);
-      const catId = activeCategoryId;
-      runFetch(page, catId, sortMode, activeMonth, activeTag);
+      runFetch(page, activeCategoryId, sortMode, activeMonth, activeTag);
     },
     [loading, isTransitioning, activeCategoryId, activeMonth, activeTag, runFetch, sortMode, totalPages],
   );
@@ -552,7 +584,8 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
   );
 
   const featuredPost = posts[0] ?? null;
-  const gridPosts = posts.slice(1);
+  const visibleGridPosts = posts.slice(1);
+  const effectiveTotalPages = totalPages;
 
   return (
     <section className="bg-cream py-16 md:py-24">
@@ -632,29 +665,22 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
             </button>
           </div>
 
-          {/* Date filter */}
+          {/* Date filter - dropdown */}
           {availableMonths.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              <button
-                type="button"
-                onClick={() => handleMonthChange('all')}
-                disabled={loading || isTransitioning}
-                className={`rounded-lg px-3 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeMonth === 'all' ? 'bg-soft-nurture text-charcoal' : 'bg-cream text-charcoal/70 hover:bg-rose-clay/70 hover:text-charcoal'}`}
-              >
-                Tất cả thời gian
-              </button>
+            <select
+              value={activeMonth}
+              onChange={(e) => handleMonthChange(e.target.value)}
+              disabled={loading || isTransitioning}
+              className="rounded-xl bg-white px-3 py-1.5 text-xs font-medium text-charcoal border border-soft-nurture focus:outline-none focus:ring-1 focus:ring-rose-clay disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+              aria-label="Lọc theo tháng"
+            >
+              <option value="all">Tất cả thời gian</option>
               {availableMonths.map((month) => (
-                <button
-                  key={month}
-                  type="button"
-                  onClick={() => handleMonthChange(month)}
-                  disabled={loading || isTransitioning}
-                  className={`rounded-lg px-3 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${activeMonth === month ? 'bg-soft-nurture text-charcoal' : 'bg-cream text-charcoal/70 hover:bg-rose-clay/70 hover:text-charcoal'}`}
-                >
+                <option key={month} value={month}>
                   {formatMonthLabel(month)}
-                </button>
+                </option>
               ))}
-            </div>
+            </select>
           )}
         </div>
 
@@ -674,15 +700,15 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
                   </li>
                 ))}
               </ul>
-            ) : gridPosts.length > 0 ? (
+            ) : visibleGridPosts.length > 0 ? (
               <ul className="grid auto-rows-fr grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-                {gridPosts.map((post) => (
+                {visibleGridPosts.map((post) => (
                   <li key={post.id} className="h-full">
                     <PostCard post={post} onTagClick={handleTagClick} />
                   </li>
                 ))}
               </ul>
-            ) : (
+            ) : featuredPost ? null : (
               <div className="flex flex-col items-center justify-center py-20 text-center text-gray-400">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -698,16 +724,16 @@ const BlogArchive = ({ data }: BlogArchiveProps) => {
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <p className="text-sm">Chua co bai viet nao.</p>
+                <p className="font-body text-sm">Chưa có bài viết nào.</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {effectiveTotalPages > 1 && (
           <div className="mt-12">
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+            <Pagination currentPage={currentPage} totalPages={effectiveTotalPages} onPageChange={handlePageChange} />
           </div>
         )}
       </div>

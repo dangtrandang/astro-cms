@@ -778,6 +778,8 @@ const blogArchivePostFields = [
   'Slug',
   'image',
   'date_published',
+  'is_sticky',
+  'sticky_priority',
   { tags: [{ tags_id: ['name', 'slug'] }] },
   { categories: [{ categories_id: ['id', 'title', 'slug'] }] },
   { author: ['id', 'name', 'image'] },
@@ -811,13 +813,15 @@ export const fetchBlogArchiveData = async (
   }
 
   const filter = andConditions.length > 1 ? { _and: andConditions } : andConditions[0];
-  const sortDir = sortMode === 'oldest' ? 'date_published' : '-date_published';
+  const sortDir = sortMode === 'oldest'
+    ? ['-is_sticky', '-sticky_priority', 'date_published']
+    : ['-is_sticky', '-sticky_priority', '-date_published'];
 
   const [posts, countResponse] = await Promise.all([
     client.request(
       sdkReadItems('posts', {
         filter: filter as any,
-        sort: [sortDir] as any[],
+        sort: sortDir as any[],
         limit: BLOG_ARCHIVE_PAGE_SIZE,
         page,
         fields: blogArchivePostFields,

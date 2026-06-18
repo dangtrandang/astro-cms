@@ -1074,6 +1074,8 @@ export interface Post {
 	type?: 'blog' | 'project' | 'video' | null;
 	video_url?: string | null;
 	Slug?: string | null;
+	is_sticky?: boolean | null;
+	sticky_priority?: number | null;
 	gallery?: PostGalleryItem[] | string[];
 	tags?: PostsTag[] | string[];
 }
