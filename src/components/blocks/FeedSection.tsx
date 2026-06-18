@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface SocialItem {
@@ -46,6 +46,10 @@ export default function FeedSection({ items: initialItems }: FeedSectionProps) {
   const totalItems = items.length || 1;
   const doubled = items.concat(items);
 
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchDeltaX = useRef(0);
+
   const nextSlide = useCallback(() => {
     if (totalItems <= 1) return;
     setCurrentIndex((prev) => (prev + 1) % totalItems);
@@ -82,14 +86,36 @@ export default function FeedSection({ items: initialItems }: FeedSectionProps) {
   const handlePrev = useCallback(() => { pauseAutoScroll(); prevSlide(); }, [pauseAutoScroll, prevSlide]);
   const handleNext = useCallback(() => { pauseAutoScroll(); nextSlide(); }, [pauseAutoScroll, nextSlide]);
 
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    pauseAutoScroll();
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchDeltaX.current = 0;
+  }, [pauseAutoScroll]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    const absDX = Math.abs(touchDeltaX.current);
+    if (absDX > 50) {
+      if (touchDeltaX.current > 0) {
+        handlePrev();
+      } else {
+        handleNext();
+      }
+    }
+  }, [handlePrev, handleNext]);
+
   if (items.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden bg-soft-nurture px-4 py-16 sm:px-6 lg:px-10 lg:py-24">
+    <section className="relative overflow-hidden bg-soft-nurture px-0 py-16 sm:px-6 lg:px-10 lg:py-24">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[30%_70%] lg:gap-14 lg:items-start">
-          <div className="space-y-5 lg:space-y-6 lg:flex lg:flex-col lg:justify-center lg:h-full">
-            <h2 className="font-heading text-[clamp(2rem,5vw,2.5rem)] lg:text-[clamp(3rem,5.5vw,4rem)] font-semibold italic leading-tight text-charcoal">
+          <div className="space-y-5 px-4 sm:px-0 lg:space-y-6 lg:flex lg:flex-col lg:justify-center lg:h-full">
+            <h2 className="font-heading text-[clamp(2.4rem,5.5vw,2.5rem)] lg:text-[clamp(3rem,5.5vw,4rem)] font-semibold italic leading-tight text-charcoal">
               Những điều tôi đang chia sẻ
             </h2>
             <p className="font-body text-body leading-relaxed text-charcoal/80 max-w-md">
@@ -107,7 +133,12 @@ export default function FeedSection({ items: initialItems }: FeedSectionProps) {
             </div>
           </div>
 
-          <div className="relative w-full overflow-hidden" onTouchStart={() => pauseAutoScroll()}>
+          <div
+            className="relative w-full overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <div
               className="flex items-stretch transition-transform duration-500 ease-in-out"
               style={{ transform: totalItems > 0 ? `translateX(-${(currentIndex / 2) * 100}%)` : 'translateX(0)' }}
@@ -118,7 +149,7 @@ export default function FeedSection({ items: initialItems }: FeedSectionProps) {
                 return (
                   <motion.div
                     key={`${item.videoId}-${i}`}
-                    className="w-1/2 shrink-0 self-stretch px-1 sm:px-1.5 lg:w-1/3"
+                    className="w-1/2 shrink-0 self-stretch px-0.5 sm:px-1.5 lg:w-1/3"
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: '-50px' }}
@@ -128,14 +159,26 @@ export default function FeedSection({ items: initialItems }: FeedSectionProps) {
                       className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-rose-clay/25 bg-white transition-shadow duration-300 ease-in-out hover:shadow-lg"
                       onClick={() => handleCardClick(i)}
                     >
-                      <div className="relative w-full shrink-0 overflow-hidden h-60 sm:h-80 lg:h-96">
+                      <div className="relative w-full shrink-0 overflow-hidden h-[17rem] sm:h-80 lg:h-96">
                         {isActive ? (
-                          <iframe
-                            src={`https://www.youtube.com/embed/${item.videoId}?autoplay=1`}
-                            className="absolute inset-0 h-full w-full"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          />
+                          <>
+                            <iframe
+                              src={`https://www.youtube.com/embed/${item.videoId}?autoplay=1`}
+                              className="absolute inset-0 h-full w-full"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                            <button
+                              className="absolute right-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-colors hover:bg-black/80"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveIndex(null);
+                              }}
+                              aria-label="Đóng video"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </>
                         ) : (
                           <img
                             src={item.thumbnail}
