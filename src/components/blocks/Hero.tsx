@@ -78,7 +78,7 @@ function LinkflowHero({
             HỒNG NGỌC HUYỀN HỌC
           </p>
           <h1
-            className="mt-6 font-heading text-[5rem] italic font-semibold leading-[0.82] text-[#2f2626] sm:text-[6.7rem] lg:text-[8rem] xl:text-[8.75rem]"
+            className="mt-6 font-heading text-[5rem] italic font-semibold leading-[0.92] text-[#2f2626] sm:text-[6.7rem] lg:text-[8rem] xl:text-[8.75rem]"
             style={{ letterSpacing: '-0.048em' }}
             data-directus={setAttr({
               collection: 'block_hero',
@@ -121,14 +121,14 @@ function LinkflowHero({
 }
 
 export default function Hero({ data }: HeroProps) {
-  const headline = data.headline || 'Nhìn <span class="text-[#D28080]">rõ hơn</span><br />một chút.';
+  const headline = data.headline || 'Nhìn <br class="min-[380px]:hidden" /> <span class="text-[#D28080]">rõ hơn</span><br />một chút.';
   const content =
     data.content ||
     'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng những cuộc trò chuyện. Bằng góc nhìn. Và đôi khi, bằng huyền học.';
   const linkflowVideoSrc = resolveDirectusFileUrl(data.video) || LINKFLOW_VIDEO_URL || SAFE_FALLBACK_VIDEO_URL;
   const linkflowImageSrc = resolveDirectusFileUrl(data.image);
 
-  const linkflowHeadline = headline || 'Nhìn <span class="text-[#D28080]">rõ hơn</span><br />một chút.';
+  const linkflowHeadline = headline || 'Nhìn <br class="min-[380px]:hidden" /> <span class="text-[#D28080]">rõ hơn</span><br />một chút.';
   const linkflowContent =
     content ||
     'Một không gian để bạn được lắng nghe, nhìn lại và gỡ rối những điều đang bế tắc. Bằng những cuộc trò chuyện. Bằng góc nhìn. Và đôi khi, bằng huyền học.';

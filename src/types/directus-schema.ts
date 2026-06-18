@@ -1657,6 +1657,53 @@ export interface DirectusDeploymentRun {
 	completed_at?: string | null;
 }
 
+export interface PageLienHe {
+	id: string;
+	seo?: Seo | string | null;
+}
+
+export interface PageGioiThieu {
+	id: string;
+	who_i_am_eyebrow?: string | null;
+	who_i_am_headline?: string | null;
+	who_i_am_content?: string | null;
+	who_i_am_portrait_image?: DirectusFile | string | null;
+	who_i_am_center_badge?: string | null;
+	who_i_am_right_items?: Record<string, any>[] | null;
+	who_i_am_social_links?: Record<string, any>[] | null;
+	who_i_am_theme_variant?: 'blue-mystic' | 'default' | null;
+	gallery_headline?: string | null;
+	gallery_variant?: 'accordion' | 'grid' | 'floating' | null;
+	gallery_background_color?: string | null;
+	gallery_background_image?: DirectusFile | string | null;
+	gallery_images?: Record<string, any>[] | null;
+	seo?: Seo | string | null;
+}
+
+export interface PageChinhSachBaoMat {
+	id: string;
+	body_headline?: string | null;
+	body_content?: string | null;
+	seo?: Seo | string | null;
+}
+
+export interface PageDieuKhoanDichVu {
+	id: string;
+	body_headline?: string | null;
+	body_content?: string | null;
+	seo?: Seo | string | null;
+}
+
+export interface PageWorkWithMe {
+	id: string;
+	hero_headline?: string | null;
+	hero_content?: string | null;
+	hero_image?: DirectusFile | string | null;
+	hero_variant?: 'default' | 'video' | 'linkflow' | null;
+	hero_button_group?: BlockButtonGroup | string | null;
+	seo?: Seo | string | null;
+}
+
 export interface Schema {
 	block_blog_archive: BlockBlogArchive[];
 	block_blog_archive_categories: BlockBlogArchiveCategory[];
@@ -1767,6 +1814,12 @@ export interface Schema {
 	directus_deployments: DirectusDeployment[];
 	directus_deployment_projects: DirectusDeploymentProject[];
 	directus_deployment_runs: DirectusDeploymentRun[];
+	page_lien_he: PageLienHe;
+	page_gioi_thieu: PageGioiThieu;
+	page_chinh_sach_bao_mat: PageChinhSachBaoMat;
+	page_dieu_khoan_dich_vu: PageDieuKhoanDichVu;
+	page_work_with_me: PageWorkWithMe;
+	page_blog: Page[];
 }
 
 export enum CollectionNames {

@@ -4,7 +4,6 @@ import Footer from '@/components/layout/Footer';
 import { getDirectusAssetURL } from '@/lib/directus/directus-utils';
 import { fetchSiteData } from '@/lib/directus/fetchers';
 import '@/styles/global.css';
-import '@/styles/fonts.css';
 
 const { globals, headerNavigation, footerNavigation } = await fetchSiteData();
 
@@ -21,6 +20,9 @@ const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTit
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400..700;1,400..700&family=Libertinus+Serif:ital,wght@0,400;0,700;1,400&display=swap" />
     <title>{fullTitle}</title>
     <meta name="description" content={metadata?.description || siteDescription} />
     <link rel="icon" href={faviconURL} />

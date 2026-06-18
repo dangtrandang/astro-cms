@@ -172,17 +172,17 @@ export default function QuoteSection() {
   `;
 
   const line1 = [
-    { text: 'Có những', delay: 400 },
-    { text: '"vấn đề"', delay: 600, highlight: true },
-    { text: 'không thể', delay: 800 },
-    { text: 'thay đổi.', delay: 1000 },
+    { text: 'Có những', delay: 200 },
+    { text: '"vấn đề"', delay: 300, highlight: true },
+    { text: 'không thể', delay: 400 },
+    { text: 'thay đổi.', delay: 500 },
   ];
 
   const line2 = [
-    { text: 'Nhưng', delay: 1500 },
-    { text: '"góc nhìn"', delay: 1700, highlight: true },
-    { text: 'thì', delay: 1900 },
-    { text: 'có thể.', delay: 2100 },
+    { text: 'Nhưng', delay: 800 },
+    { text: '"góc nhìn"', delay: 900, highlight: true },
+    { text: 'thì', delay: 1000 },
+    { text: 'có thể.', delay: 1100 },
   ];
 
   return (
@@ -282,7 +282,8 @@ export default function QuoteSection() {
 
         <figure className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center">
           <blockquote className="font-heading text-charcoal">
-            <p className="text-[clamp(1.8rem,5vw,4rem)] italic leading-[1.35] tracking-[-0.03em]">
+            {/* Desktop: 2 dòng — hidden trên mobile */}
+            <p className="hidden sm:block text-[clamp(1.8rem,5vw,4rem)] italic leading-[1.35] tracking-[-0.03em]">
               <span className="block">
                 {line1.map((word, i) => (
                   <span
@@ -306,13 +307,31 @@ export default function QuoteSection() {
                 ))}
               </span>
             </p>
+
+            {/* Mobile: 3 dòng — hidden trên desktop */}
+            <p className="sm:hidden text-[clamp(1.8rem,6.5vw,3.2rem)] italic leading-[1.35] tracking-[-0.03em]">
+              <span className="block">
+                <span className="word-animate" data-delay="200">Có những </span>
+                <span className="word-animate text-rose-clay" data-delay="300">"vấn đề"</span>
+              </span>
+              <span className="block mt-2">
+                <span className="word-animate" data-delay="500">không thể</span>
+                <span className="word-animate" data-delay="600"> thay đổi.</span>
+              </span>
+              <span className="block mt-2">
+                <span className="word-animate" data-delay="900">Nhưng </span>
+                <span className="word-animate text-rose-clay" data-delay="1000">"góc nhìn"</span>
+                <span className="word-animate" data-delay="1100"> thì</span>
+                <span className="word-animate" data-delay="1200"> có thể.</span>
+              </span>
+            </p>
           </blockquote>
 
           <figcaption className="mt-10 flex flex-col items-center gap-3">
-            <span className="word-animate block h-px w-24 bg-gradient-to-r from-transparent via-rose-clay/55 to-transparent" data-delay="2600" />
+            <span className="word-animate block h-px w-24 bg-gradient-to-r from-transparent via-rose-clay/55 to-transparent" data-delay="1500" />
             <p
               className="word-animate font-body text-[0.875rem] font-medium tracking-[0.16em] text-charcoal/60"
-              data-delay="2700"
+              data-delay="1600"
             >
               Hồng Ngọc Huyền Học
             </p>

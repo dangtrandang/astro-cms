@@ -1,4 +1,4 @@
-import type { DirectusUser, Page, Post, Schema } from '@/types/directus-schema';
+import type { DirectusUser, Page, Post, Schema, Seo } from '@/types/directus-schema';
 import type { QueryFilter } from '@directus/sdk';
 import { aggregate as sdkAggregate, createDirectus, readItems as sdkReadItems, rest, staticToken } from '@directus/sdk';
 import { useDirectus } from './directus';
@@ -203,7 +203,7 @@ export const fetchPageLienHe = async () => {
 export const fetchPageGioiThieu = async () => {
   try {
     return await directus.request(readSingleton('page_gioi_thieu', {
-      fields: ['id', 'who_i_am_eyebrow', 'who_i_am_headline', 'who_i_am_content', 'who_i_am_portrait_image', 'who_i_am_center_badge', 'who_i_am_right_items', 'who_i_am_social_links', 'who_i_am_theme_variant', 'gallery_headline', 'gallery_variant', 'gallery_background_color', 'gallery_background_image', { gallery_images: ['directus_files_id'] }, 'seo'],
+      fields: ['id', 'who_i_am_eyebrow', 'who_i_am_headline', 'who_i_am_content', 'who_i_am_portrait_image', 'who_i_am_center_badge', 'who_i_am_right_items', 'who_i_am_social_links', 'who_i_am_theme_variant', 'gallery_headline', 'gallery_variant', 'gallery_background_color', 'gallery_background_image', { gallery_images: ['directus_files_id'] }, 'seo'] as any[],
     })) as any;
   } catch { return { id: '', who_i_am_headline: null, seo: null }; }
 };
@@ -498,14 +498,14 @@ export const searchContent = async (search: string) => {
               {
                 _or: [
                   { title: { _contains: search } },
-                  { description: { _contains: search } },
-                  { slug: { _contains: search } },
+                  { summary: { _contains: search } },
+                  { Slug: { _contains: search } },
                   { content: { _contains: search } },
                 ],
               },
             ],
           },
-          fields: ['id', 'title', 'description', 'slug', 'content', 'status'],
+          fields: ['id', 'title', 'summary', 'Slug', 'content', 'status'],
         }),
       ),
     ]);
@@ -514,16 +514,16 @@ export const searchContent = async (search: string) => {
       ...pages.map((page) => ({
         id: page.id,
         title: page.title,
-        description: page.seo?.meta_description,
+        description: (page.seo as Seo | null | undefined)?.meta_description,
         type: 'Page',
         link: `/${page.permalink.replace(/^\/+/, '')}`,
       })),
       ...posts.map((post) => ({
         id: post.id,
         title: post.title,
-        description: post.description,
+        description: post.summary,
         type: 'Post',
-        link: `/blog/${post.slug}`,
+        link: `/blog/${post.Slug}`,
       })),
     ];
   } catch {
@@ -536,7 +536,7 @@ export const fetchAllPosts = async (): Promise<Post[]> => {
   try {
     const posts = (await directus.request(
       readItems('posts', {
-        fields: ['id', 'slug', 'status', 'title'],
+        fields: ['id', 'Slug', 'status', 'title'],
         filter: { status: { _eq: 'published' } },
       }),
     )) as Post[];
@@ -638,7 +638,7 @@ export const getPostIdBySlug = async (slug: string, token?: string) => {
       withToken(
         token as string,
         readItems('posts', {
-          filter: { slug: { _eq: slug } },
+          filter: { Slug: { _eq: slug } },
           limit: 1,
           fields: ['id'],
         }),
@@ -684,9 +684,9 @@ export const fetchPostByIdAndVersion = async (
       'Slug',
       'seo',
       { tags: [{ tags_id: ['name', 'slug'] }] },
-      { categories: [{ categories_id: ['id', 'title', 'color', 'slug'] }] },
+      { category: ['id', 'title', 'color', 'slug'] },
       { author: ['id', 'name', 'image', 'bio'] },
-    ] as const;
+    ] as any[];
 
     const [postData, relatedPosts] = await Promise.all([
       directus.request(
@@ -701,7 +701,7 @@ export const fetchPostByIdAndVersion = async (
       fetchRelatedPosts(id),
     ]);
 
-    return { post: postData as Post, relatedPosts };
+    return { post: postData as unknown as Post, relatedPosts };
   } catch {
     throw new Error('Failed to fetch versioned post');
   }
