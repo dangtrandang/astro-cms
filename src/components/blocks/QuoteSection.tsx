@@ -288,7 +288,8 @@ export default function QuoteSection() {
                 {line1.map((word, i) => (
                   <span
                     key={i}
-                    className={`word-animate${word.highlight ? ' text-rose-clay' : ''}`}
+                    className="word-animate"
+                    style={word.highlight ? { color: '#d28080' } : undefined}
                     data-delay={word.delay}
                   >
                     {word.text}
@@ -299,7 +300,8 @@ export default function QuoteSection() {
                 {line2.map((word, i) => (
                   <span
                     key={i}
-                    className={`word-animate${word.highlight ? ' text-rose-clay' : ''}`}
+                    className="word-animate"
+                    style={word.highlight ? { color: '#d28080' } : undefined}
                     data-delay={word.delay}
                   >
                     {word.text}
@@ -312,7 +314,7 @@ export default function QuoteSection() {
             <p className="sm:hidden text-[clamp(1.8rem,6.5vw,3.2rem)] italic leading-[1.35] tracking-[-0.03em]">
               <span className="block">
                 <span className="word-animate" data-delay="200">Có những </span>
-                <span className="word-animate text-rose-clay" data-delay="300">"vấn đề"</span>
+                <span className="word-animate" style={{ color: '#d28080' }} data-delay="300">"vấn đề"</span>
               </span>
               <span className="block mt-2">
                 <span className="word-animate" data-delay="500">không thể</span>
@@ -320,7 +322,7 @@ export default function QuoteSection() {
               </span>
               <span className="block mt-2">
                 <span className="word-animate" data-delay="900">Nhưng </span>
-                <span className="word-animate text-rose-clay" data-delay="1000">"góc nhìn"</span>
+                <span className="word-animate" style={{ color: '#d28080' }} data-delay="1000">"góc nhìn"</span>
                 <span className="word-animate" data-delay="1100"> thì</span>
                 <span className="word-animate" data-delay="1200"> có thể.</span>
               </span>
