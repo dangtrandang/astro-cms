@@ -183,6 +183,7 @@ const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTit
       variant={headerVariant}
       navigation={headerNavigation}
       globals={globals}
+      currentPathname={Astro.url.pathname}
       client:load
     />
     <main class="flex-grow">

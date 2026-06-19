@@ -13,6 +13,7 @@ interface NavigationBarProps {
     logo_on_dark_bg?: string;
   };
   variant?: 'default' | 'overlay';
+  currentPathname?: string;
 }
 
 const getHref = (item?: { page?: { permalink?: string | null }; url?: string }) =>
@@ -25,11 +26,11 @@ const normalizePath = (value?: string) => {
   return stripped.endsWith('/') ? stripped.slice(0, -1) : stripped;
 };
 
-const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation, globals, variant = 'default' }, ref) => {
+const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation, globals, variant = 'default', currentPathname = '/' }, ref) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<{ firstName: string; lastName: string; avatarUrl: string | null } | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [currentPath, setCurrentPath] = useState('/');
+  const [currentPath, setCurrentPath] = useState(() => normalizePath(currentPathname));
   const directusURL = import.meta.env.PUBLIC_DIRECTUS_URL;
 
   useEffect(() => {
@@ -115,7 +116,7 @@ const NavigationBar = forwardRef<HTMLElement, NavigationBarProps>(({ navigation,
                 <a
                   key={link.id || i}
                   href={href}
-                  className={`relative text-[18px] font-medium transition-colors ${isActive ? 'text-[#d28080]' : navLinkTone}`}
+                  className={`relative text-[18px] font-medium transition-colors duration-300 ${isActive ? 'text-[#d28080]' : navLinkTone}`}
                 >
                   {link.title}
                   {isActive ? <span className="absolute left-0 top-full mt-2 h-[2px] w-full rounded-full bg-[#d28080]" /> : null}
