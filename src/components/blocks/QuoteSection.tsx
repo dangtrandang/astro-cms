@@ -190,14 +190,16 @@ export default function QuoteSection() {
       <style>{pageStyles}</style>
       <section
         ref={sectionRef}
-        className="relative overflow-hidden bg-cream px-6 py-20 sm:px-8 lg:px-10 lg:py-28"
+        className="relative px-6 py-20 sm:px-8 lg:px-10 lg:py-28 bg-transparent"
       >
-        <div className="pointer-events-none absolute inset-0 opacity-40">
+        <div className="absolute inset-0 bg-cream z-0 pointer-events-none" />
+
+        <div className="pointer-events-none absolute inset-0 opacity-40 z-0">
           <div className="absolute left-1/2 top-1/2 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30 blur-3xl" />
         </div>
 
         <svg
-          className="pointer-events-none absolute inset-0 h-full w-full"
+          className="pointer-events-none absolute inset-0 h-full w-full z-0"
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
         >
@@ -268,15 +270,15 @@ export default function QuoteSection() {
         </svg>
 
         <div
-          className="floating-element-animate"
+          className="floating-element-animate z-0"
           style={{ top: '20%', left: '10%', animationDelay: '0.5s' }}
         />
         <div
-          className="floating-element-animate"
+          className="floating-element-animate z-0"
           style={{ top: '70%', left: '88%', animationDelay: '1s' }}
         />
         <div
-          className="floating-element-animate"
+          className="floating-element-animate z-0"
           style={{ top: '45%', left: '8%', animationDelay: '1.8s' }}
         />
 
@@ -342,7 +344,7 @@ export default function QuoteSection() {
 
         <div
           id="mouse-gradient-quote"
-          className="h-60 w-60 blur-xl sm:h-80 sm:w-80 sm:blur-2xl md:h-96 md:w-96 md:blur-3xl"
+          className="h-60 w-60 blur-xl sm:h-80 sm:w-80 sm:blur-2xl md:h-96 md:w-96 md:blur-3xl z-0"
           style={{
             left: mouseGradientStyle.left,
             top: mouseGradientStyle.top,

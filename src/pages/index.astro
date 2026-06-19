@@ -6,6 +6,7 @@ import Layout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/blocks/Hero';
 import QuoteSection from '@/components/blocks/QuoteSection';
 import WhoIAm from '@/components/blocks/WhoIAm';
+import FloatingOrnament from '@/components/fancy/image/FloatingOrnament';
 import FeedSection from '@/components/blocks/FeedSection';
 import Gallery from '@/components/blocks/Gallery';
 import { fetchHomepageData } from '@/lib/directus/fetchers';
@@ -39,19 +40,43 @@ const metadata = {
     variant: (data.hero_variant as 'default' | 'video' | 'linkflow') || 'linkflow',
   }} />
 
-  <QuoteSection client:load />
+  <div class="relative overflow-hidden z-0 bg-cream">
+    <QuoteSection client:load />
 
-  <WhoIAm data={{
-    id: 'homepage-whoiam',
-    eyebrow: data.who_i_am_eyebrow,
-    headline: data.who_i_am_headline,
-    content: data.who_i_am_content,
-    portrait_image: data.who_i_am_portrait_image,
-    center_badge: data.who_i_am_center_badge,
-    right_items: data.who_i_am_right_items,
-    social_links: data.who_i_am_social_links,
-    theme_variant: (data.who_i_am_theme_variant as 'blue-mystic' | 'default') || 'default',
-  }} />
+    <WhoIAm data={{
+      id: 'homepage-whoiam',
+      eyebrow: data.who_i_am_eyebrow,
+      headline: data.who_i_am_headline,
+      content: data.who_i_am_content,
+      portrait_image: data.who_i_am_portrait_image,
+      center_badge: data.who_i_am_center_badge,
+      right_items: data.who_i_am_right_items,
+      social_links: data.who_i_am_social_links,
+      theme_variant: (data.who_i_am_theme_variant as 'blue-mystic' | 'default') || 'default',
+    }} />
+
+    <!-- Right side ornament (symbol6) starts at top of Quote Section -->
+    <FloatingOrnament
+      client:load
+      imageSrc="/libassetweb/symbol6.png"
+      side="right"
+      topClass="top-0"
+      offsetClass="-right-[8%] sm:-right-[10%] md:-right-[12%] lg:-right-[15%] xl:-right-[18%]"
+      zIndexClass="z-[5]"
+    />
+
+    <!-- Left side ornament (symbol8) starts near the end of Quote Section -->
+    <FloatingOrnament
+      client:load
+      imageSrc="/libassetweb/symbol8.png"
+      side="left"
+      topClass="top-[380px] sm:top-[350px] md:top-[320px] lg:top-[380px]"
+      offsetClass="-left-[6%] sm:-left-[8%] md:-left-[10%] lg:-left-[12%] xl:-left-[14%]"
+      widthClass="w-44 sm:w-64 md:w-[26rem] lg:w-[36rem] xl:w-[46rem] 2xl:w-[54rem]"
+      rotationDirection="counter-clockwise"
+      zIndexClass="z-[5]"
+    />
+  </div>
 
   <FeedSection client:load items={socialItems} />
 

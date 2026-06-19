@@ -103,11 +103,16 @@ export default function WhoIAm({ data }: WhoIAmProps) {
     return (
         <section
             className={cn(
-                'relative overflow-hidden px-6 py-20 sm:px-8 lg:px-10 lg:py-28',
-                isBlueMystic ? 'bg-[#2E568D] text-white' : 'bg-cream text-charcoal'
+                'relative px-6 py-20 sm:px-8 lg:px-10 lg:py-28 bg-transparent text-charcoal',
+                isBlueMystic && 'text-white'
             )}
         >
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className={cn(
+                'absolute inset-0 z-0 pointer-events-none',
+                isBlueMystic ? 'bg-[#2E568D]' : 'bg-cream'
+            )} />
+
+            <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
                 <div
                     className={cn(
                         'absolute left-1/2 top-1/2 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full border',
@@ -128,7 +133,7 @@ export default function WhoIAm({ data }: WhoIAmProps) {
                 />
             </div>
 
-            <div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.05fr_1fr_1.05fr] lg:items-center">
+            <div className="relative z-10 mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.05fr_1fr_1.05fr] lg:items-center">
                 <div className="relative z-10 max-w-xl">
                     <p
                         className={cn(
