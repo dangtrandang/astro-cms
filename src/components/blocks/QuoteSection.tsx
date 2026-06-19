@@ -10,11 +10,8 @@ interface Ripple {
 }
 
 export default function QuoteSection() {
-  const [mouseGradientStyle, setMouseGradientStyle] = useState({
-    left: '0px',
-    top: '0px',
-    opacity: 0,
-  });
+  const gradientRef = useRef<HTMLDivElement>(null);
+  const firstMoveRef = useRef(true);
   const [ripples, setRipples] = useState<Ripple[]>([]);
   const [triggered, setTriggered] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -49,27 +46,43 @@ export default function QuoteSection() {
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     const section = sectionRef.current;
-    if (!section) return;
+    const gradient = gradientRef.current;
+    if (!section || !gradient) return;
     const rect = section.getBoundingClientRect();
+
+    // Position gradient relative to viewport (since it is position: fixed)
+    if (firstMoveRef.current) {
+      firstMoveRef.current = false;
+      const originalTransition = gradient.style.transition;
+      gradient.style.transition = 'none';
+      gradient.style.left = `${e.clientX}px`;
+      gradient.style.top = `${e.clientY}px`;
+      // Force reflow to apply position instantly without transition
+      void gradient.offsetHeight;
+      gradient.style.transition = originalTransition;
+    } else {
+      gradient.style.left = `${e.clientX}px`;
+      gradient.style.top = `${e.clientY}px`;
+    }
+
     if (
       e.clientX < rect.left ||
       e.clientX > rect.right ||
       e.clientY < rect.top ||
       e.clientY > rect.bottom
     ) {
-      setMouseGradientStyle((prev) => ({ ...prev, opacity: 0 }));
+      gradient.style.opacity = '0';
       return;
     }
-    setMouseGradientStyle({
-      left: `${e.clientX}px`,
-      top: `${e.clientY}px`,
-      opacity: 1,
-    });
+    gradient.style.opacity = '1';
   }, []);
 
   useEffect(() => {
-    const handleMouseLeave = () =>
-      setMouseGradientStyle((prev) => ({ ...prev, opacity: 0 }));
+    const handleMouseLeave = () => {
+      if (gradientRef.current) {
+        gradientRef.current.style.opacity = '0';
+      }
+    };
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseleave', handleMouseLeave);
     return () => {
@@ -117,11 +130,6 @@ export default function QuoteSection() {
       50% { opacity: 0.8; transform: translateY(10px) scale(0.95); filter: blur(2px); }
       100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
     }
-    @keyframes grid-draw {
-      0% { stroke-dashoffset: 1000; opacity: 0; }
-      50% { opacity: 0.3; }
-      100% { stroke-dashoffset: 0; opacity: 0.12; }
-    }
     @keyframes float {
       0%, 100% { transform: translateY(0) translateX(0); opacity: 0.15; }
       25% { transform: translateY(-10px) translateX(5px); opacity: 0.45; }
@@ -140,10 +148,8 @@ export default function QuoteSection() {
     .grid-line {
       stroke: #6F8695;
       stroke-width: 0.5;
-      opacity: 0;
+      opacity: 0.12;
       stroke-dasharray: 5 5;
-      stroke-dashoffset: 1000;
-      animation: grid-draw 2s ease-out forwards;
     }
     .floating-element-animate {
       position: absolute;
@@ -152,6 +158,8 @@ export default function QuoteSection() {
       background: #DDB8B2;
       border-radius: 50%;
       opacity: 0;
+    }
+    .floating-element-animate.active {
       animation: float 4s ease-in-out infinite;
     }
     .ripple-effect {
@@ -209,7 +217,6 @@ export default function QuoteSection() {
             x2="100%"
             y2="15%"
             className="grid-line"
-            style={{ animationDelay: '0.3s' }}
           />
           <line
             x1="0"
@@ -217,7 +224,6 @@ export default function QuoteSection() {
             x2="100%"
             y2="85%"
             className="grid-line"
-            style={{ animationDelay: '0.7s' }}
           />
           <circle
             cx="12%"
@@ -225,7 +231,6 @@ export default function QuoteSection() {
             r="2"
             className="grid-line"
             style={{
-              animationDelay: '1.2s',
               fill: '#DDB8B2',
               stroke: 'none',
               opacity: '0.2',
@@ -237,7 +242,6 @@ export default function QuoteSection() {
             r="2"
             className="grid-line"
             style={{
-              animationDelay: '1.4s',
               fill: '#DDB8B2',
               stroke: 'none',
               opacity: '0.2',
@@ -249,7 +253,6 @@ export default function QuoteSection() {
             r="2"
             className="grid-line"
             style={{
-              animationDelay: '1.6s',
               fill: '#DDB8B2',
               stroke: 'none',
               opacity: '0.2',
@@ -261,7 +264,6 @@ export default function QuoteSection() {
             r="2"
             className="grid-line"
             style={{
-              animationDelay: '1.8s',
               fill: '#DDB8B2',
               stroke: 'none',
               opacity: '0.2',
@@ -270,15 +272,15 @@ export default function QuoteSection() {
         </svg>
 
         <div
-          className="floating-element-animate z-0"
+          className={`floating-element-animate z-0 ${triggered ? 'active' : ''}`}
           style={{ top: '20%', left: '10%', animationDelay: '0.5s' }}
         />
         <div
-          className="floating-element-animate z-0"
+          className={`floating-element-animate z-0 ${triggered ? 'active' : ''}`}
           style={{ top: '70%', left: '88%', animationDelay: '1s' }}
         />
         <div
-          className="floating-element-animate z-0"
+          className={`floating-element-animate z-0 ${triggered ? 'active' : ''}`}
           style={{ top: '45%', left: '8%', animationDelay: '1.8s' }}
         />
 
@@ -343,12 +345,13 @@ export default function QuoteSection() {
         </figure>
 
         <div
+          ref={gradientRef}
           id="mouse-gradient-quote"
           className="h-60 w-60 blur-xl sm:h-80 sm:w-80 sm:blur-2xl md:h-96 md:w-96 md:blur-3xl z-0"
           style={{
-            left: mouseGradientStyle.left,
-            top: mouseGradientStyle.top,
-            opacity: mouseGradientStyle.opacity,
+            left: '0px',
+            top: '0px',
+            opacity: 0,
           }}
         />
 
