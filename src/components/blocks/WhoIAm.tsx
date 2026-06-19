@@ -27,6 +27,8 @@ interface WhoIAmProps {
         social_links?: SocialLink[] | null;
         theme_variant?: 'blue-mystic' | 'default' | null;
     };
+    editCollection?: string;
+    editFieldPrefix?: string;
 }
 
 const DEFAULT_ITEMS: WhoIAmItem[] = [
@@ -94,11 +96,12 @@ function getFeatureIcon(icon?: string) {
     }
 }
 
-export default function WhoIAm({ data }: WhoIAmProps) {
+export default function WhoIAm({ data, editCollection = 'block_who_i_am', editFieldPrefix = '' }: WhoIAmProps) {
     const imageId = getImageId(data.portrait_image);
     const items = data.right_items?.length ? data.right_items : DEFAULT_ITEMS;
     const socials = data.social_links?.length ? data.social_links : DEFAULT_SOCIALS;
     const isBlueMystic = (data.theme_variant || 'blue-mystic') === 'blue-mystic';
+    const f = (name: string) => `${editFieldPrefix}${name}`;
 
     return (
         <section
@@ -140,7 +143,7 @@ export default function WhoIAm({ data }: WhoIAmProps) {
                             'text-sm font-semibold uppercase tracking-[0.32em]',
                             isBlueMystic ? 'text-[#D6A64B]' : 'text-rose-clay'
                         )}
-                        data-directus={setAttr({ collection: 'block_who_i_am', item: data.id, fields: ['eyebrow'], mode: 'popover' })}
+                        data-directus={setAttr({ collection: editCollection, item: data.id, fields: [f('eyebrow')], mode: 'popover' })}
                     >
                         {data.eyebrow || 'WHO AM I'}
                     </p>
@@ -150,7 +153,7 @@ export default function WhoIAm({ data }: WhoIAmProps) {
                             'mt-5 font-heading text-4xl font-semibold italic leading-[1.05] tracking-[-0.03em] sm:text-5xl lg:text-[3.6rem]',
                             isBlueMystic ? 'text-white' : 'text-charcoal'
                         )}
-                        data-directus={setAttr({ collection: 'block_who_i_am', item: data.id, fields: ['headline'], mode: 'drawer' })}
+                        data-directus={setAttr({ collection: editCollection, item: data.id, fields: [f('headline')], mode: 'drawer' })}
                         dangerouslySetInnerHTML={{
                             __html: data.headline || 'Neu ban da buoc den day, ban can biet toi la ai?',
                         }}
@@ -161,17 +164,17 @@ export default function WhoIAm({ data }: WhoIAmProps) {
                             'mt-8 max-w-lg text-base leading-8 sm:text-lg',
                             isBlueMystic ? 'text-white/92' : 'text-charcoal/80'
                         )}
-                        data-directus={setAttr({ collection: 'block_who_i_am', item: data.id, fields: ['content'], mode: 'drawer' })}
+                        data-directus={setAttr({ collection: editCollection, item: data.id, fields: [f('content')], mode: 'drawer' })}
                         dangerouslySetInnerHTML={{
                             __html:
                                 data.content ||
-                                '<p>Mình yêu huyền học. Nhưng mình không xem huyền học là câu trả lời. Điều khiến mình hứng thú hơn cả là những câu chuyện, những lựa chọn, và những góc nhìn khác nhau của con người. ... Tarot, Thần số hay Kinh Dịch chỉ là những công cụ giúp mình nhìn một vấn đề từ nhiều hướng hơn.</p>',
+                                '<p>Minh yeu huyen hoc. Nhung minh khong xem huyen hoc la cau tra loi. Dieu khien minh hung thu hon ca la nhung cau chuyen, nhung lua chon, va nhung goc nhin khac nhau cua con nguoi. ... Tarot, Than so hay Kinh Dich chi la nhung cong cu giup minh nhin mot van de tu nhieu huong hon.</p>',
                         }}
                     />
 
                     <div
                         className="mt-10 flex flex-wrap gap-4"
-                        data-directus={setAttr({ collection: 'block_who_i_am', item: data.id, fields: ['social_links'], mode: 'drawer' })}
+                        data-directus={setAttr({ collection: editCollection, item: data.id, fields: [f('social_links')], mode: 'drawer' })}
                     >
                         {socials.map((social) => {
                             const Icon = getSocialIcon(social.platform);
@@ -215,15 +218,20 @@ export default function WhoIAm({ data }: WhoIAmProps) {
                                 'absolute left-1/2 top-8 -translate-x-1/2 rounded-lg border px-4 py-1 text-xs uppercase tracking-[0.24em]',
                                 isBlueMystic ? 'border-white/30 bg-white/10 text-white/80' : 'border-rose-clay/50 bg-white/70 text-charcoal/70'
                             )}
-                            data-directus={setAttr({ collection: 'block_who_i_am', item: data.id, fields: ['center_badge'], mode: 'popover' })}
+                            data-directus={setAttr({ collection: editCollection, item: data.id, fields: [f('center_badge')], mode: 'popover' })}
                         >
                             {data.center_badge}
                         </div>
                     ) : null}
 
-                    <div className="relative z-10 w-full max-w-[22rem] md:max-w-[26rem] lg:max-w-[28rem]">
-                        {imageId ? (
+                    <div
+                        className="relative z-10 w-full max-w-[22rem] md:max-w-[26rem] lg:max-w-[28rem]"
+                        data-directus={setAttr({ collection: editCollection, item: data.id, fields: [f('portrait_image')], mode: 'popover' })}
+                    >
+                        {imageId && !imageId.startsWith('http') ? (
                             <DirectusImage uuid={imageId} alt={data.title || 'Who I Am portrait'} className="h-auto w-full object-contain" />
+                        ) : typeof data.portrait_image === 'string' && data.portrait_image.startsWith('http') ? (
+                            <img src={data.portrait_image} alt={data.title || 'Who I Am portrait'} className="h-auto w-full object-contain" />
                         ) : (
                             <div
                                 className={cn(
@@ -237,7 +245,7 @@ export default function WhoIAm({ data }: WhoIAmProps) {
 
                 <div
                     className="relative z-10 space-y-8"
-                    data-directus={setAttr({ collection: 'block_who_i_am', item: data.id, fields: ['right_items'], mode: 'drawer' })}
+                    data-directus={setAttr({ collection: editCollection, item: data.id, fields: [f('right_items')], mode: 'drawer' })}
                 >
                     {items.map((item, index) => {
                         const Icon = getFeatureIcon(item.icon);

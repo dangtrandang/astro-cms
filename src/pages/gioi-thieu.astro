@@ -24,7 +24,7 @@ const metadata = {
     right_items: data.who_i_am_right_items,
     social_links: data.who_i_am_social_links,
     theme_variant: (data.who_i_am_theme_variant as 'blue-mystic' | 'default') || 'default',
-  }} />
+  }} editCollection="page_gioi_thieu" editFieldPrefix="who_i_am_" />
   <Gallery client:load data={{
     id: `gallery-${data.id}`,
     headline: data.gallery_headline,
