@@ -15,29 +15,6 @@ const directusUrl = import.meta.env.PUBLIC_DIRECTUS_URL as string;
       </div>
 
       <form id="register-form" class="space-y-4">
-        <div class="flex gap-3">
-          <div class="flex-1">
-            <label for="reg_first_name" class="block text-sm font-medium text-charcoal mb-1">Họ</label>
-            <input
-              type="text"
-              id="reg_first_name"
-              name="first_name"
-              autocomplete="given-name"
-              class="w-full rounded-xl border border-rose-clay/45 bg-cream px-4 py-2.5 outline-none transition focus:border-rose-clay/50"
-            />
-          </div>
-          <div class="flex-1">
-            <label for="reg_last_name" class="block text-sm font-medium text-charcoal mb-1">Tên</label>
-            <input
-              type="text"
-              id="reg_last_name"
-              name="last_name"
-              autocomplete="family-name"
-              class="w-full rounded-xl border border-rose-clay/45 bg-cream px-4 py-2.5 outline-none transition focus:border-rose-clay/50"
-            />
-          </div>
-        </div>
-
         <div>
           <label for="reg_email" class="block text-sm font-medium text-charcoal mb-1">Email <span class="text-red-400">*</span></label>
           <input
@@ -81,20 +58,6 @@ const directusUrl = import.meta.env.PUBLIC_DIRECTUS_URL as string;
               </svg>
             </button>
           </div>
-        </div>
-
-        <div>
-          <label for="reg_confirm_password" class="block text-sm font-medium text-charcoal mb-1">Xác nhận mật khẩu <span class="text-red-400">*</span></label>
-          <input
-            type="password"
-            id="reg_confirm_password"
-            name="confirm_password"
-            required
-            minlength="8"
-            autocomplete="new-password"
-            placeholder="Nhập lại mật khẩu"
-            class="w-full rounded-xl border border-rose-clay/45 bg-cream px-4 py-2.5 outline-none transition focus:border-rose-clay/50"
-          />
         </div>
 
         <button
@@ -159,10 +122,7 @@ const directusUrl = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 
     const formData = new FormData(form);
     const password = formData.get('password')?.toString() || '';
-    const confirm = formData.get('confirm_password')?.toString() || '';
     const body = {
-      first_name: formData.get('first_name')?.toString().trim() || '',
-      last_name: formData.get('last_name')?.toString().trim() || '',
       email: formData.get('email')?.toString().trim() || '',
       password,
     };
@@ -177,14 +137,6 @@ const directusUrl = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 
     if (password.length < 8) {
       errEl.textContent = 'Mật khẩu phải có ít nhất 8 ký tự';
-      errEl.classList.remove('hidden');
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Đăng ký';
-      return;
-    }
-
-    if (password !== confirm) {
-      errEl.textContent = 'Mật khẩu xác nhận không khớp';
       errEl.classList.remove('hidden');
       submitBtn.disabled = false;
       submitBtn.textContent = 'Đăng ký';
