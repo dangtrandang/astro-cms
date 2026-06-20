@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Dialog, DialogContent, DialogOverlay } from '@/components/ui/dialog';
 
 interface SocialItem {
   title: string;
@@ -41,6 +42,7 @@ export default function FeedSection({ items: initialItems }: FeedSectionProps) {
   const items = initialItems;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
   const isInteracting = useRef(false);
   const totalItems = items.length || 1;
@@ -80,7 +82,11 @@ export default function FeedSection({ items: initialItems }: FeedSectionProps) {
 
   const handleCardClick = useCallback((index: number) => {
     pauseAutoScroll();
-    setActiveIndex((prev) => (prev === index ? null : index));
+    if (window.innerWidth < 1024) {
+      setLightboxIndex(index);
+    } else {
+      setActiveIndex((prev) => (prev === index ? null : index));
+    }
   }, [pauseAutoScroll]);
 
   const handlePrev = useCallback(() => { pauseAutoScroll(); prevSlide(); }, [pauseAutoScroll, prevSlide]);
@@ -134,7 +140,7 @@ export default function FeedSection({ items: initialItems }: FeedSectionProps) {
           </div>
 
           <div
-            className="relative w-full overflow-hidden"
+            className="relative w-full overflow-hidden px-3 sm:px-0"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -216,6 +222,42 @@ export default function FeedSection({ items: initialItems }: FeedSectionProps) {
           </div>
         </div>
       </div>
+
+      <Dialog open={lightboxIndex !== null} onOpenChange={(open) => { if (!open) setLightboxIndex(null); }}>
+        <DialogOverlay className="bg-black/10" />
+        <DialogContent
+          hideCloseButton
+          className="max-w-none border-0 bg-transparent p-0 shadow-none"
+          onInteractOutside={(e) => { e.preventDefault(); setLightboxIndex(null); }}
+        >
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+          <div className="flex min-h-dvh items-center justify-center px-[3px] animate-in fade-in duration-200" onClick={() => setLightboxIndex(null)}>
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+            <div className="w-full max-w-5xl" onClick={(e) => e.stopPropagation()}>
+              <div className="relative">
+                <button
+                  className="absolute -right-1 -top-10 z-50 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
+                  onClick={() => setLightboxIndex(null)}
+                  aria-label="Đóng video"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+
+                {lightboxIndex !== null && (
+                  <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${items[lightboxIndex].videoId}?autoplay=1`}
+                      className="h-full w-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
