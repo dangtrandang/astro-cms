@@ -132,7 +132,7 @@ const Gallery = ({ data }: GalleryProps) => {
   if (isFloating) return <FloatingGallery data={data} items={sortedItems} />;
 
   return (
-    <section className="bg-cream py-16 text-charcoal md:py-20">
+    <section className="bg-cream px-[5px] py-16 text-charcoal shadow-md md:py-20">
       <div className="flex w-full flex-col gap-10 px-0">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-5 px-6 text-center sm:px-8">
           {title && (
@@ -181,7 +181,7 @@ const Gallery = ({ data }: GalleryProps) => {
                   <button
                     key={item.id}
                     type="button"
-                    className="group relative min-h-[74px] overflow-hidden text-left transition-[flex,min-height] duration-500 ease-out md:min-h-0"
+                    className="group relative min-h-[74px] overflow-hidden rounded-2xl text-left transition-[flex,min-height] duration-500 ease-out md:min-h-0"
                     style={{
                       flex: isActive ? 2.94 : 1,
                       minHeight: isActive ? '208px' : '74px',
@@ -200,11 +200,11 @@ const Gallery = ({ data }: GalleryProps) => {
                     />
 
                     <div className="absolute inset-x-4 bottom-4 md:inset-x-8 md:bottom-8">
-                      <div className="flex items-center gap-2 text-cream md:gap-4">
+                      <div className="flex items-center gap-2 text-[#f2d1d1] md:gap-4">
                         <span
                           role="button"
                           tabIndex={0}
-                          className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-cream/70 bg-black/14 backdrop-blur-[2px] transition hover:bg-black/24 md:h-11 md:w-11"
+                          className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#f2d1d1]/70 bg-black/14 backdrop-blur-[2px] transition hover:bg-black/24 md:h-9 md:w-9"
                           onClick={(event) => {
                             event.stopPropagation();
                             openLightbox(index);
@@ -217,16 +217,16 @@ const Gallery = ({ data }: GalleryProps) => {
                           }}
                           aria-label={`Xem full anh ${index + 1}`}
                         >
-                          <Eye className="size-3.5 md:size-4" />
+                          <Eye className="size-3 md:size-3.5" />
                         </span>
-                        <div className="min-w-0 border-l border-cream/70 pl-3 md:pl-4">
+                        <div className="min-w-0 border-l border-[#f2d1d1]/70 pl-3 md:pl-4">
                           {item.title && (
-                            <p className="font-heading text-sm font-medium italic leading-tight text-cream md:text-2xl">
+                            <p className="font-heading text-xs font-medium italic leading-tight text-[#f2d1d1] md:text-lg">
                               {item.title}
                             </p>
                           )}
                           {item.description && isActive && (
-                            <p className="mt-1 max-w-[30rem] text-xs leading-5 text-cream/85 md:mt-2 md:text-base md:leading-6">
+                            <p className="mt-1 max-w-[30rem] text-xs leading-5 text-[#f2d1d1]/85 md:mt-2 md:text-base md:leading-6">
                               {item.description}
                             </p>
                           )}
@@ -252,7 +252,7 @@ const Gallery = ({ data }: GalleryProps) => {
               <button
                 key={item.id}
                 type="button"
-                className="relative aspect-[4/5] overflow-hidden text-left"
+                className="relative aspect-[4/5] overflow-hidden rounded-2xl text-left"
                 onClick={() => openLightbox(index)}
                 aria-label={`Mo anh ${index + 1}`}
               >
@@ -286,7 +286,7 @@ const Gallery = ({ data }: GalleryProps) => {
                   alt={headline || title || `Gallery image ${currentIndex + 1}`}
                   width={1600}
                   height={1100}
-                  className="max-h-[calc(92vh-3rem)] max-w-full object-contain"
+                  className="max-h-[calc(92vh-3rem)] max-w-full rounded-2xl object-contain"
                 />
 
                 <DialogClose asChild>
