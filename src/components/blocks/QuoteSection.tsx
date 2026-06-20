@@ -285,6 +285,13 @@ export default function QuoteSection() {
         />
 
         <figure className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center">
+          <img
+            src="/libassetweb/symbol7.png"
+            alt=""
+            className="word-animate mb-6"
+            style={{ width: '30%', height: 'auto', maxWidth: '120px' }}
+            data-delay="50"
+          />
           <blockquote className="font-heading text-charcoal">
             {/* Desktop: 2 dòng — hidden trên mobile */}
             <p className="hidden sm:block text-[clamp(1.8rem,5vw,4rem)] italic leading-[1.35] tracking-[-0.03em]">

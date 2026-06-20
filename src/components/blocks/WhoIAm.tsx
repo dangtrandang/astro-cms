@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { Instagram, Facebook, Twitter, Youtube, Sparkles, Orbit, Gem } from 'lucide-react';
 import DirectusImage from '@/components/shared/DirectusImage';
 import { cn } from '@/lib/utils';
@@ -137,7 +138,13 @@ export default function WhoIAm({ data, editCollection = 'block_who_i_am', editFi
             </div>
 
             <div className="relative z-10 mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.05fr_1fr_1.05fr] lg:items-center">
-                <div className="relative z-10 max-w-xl">
+                <motion.div
+                    className="relative z-10 max-w-xl"
+                    initial={{ opacity: 0, x: -60 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                >
                     <p
                         className={cn(
                             'text-sm font-semibold uppercase tracking-[0.32em]',
@@ -196,7 +203,7 @@ export default function WhoIAm({ data, editCollection = 'block_who_i_am', editFi
                             );
                         })}
                     </div>
-                </div>
+                </motion.div>
 
                 <div className="relative flex items-center justify-center">
                     <div
@@ -224,9 +231,13 @@ export default function WhoIAm({ data, editCollection = 'block_who_i_am', editFi
                         </div>
                     ) : null}
 
-                    <div
+                    <motion.div
                         className="relative z-10 w-full max-w-[22rem] md:max-w-[26rem] lg:max-w-[28rem]"
                         data-directus={setAttr({ collection: editCollection, item: data.id, fields: [f('portrait_image')], mode: 'popover' })}
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
                     >
                         {imageId && !imageId.startsWith('http') ? (
                             <DirectusImage uuid={imageId} alt={data.title || 'Who I Am portrait'} className="h-auto w-full object-contain" />
@@ -240,12 +251,16 @@ export default function WhoIAm({ data, editCollection = 'block_who_i_am', editFi
                                 )}
                             />
                         )}
-                    </div>
+                    </motion.div>
                 </div>
 
-                <div
+                <motion.div
                     className="relative z-10 space-y-8"
                     data-directus={setAttr({ collection: editCollection, item: data.id, fields: [f('right_items')], mode: 'drawer' })}
+                    initial={{ opacity: 0, x: 60 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
                 >
                     {items.map((item, index) => {
                         const Icon = getFeatureIcon(item.icon);
@@ -276,7 +291,7 @@ export default function WhoIAm({ data, editCollection = 'block_who_i_am', editFi
                             </div>
                         );
                     })}
-                </div>
+                </motion.div>
             </div>
         </section>
     );
