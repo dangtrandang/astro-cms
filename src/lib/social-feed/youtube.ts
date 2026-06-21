@@ -8,8 +8,8 @@ export interface SocialItem {
   views: number;
 }
 
-const RSS_URL = 'https://www.youtube.com/feeds/videos.xml?channel_id=UCU3F2ZrYI68UKPxaw63lrYg';
-const RSS_FEED_URL = 'https://www.youtube.com/feeds/videos.xml?channel_id=UCU3F2ZrYI68UKPxaw63lrYg';
+const RSS_URL = 'https://www.youtube.com/feeds/videos.xml?channel_id=UCyPpIoGDGUsSIArIlGi4a0Q';
+const RSS_FEED_URL = 'https://www.youtube.com/feeds/videos.xml?channel_id=UCyPpIoGDGUsSIArIlGi4a0Q';
 
 export async function fetchYouTubeVideos(limit = 6): Promise<SocialItem[]> {
   const response = await fetch(RSS_URL);
