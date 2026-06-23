@@ -237,7 +237,7 @@ function FeaturedPost({ post, onTagClick }: { post: Post; onTagClick?: (slug: st
       )}
 
       {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/20" />
 
       {/* Content */}
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 sm:gap-4 p-4 sm:p-6 md:p-8">
@@ -267,7 +267,7 @@ function FeaturedPost({ post, onTagClick }: { post: Post; onTagClick?: (slug: st
           </svg>
         </div>
 
-        {excerpt && <p className="max-w-xl text-xs leading-relaxed text-white/80 line-clamp-2 sm:text-sm">{excerpt}</p>}
+        {excerpt && <p className="max-w-xl text-xs leading-relaxed text-white/80 line-clamp-2 sm:text-sm hidden">{excerpt}</p>}
 
         <div className="flex flex-wrap items-center gap-6">
           {/* Author */}

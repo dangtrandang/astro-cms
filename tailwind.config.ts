@@ -80,7 +80,7 @@ const config: Config = {
             },
             p: {
               fontFamily: '"Libertinus Serif", serif',
-              fontSize: 'clamp(1rem, 2vw, 1.125rem)',
+              fontSize: 'clamp(1.3rem, 2.5vw, 1.5rem)',
               fontWeight: '400',
               lineHeight: '1.6',
             },

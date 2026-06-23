@@ -205,7 +205,7 @@ export default function BlogPostClient({
                 <Headline
                   as="h1"
                   headline={post.title}
-                  className="max-w-[80rem] !font-heading italic text-[1.7rem] font-semibold leading-tight !text-cream sm:text-4xl md:text-5xl"
+                  className="max-w-[80rem] !font-heading italic text-[1.2rem] font-semibold leading-tight !text-cream sm:text-4xl md:text-5xl"
                 />
               </div>
 
