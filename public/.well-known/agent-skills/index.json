@@ -1,0 +1,23 @@
+{
+  "$schema": "https://agent-skills.io/schemas/v0.2.0/index.json",
+  "skills": [
+    {
+      "name": "search-content",
+      "type": "api",
+      "description": "Search across pages and blog posts on Hồng Ngọc Huyền Học website",
+      "url": "https://dev.hongngochuyenhoc.com/api/search",
+      "method": "GET",
+      "parameters": {
+        "query": {
+          "type": "string",
+          "description": "Search term",
+          "required": true,
+          "in": "query"
+        }
+      },
+      "authentication": {
+        "type": "none"
+      }
+    }
+  ]
+}

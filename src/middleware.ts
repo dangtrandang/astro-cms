@@ -11,6 +11,7 @@ const PROTECTED_ROUTES = ['/tai-khoan', '/login', '/dang-ky', '/sso-callback'];
 const PUBLIC_AUTH_ROUTES = ['/login', '/dang-ky'];
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
+const SITE_URL = import.meta.env.PUBLIC_SITE_URL || 'https://dev.hongngochuyenhoc.com';
 
 const userFetch = (token: string, path: string) =>
   fetch(`${DIRECTUS_URL}${path}`, {
@@ -25,12 +26,28 @@ const adminFetch = (path: string) =>
   });
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  const { url, cookies } = context;
+  const { url, request, cookies } = context;
   const locals = context.locals as AuthLocals;
   const { pathname } = new URL(url);
 
+  // ── Markdown Negotiation: Accept: text/markdown → return markdown ──
+  const accept = request.headers.get('accept') || '';
+  if (accept.includes('text/markdown')) {
+    const mdPath = pathname === '/' ? '/index.md' : `${pathname}.md`.replace(/\/+$/, '');
+    // Try to fetch the markdown file from public or generate a simple response
+    const mdContent = getMarkdownForPath(pathname, SITE_URL);
+    return new Response(mdContent, {
+      headers: {
+        'Content-Type': 'text/markdown; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  }
+
+  // ── Auth middleware (existing) ──
   const isProtected = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
-  if (!isProtected) return next();
+  if (!isProtected) return addLinkHeaders(await next(), pathname, SITE_URL);
 
   if (pathname === '/sso-callback') return next();
 
@@ -93,10 +110,56 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     const response = await next();
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-    return response;
+    return addLinkHeaders(response, pathname, SITE_URL);
   } catch (err) {
     console.error('[middleware] auth check failed:', err);
     cookies.delete(AUTH_COOKIE_NAME, { path: '/' });
     return context.redirect('/login');
   }
 });
+
+/**
+ * Add Link response headers for agent discovery (RFC 8288)
+ */
+function addLinkHeaders(response: Response, pathname: string, siteUrl: string): Response {
+  if (pathname === '/') {
+    const links = [
+      `</.well-known/api-catalog>; rel="api-catalog"`,
+      `</.well-known/oauth-authorization-server>; rel="oauth-authorization-server"`,
+      `</.well-known/mcp.json>; rel="mcp"`,
+      `</robots.txt>; rel="robots"`,
+    ];
+    response.headers.set('Link', links.join(', '));
+  }
+  return response;
+}
+
+/**
+ * Generate markdown content for agent consumption
+ */
+function getMarkdownForPath(pathname: string, siteUrl: string): string {
+  const title = pathname === '/' ? 'Hồng Ngọc Huyền Học' : `Page ${pathname}`;
+  return `# ${title}
+
+This is an agent-friendly markdown representation of ${siteUrl}${pathname}.
+
+## Available Resources
+
+- [Homepage](${siteUrl}/)
+- [About](${siteUrl}/gioi-thieu)
+- [Contact](${siteUrl}/lien-he)
+- [Blog](${siteUrl}/blog)
+
+## API Endpoints
+
+- \`GET /api/site-data\` — Global site configuration, navigation, metadata
+- \`GET /api/blog-archive-posts\` — Paginated blog posts
+- \`GET /api/recent-posts\` — Recent blog posts
+- \`GET /api/search?query=...\` — Search across pages and posts
+
+## Authentication
+
+- Token endpoint: \`POST https://cms.hongngochuyenhoc.com/auth/login\`
+- Public content is accessible without authentication.
+- Protected areas: /tai-khoan, /api/auth/*`;
+}

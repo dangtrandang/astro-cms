@@ -1,0 +1,25 @@
+{
+  "serverInfo": {
+    "name": "hongngochuyenhoc-mcp",
+    "version": "1.0.0",
+    "description": "MCP server for Hồng Ngọc Huyền Học website"
+  },
+  "capabilities": {
+    "resources": {
+      "siteData": {
+        "description": "Global site configuration, navigation, and metadata",
+        "uri": "https://dev.hongngochuyenhoc.com/api/site-data"
+      },
+      "pages": {
+        "description": "CMS-driven page content with block-based layout",
+        "uri": "https://dev.hongngochuyenhoc.com/api/page-blocks"
+      },
+      "blogPosts": {
+        "description": "Published blog posts with archive, search and pagination",
+        "uri": "https://dev.hongngochuyenhoc.com/api/blog-archive-posts"
+      }
+    }
+  },
+  "endpoint": "https://dev.hongngochuyenhoc.com/.well-known/mcp",
+  "transport": "https"
+}

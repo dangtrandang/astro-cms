@@ -1,0 +1,18 @@
+{
+  "resource": "https://cms.hongngochuyenhoc.com",
+  "authorization_servers": ["https://cms.hongngochuyenhoc.com"],
+  "scopes_supported": ["openid", "profile", "email"],
+  "bearer_methods_supported": ["header", "cookie"],
+  "resources": [
+    {
+      "path": "/tai-khoan",
+      "description": "User account dashboard",
+      "scopes_required": ["openid", "profile"]
+    },
+    {
+      "path": "/api/auth",
+      "description": "Authentication API",
+      "scopes_required": ["openid"]
+    }
+  ]
+}

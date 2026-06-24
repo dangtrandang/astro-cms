@@ -1,0 +1,14 @@
+{
+  "issuer": "https://cms.hongngochuyenhoc.com",
+  "authorization_endpoint": "https://cms.hongngochuyenhoc.com/auth/login",
+  "token_endpoint": "https://cms.hongngochuyenhoc.com/auth/login",
+  "userinfo_endpoint": "https://cms.hongngochuyenhoc.com/users/me",
+  "end_session_endpoint": "https://dev.hongngochuyenhoc.com/api/auth/logout",
+  "scopes_supported": ["openid", "profile", "email"],
+  "response_types_supported": ["none"],
+  "grant_types_supported": ["password", "refresh_token"],
+  "subject_types_supported": ["public"],
+  "id_token_signing_alg_values_supported": ["none"],
+  "token_endpoint_auth_methods_supported": ["client_secret_post"],
+  "claims_supported": ["sub", "name", "email", "picture"]
+}

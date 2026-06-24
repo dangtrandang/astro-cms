@@ -1,0 +1,5 @@
+{
+  "keys": [],
+  "algorithms_supported": ["hs2019"],
+  "max_ttl": 300
+}

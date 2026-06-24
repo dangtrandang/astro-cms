@@ -1,0 +1,40 @@
+# robots.txt — Hồng Ngọc Huyền Học
+# https://dev.hongngochuyenhoc.com
+
+# ── Allow all friendly crawlers ──
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /tai-khoan/
+Disallow: /login
+Disallow: /dang-ky
+Disallow: /reset-password
+Disallow: /sso-callback
+
+# ── AI Crawler Rules ──
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+# ── Content Signals ──
+# ai-train=no: Do not train AI models on this content
+# search=yes: Allow search indexing and retrieval-augmented generation
+# ai-input=no: Do not use as conversational AI input
+Content-Signal: ai-train=no, search=yes, ai-input=no
+
+# ── Sitemap ──
+Sitemap: https://dev.hongngochuyenhoc.com/sitemap.xml

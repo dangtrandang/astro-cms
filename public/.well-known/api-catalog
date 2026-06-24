@@ -1,0 +1,34 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://dev.hongngochuyenhoc.com/api/site-data",
+      "rel": "service-doc",
+      "href": "https://dev.hongngochuyenhoc.com/api/site-data",
+      "type": "application/json"
+    },
+    {
+      "anchor": "https://dev.hongngochuyenhoc.com/api/blog-archive-posts",
+      "rel": "service-doc",
+      "href": "https://dev.hongngochuyenhoc.com/api/blog-archive-posts",
+      "type": "application/json"
+    },
+    {
+      "anchor": "https://dev.hongngochuyenhoc.com/api/recent-posts",
+      "rel": "service-doc",
+      "href": "https://dev.hongngochuyenhoc.com/api/recent-posts",
+      "type": "application/json"
+    },
+    {
+      "anchor": "https://cms.hongngochuyenhoc.com",
+      "rel": "service-desc",
+      "href": "https://cms.hongngochuyenhoc.com/graphql",
+      "type": "application/json"
+    },
+    {
+      "anchor": "https://cms.hongngochuyenhoc.com",
+      "rel": "status",
+      "href": "https://cms.hongngochuyenhoc.com/server/health",
+      "type": "application/json"
+    }
+  ]
+}

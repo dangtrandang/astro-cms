@@ -174,6 +174,39 @@ const fullTitle = metadata?.title ? `${metadata.title} | ${siteTitle}` : siteTit
       })();
     </script>
 
+    <script is:inline>
+      // ── WebMCP: expose site tools to AI agents ──
+      (function () {
+        try {
+          if (typeof navigator.modelContext === 'undefined' ||
+              typeof navigator.modelContext.provideContext !== 'function') {
+            return; // WebMCP API not available
+          }
+
+          navigator.modelContext.provideContext({
+            tools: [{
+              name: 'search_site',
+              description: 'Search across all pages and blog posts on Hồng Ngọc Huyền Học',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  query: { type: 'string', description: 'Search term to find content' }
+                },
+                required: ['query']
+              },
+              execute: async (args) => {
+                const res = await fetch('/api/search?query=' + encodeURIComponent(args.query));
+                const json = await res.json();
+                return json;
+              }
+            }]
+          });
+        } catch (_) {
+          // WebMCP API unavailable — safe to ignore
+        }
+      })();
+    </script>
+
   </head>
   <body class="antialiased font-body flex flex-col min-h-screen bg-cream text-charcoal">
     <!-- Top Progress Bar: ngay sau mở body, trước mọi nội dung -->
