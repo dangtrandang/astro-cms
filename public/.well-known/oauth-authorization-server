@@ -7,5 +7,12 @@
   "response_types_supported": ["none"],
   "token_endpoint_auth_signing_alg_values_supported": ["none"],
   "scopes_supported": ["openid", "profile", "email"],
-  "code_challenge_methods_supported": []
+  "code_challenge_methods_supported": [],
+  "agent_auth": {
+    "register_uri": "https://cms.hongngochuyenhoc.com/auth/register",
+    "supported_identity_types": ["email", "password"],
+    "credential_types": ["bearer_token"],
+    "claim_uri": "https://cms.hongngochuyenhoc.com/users/me",
+    "revocation_uri": "https://dev.hongngochuyenhoc.com/api/auth/logout"
+  }
 }

@@ -1,0 +1,9 @@
+{
+  "agent_discovery": {
+    "version": "1.0",
+    "index_endpoint": "/.well-known/ai-agent",
+    "mcp_endpoint": "/.well-known/mcp.json",
+    "api_catalog": "/.well-known/api-catalog",
+    "skills_index": "/.well-known/agent-skills/index.json"
+  }
+}

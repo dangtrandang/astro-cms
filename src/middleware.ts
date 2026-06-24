@@ -33,21 +33,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // ── Markdown Negotiation: Accept: text/markdown → return markdown ──
   const accept = request.headers.get('accept') || '';
   if (accept.includes('text/markdown')) {
-    const mdPath = pathname === '/' ? '/index.md' : `${pathname}.md`.replace(/\/+$/, '');
-    // Try to fetch the markdown file from public or generate a simple response
-    const mdContent = getMarkdownForPath(pathname, SITE_URL);
-    return new Response(mdContent, {
-      headers: {
-        'Content-Type': 'text/markdown; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
+    return getMarkdownResponse(pathname, SITE_URL);
   }
 
   // ── Auth middleware (existing) ──
   const isProtected = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
-  if (!isProtected) return addLinkHeaders(await next(), pathname, SITE_URL);
+  if (!isProtected) return addLinkHeaders(await next(), pathname);
 
   if (pathname === '/sso-callback') return next();
 
@@ -110,7 +101,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     const response = await next();
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-    return addLinkHeaders(response, pathname, SITE_URL);
+    return addLinkHeaders(response, pathname);
   } catch (err) {
     console.error('[middleware] auth check failed:', err);
     cookies.delete(AUTH_COOKIE_NAME, { path: '/' });
@@ -120,19 +111,86 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
 /**
  * Add Link response headers for agent discovery (RFC 8288)
+ * Applied to ALL pages, with homepage getting extra rel types.
  */
-function addLinkHeaders(response: Response, pathname: string, siteUrl: string): Response {
+function addLinkHeaders(response: Response, pathname: string): Response {
+  const links: string[] = [
+    `</.well-known/api-catalog>; rel="api-catalog"`,
+    `</.well-known/mcp.json>; rel="mcp"`,
+    `</robots.txt>; rel="robots"`,
+    `</auth.md>; rel="describedby"`,
+  ];
+
   if (pathname === '/') {
-    const links = [
-      `</.well-known/api-catalog>; rel="api-catalog"`,
-      `</.well-known/oauth-authorization-server>; rel="oauth-authorization-server"`,
-      `</.well-known/mcp.json>; rel="mcp"`,
-      `</robots.txt>; rel="robots"`,
-    ];
-    response.headers.set('Link', links.join(', '));
+    links.push(`</.well-known/oauth-authorization-server>; rel="oauth-authorization-server"`);
+    links.push(`</.well-known/agent-skills/index.json>; rel="service-doc"`);
   }
+
+  response.headers.set('Link', links.join(', '));
   return response;
 }
+
+/**
+ * Return markdown response with required headers for agent consumption
+ */
+function getMarkdownResponse(pathname: string, siteUrl: string): Response {
+  const content = generateMarkdownForPath(pathname, siteUrl);
+  const tokenCount = String(Math.ceil(content.length / 4));
+
+  return new Response(content, {
+    headers: {
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'x-markdown-tokens': tokenCount,
+      'Cache-Control': 'public, max-age=3600',
+      'Access-Control-Allow-Origin': '*',
+    },
+  });
+}
+
+/**
+ * Generate markdown content for agent consumption at a given path
+ */
+function generateMarkdownForPath(pathname: string, siteUrl: string): string {
+  const title = pathname === '/' ? 'Hồng Ngọc Huyền Học' : `Page ${pathname}`;
+  return `# ${title}
+
+This is an agent-friendly markdown representation of ${siteUrl}${pathname}.
+
+## Available Resources
+
+- [Homepage](${siteUrl}/)
+- [About](${siteUrl}/gioi-thieu)
+- [Contact](${siteUrl}/lien-he)
+- [Blog](${siteUrl}/blog)
+- [Privacy Policy](${siteUrl}/chinh-sach-bao-mat)
+- [Terms of Service](${siteUrl}/dieu-khoan-dich-vu)
+- [Work With Me](${siteUrl}/work-with-me)
+
+## API Endpoints
+
+- \`GET /api/site-data\` — Global site configuration, navigation, metadata
+- \`GET /api/blog-archive-posts\` — Paginated blog posts
+- \`GET /api/recent-posts\` — Recent blog posts
+- \`GET /api/search?query=...\` — Search across pages and posts
+
+## Discovery Endpoints
+
+- \`/.well-known/api-catalog\` — API catalog (RFC 9727)
+- \`/.well-known/oauth-authorization-server\` — OAuth metadata (RFC 8414)
+- \`/.well-known/openid-configuration\` — OpenID Connect discovery
+- \`/.well-known/oauth-protected-resource\` — Protected resource metadata (RFC 9728)
+- \`/.well-known/mcp.json\` — MCP server info
+- \`/.well-known/mcp/server-card.json\` — MCP Server Card
+- \`/.well-known/agent-skills/index.json\` — Agent skills index
+
+## Authentication
+
+- Token endpoint: \`POST https://cms.hongngochuyenhoc.com/auth/login\`
+- Register: \`POST https://cms.hongngochuyenhoc.com/auth/register\`
+- Public content is accessible without authentication.
+- Protected areas: /tai-khoan, /api/auth/*`;
+}
+
 
 /**
  * Generate markdown content for agent consumption
