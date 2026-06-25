@@ -193,6 +193,21 @@ const processExchange = async (token: string): Promise<AuthResult> => {
     return { redirect: '', accessToken: null, error: `contact:${err.message}` };
   }
 
+  // Step 5b: Create user_registrations record to trigger welcome + admin flows
+  // For Google SSO users, store a placeholder since there's no password
+  try {
+    const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email;
+    await adminFetch('/items/user_registrations', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: fullName,
+        email: user.email,
+        password: user.provider === 'google' ? `sso:${user.provider}:${user.id}` : 'sso:google',
+      }),
+    });
+  } catch {
+    // non-fatal
+  }
   const destination = '/tai-khoan';
 
   return { redirect: destination, accessToken, error: null };

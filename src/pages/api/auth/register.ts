@@ -153,6 +153,20 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     // non-fatal, sso-callback will handle on next login
   }
 
+  // Create user_registrations record to trigger welcome + admin flows
+  try {
+    const fullName = [firstName, lastName].filter(Boolean).join(' ') || email;
+    await adminFetch('/items/user_registrations', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: fullName,
+        email,
+        password,
+      }),
+    });
+  } catch {
+    // non-fatal, flow will be retried on user_registrations trigger
+  }
   // Login to get access token
   const loginRes = await fetch(`${DIRECTUS_URL}/auth/login`, {
     method: 'POST',

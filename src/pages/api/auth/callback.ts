@@ -99,8 +99,26 @@ export const POST: APIRoute = async ({ request, redirect }) => {
           last_name: user.last_name,
         }),
       )) as any;
-    }
 
+      // Trigger user_registrations flows for new SSO user
+      try {
+        const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email;
+        await fetch(`${DIRECTUS_URL}/items/user_registrations`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${ADMIN_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: fullName,
+            email: user.email,
+            password: `sso:google:${user.id}`,
+          }),
+        });
+      } catch {
+        // non-fatal
+      }
+    }
     const destination = '/tai-khoan';
 
     const cookieValue = `auth_token=${accessToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=604800`;
@@ -179,8 +197,26 @@ export const GET: APIRoute = async ({ request, redirect }) => {
           last_name: user.last_name,
         }),
       )) as any;
-    }
 
+      // Trigger user_registrations flows for new SSO user
+      try {
+        const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email;
+        await fetch(`${DIRECTUS_URL}/items/user_registrations`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${ADMIN_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: fullName,
+            email: user.email,
+            password: `sso:google:${user.id}`,
+          }),
+        });
+      } catch {
+        // non-fatal
+      }
+    }
     const destination = '/tai-khoan';
 
     const cookieValue = `auth_token=${accessToken}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=604800`;
