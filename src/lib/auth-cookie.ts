@@ -5,13 +5,5 @@ export const AUTH_COOKIE_OPTIONS = {
   secure: true,
   sameSite: 'lax',
   path: '/',
-  maxAge: 3600,
-} as const;
-
-export const AUTH_COOKIE_OPTIONS_LONG = {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'lax',
-  path: '/',
   maxAge: 604800,
 } as const;

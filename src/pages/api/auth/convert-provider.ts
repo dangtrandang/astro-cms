@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { AUTH_COOKIE_NAME } from '@/lib/auth-cookie';
 
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
 const ADMIN_TOKEN = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
@@ -14,7 +15,7 @@ const adminFetch = (path: string, init?: RequestInit) =>
   });
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-  const token = cookies.get('auth_token')?.value;
+  const token = cookies.get(AUTH_COOKIE_NAME)?.value;
   if (!token) {
     return new Response(JSON.stringify({ error: 'Chưa đăng nhập' }), {
       status: 401,
@@ -45,7 +46,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   });
 
   if (!meRes.ok) {
-    cookies.delete('auth_token', { path: '/' });
+    cookies.delete(AUTH_COOKIE_NAME, { path: '/' });
     return new Response(JSON.stringify({ error: 'Phiên đăng nhập hết hạn' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },

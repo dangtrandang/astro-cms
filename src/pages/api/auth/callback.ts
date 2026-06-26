@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { createDirectus, rest, staticToken, readItems, createItem, updateItem } from '@directus/sdk';
 import { createUserClient } from '@/lib/directus/directus';
-import { AUTH_COOKIE_NAME, AUTH_COOKIE_OPTIONS_LONG } from '@/lib/auth-cookie';
+import { AUTH_COOKIE_NAME, AUTH_COOKIE_OPTIONS } from '@/lib/auth-cookie';
 import type { Schema } from '@/types/directus-schema';
 
 const DIRECTUS_URL = import.meta.env.PUBLIC_DIRECTUS_URL as string;
@@ -130,7 +130,7 @@ async function handleAuthCallback(
     await createUserRegistration(ADMIN_TOKEN, fullName, user.email, user.id);
   }
 
-  cookies.set(AUTH_COOKIE_NAME, accessToken, AUTH_COOKIE_OPTIONS_LONG);
+  cookies.set(AUTH_COOKIE_NAME, accessToken, AUTH_COOKIE_OPTIONS);
 
   return new Response(null, {
     status: 302,
