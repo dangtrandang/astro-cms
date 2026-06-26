@@ -156,12 +156,16 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   // Create user_registrations record to trigger welcome + admin flows
   try {
     const fullName = [firstName, lastName].filter(Boolean).join(' ') || email;
+    const encoder = new TextEncoder();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(password));
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const passwordHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
     await adminFetch('/items/user_registrations', {
       method: 'POST',
       body: JSON.stringify({
         name: fullName,
         email,
-        password,
+        password: `pw:sha256:${passwordHash}`,
       }),
     });
   } catch {

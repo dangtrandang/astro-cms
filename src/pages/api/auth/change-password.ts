@@ -24,11 +24,19 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   let newPassword: string;
+  let currentPassword: string;
   try {
     const body = await request.json();
     newPassword = (body.password as string)?.trim();
+    currentPassword = (body.current_password as string)?.trim();
     if (!newPassword || newPassword.length < 8) {
       return new Response(JSON.stringify({ error: 'Mật khẩu phải có ít nhất 8 ký tự' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    if (!currentPassword) {
+      return new Response(JSON.stringify({ error: 'Vui lòng nhập mật khẩu hiện tại' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -54,9 +62,24 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   const meData = await meRes.json().catch(() => null);
   const userId = meData?.data?.id;
+  const userEmail = meData?.data?.email;
 
-  if (!userId) {
+  if (!userId || !userEmail) {
     return new Response(JSON.stringify({ error: 'Không xác định được người dùng' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Verify current password via Directus login
+  const verifyRes = await fetch(`${DIRECTUS_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail, password: currentPassword, mode: 'json' }),
+  });
+
+  if (!verifyRes.ok) {
+    return new Response(JSON.stringify({ error: 'Mật khẩu hiện tại không đúng' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
     });
