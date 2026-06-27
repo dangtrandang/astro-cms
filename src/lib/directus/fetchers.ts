@@ -166,40 +166,6 @@ export const fetchPageData = async (
   }
 };
 
-/**
- * Singleton page fetchers — each page has its own Directus singleton collection.
- */
-
-export const fetchPageLienHe = async () => {
-  try {
-    const serverToken = import.meta.env.DIRECTUS_SERVER_TOKEN as string;
-    const client = createAuthClient(serverToken);
-    const page = await client.request(readSingleton('page_lien_he', {
-      fields: ['id', 'seo'],
-    }));
-    const blockFormResult = await client.request(readItems('block_form', {
-      filter: { form: { key: { _eq: 'contact' } } },
-      fields: ['id', 'title', 'headline',
-        { form: ['id', 'title', 'on_success', 'submit_label', 'success_message', 'schema'] },
-        { image: [{ directus_files_id: ['id'] }] },
-      ],
-      limit: 1,
-    }));
-    const block = (blockFormResult as any[])?.[0] ?? null;
-    return {
-      id: (page as any)?.id ?? '',
-      title: block?.title ?? null,
-      form_headline: block?.headline ?? null,
-      contact_form: block?.form ?? null,
-      image: block?.image ?? null,
-      seo: (page as any)?.seo ?? null,
-    };
-  } catch (err) {
-    console.error('fetchPageLienHe error:', err);
-    return { id: '', title: null, form_headline: null, contact_form: null, image: null, seo: null };
-  }
-};
-
 export const fetchPageGioiThieu = async () => {
   try {
     return await directus.request(readSingleton('page_gioi_thieu', {

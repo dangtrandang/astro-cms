@@ -1,0 +1,45 @@
+---
+description: Priority workflow cho mọi task - Karpathy trước, MCP Inventory sau
+alwaysApply: true
+---
+
+# Task Execution Priority
+
+## Thứ tự đọc rules (từ trên xuống, không bỏ qua)
+
+### 1. Karpathy Behavioral Guidelines
+Đọc TRƯỚC TIÊN trước khi làm bất cứ gì. Áp dụng cho mọi task.
+
+Mỗi task phải:
+- **Think Before Coding**: state assumptions, ask nếu ambiguous
+- **Simplicity First**: minimum code, nothing speculative
+- **Surgical Changes**: touch only what must, clean up own mess
+- **Goal-Driven Execution**: define success criteria, loop until verified
+
+### 2. MCP Inventory & Auto Memory
+Đọc SAU Karpathy. Dùng để guide approach cho code tasks.
+
+**Semble** (`search`, `find_related`):
+- Prefer over Grep/Glob khi hỏi về code
+- Pass project root as `repo` cho local projects
+
+**AgentMemory**:
+- `memory_recall` / `memory_smart_search` trước khi làm gì
+- `memory_save` khi trigger fire (architecture, bug, pattern, preference, workflow, fact)
+- `memory_lesson_save` khi approach worked/failed/validated/caught
+
+## Code Task Workflow
+
+Khi user hỏi check/kiểm tra/truy vết code:
+
+1. Gọi `semble.search` tìm code (không dùng Task explore, không đọc file trực tiếp)
+2. Gọi `memory_recall` query liên quan
+3. Chỉ đọc file nếu cần verify cụ thể, sau khi đã có overview từ search
+
+## Execution Order
+
+```
+User request → Read Karpathy → Read MCP Inventory → Plan approach → Execute with Semble + AgentMemory
+```
+
+Không làm gì trước khi đọc 2 rules này.

@@ -1660,6 +1660,25 @@ export interface DirectusDeploymentRun {
 export interface PageLienHe {
 	id: string;
 	seo?: Seo | string | null;
+	form_headline?: string | null;
+	contact_form?: {
+		id: string;
+		title?: string | null;
+		on_success?: 'redirect' | 'message' | null;
+		submit_label?: string | null;
+		success_message?: string | null;
+		success_redirect_url?: string | null;
+		schema?: any[] | null;
+		fields?: any[] | null;
+		is_active?: boolean | null;
+	} | null;
+	form_image?: {
+		directus_files_id?: {
+			id: string;
+			title?: string | null;
+			description?: string | null;
+		};
+	}[] | null;
 }
 
 export interface PageGioiThieu {

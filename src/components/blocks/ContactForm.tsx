@@ -73,6 +73,7 @@ export default function ContactForm({ data }: ContactFormBlockProps) {
                             <p
                                 className="mt-3 font-body text-lg text-charcoal/70"
                                 dangerouslySetInnerHTML={{ __html: headline }}
+                                suppressHydrationWarning
                                 data-directus={setAttr({
                                     collection: 'block_form',
                                     item: id,

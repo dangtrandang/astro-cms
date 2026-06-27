@@ -1,25 +1,74 @@
 ---
 import Layout from '@/layouts/BaseLayout.astro';
-import { fetchPageLienHe } from '@/lib/directus/fetchers';
 import ContactForm from '@/components/blocks/ContactForm';
 
-const data = await fetchPageLienHe();
 const siteURL = import.meta.env.PUBLIC_SITE_URL || '';
 const metadata = {
   title: 'Liên hệ | Hồng Ngọc Huyền Học',
   description: 'Liên hệ với Hồng Ngọc để được tư vấn',
   openGraph: { title: 'Liên hệ | Hồng Ngọc Huyền Học', description: '', url: `${siteURL}/lien-he`, type: 'website' },
 };
+
+const contactFormData = {
+  id: '1d62a1f2-d828-45f2-a87f-6b58b32fcbf7',
+  title: 'Thông tin liên hệ',
+  headline: '<p>Liên hệ với Hồng Ngọc nhé!</p>',
+  image: [{ directus_files_id: { id: '41793aae-0c31-4b65-b7b4-9d2c88f6dade', title: null, description: null } }],
+  form: {
+    id: '7c93965b-f97a-46ac-b8c8-18d7c484129b',
+    title: 'Liên hệ',
+    on_success: 'message' as const,
+    submit_label: 'Gửi liên hệ',
+    success_message: 'Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.',
+    schema: [
+      {
+        id: 1,
+        name: 'name',
+        label: 'Họ và tên',
+        type: 'text',
+        placeholder: 'Nhập họ và tên của bạn',
+        required: true,
+        width: 50,
+        sort: 1,
+        validation: null,
+      },
+      {
+        id: 2,
+        name: 'email',
+        label: 'Email',
+        type: 'text',
+        placeholder: 'Nhập địa chỉ email',
+        required: true,
+        width: 50,
+        sort: 2,
+      },
+      {
+        id: 4,
+        name: 'subject',
+        label: 'Tiêu đề',
+        type: 'text',
+        placeholder: 'Nhập tiêu đề',
+        required: true,
+        width: 100,
+        sort: 3,
+      },
+      {
+        id: 5,
+        name: 'message',
+        label: 'Nội dung',
+        type: 'textarea',
+        placeholder: 'Nhập nội dung tin nhắn...',
+        required: true,
+        width: 100,
+        sort: 4,
+      },
+    ],
+  },
+};
 ---
 
 <Layout metadata={metadata}>
   <div class="min-h-[70vh] px-4 py-8 lg:py-12">
-    <ContactForm client:load data={{
-      id: data.id,
-      title: data.title,
-      headline: data.form_headline,
-      form: data.contact_form,
-      image: data.image,
-    }} />
+    <ContactForm client:load data={contactFormData} />
   </div>
 </Layout>
